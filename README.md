@@ -6,6 +6,8 @@ Text User Interface Library for the Harbour compiler
 Features
 --------
 
-* Object oriented design
+* CUA compliant (define extents)
+* Object oriented Widget hierarchy
 * Event driven
+* Editing controls aware of data model
 * Multitask aware
