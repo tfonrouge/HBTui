@@ -90,7 +90,7 @@ RETURN
 METHOD PROCEDURE displayLayout() CLASS HBTui_Widget
     LOCAL itm
 
-    AltD()
+//    AltD()
     FOR EACH itm IN ::Flayout
     NEXT
 

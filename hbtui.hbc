@@ -9,3 +9,4 @@ libpaths=lib/${hb_arch}/${hb_comp}
 libs=hbct hbtui
 
 {unix|linux|darwin}gt=gtxwc
+{win}gt=gtwvt

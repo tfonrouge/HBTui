@@ -11,9 +11,9 @@
 #include "hbapigt.h"
 
 /*
-    HBTui_UI_UnRefCountCopy
+    HBTUI_UI_UnRefCountCopy
 */
-HB_FUNC( HBTui_UI_UNREFCOUNTCOPY )
+HB_FUNC( HBTUI_UI_UNREFCOUNTCOPY )
 {
     PHB_ITEM pSelf = hb_param( 1, HB_IT_OBJECT );
 
@@ -27,9 +27,9 @@ HB_FUNC( HBTui_UI_UNREFCOUNTCOPY )
 }
 
 /*
-    HBTui_UI_RefCount
+    HBTUI_UI_RefCount
 */
-HB_FUNC( HBTui_UI_REFCOUNT )
+HB_FUNC( HBTUI_UI_REFCOUNT )
 {
     PHB_ITEM pSelf = hb_param( 1, HB_IT_OBJECT );
 
@@ -40,9 +40,9 @@ HB_FUNC( HBTui_UI_REFCOUNT )
 }
 
 /*
-    HBTui_UI_WIdAtMousePos
+    HBTUI_UI_WIdAtMousePos
 */
-HB_FUNC( HBTui_UI_WIDATMOUSEPOS )
+HB_FUNC( HBTUI_UI_WIDATMOUSEPOS )
 {
     int x,y;
     hb_mouseGetPos( &x, &y );

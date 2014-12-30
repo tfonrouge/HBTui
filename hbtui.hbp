@@ -13,7 +13,7 @@
 
 -instpath=${hb_lib}/
 
--instfile=inc:include/*
+-instfile=inc:include/hbtui.ch
 -instpath=inc:${hb_inc}/hbtui/
 
 -instforce

@@ -35,7 +35,7 @@ METHOD FUNCTION Exec() CLASS HBTui_App
     LOCAL event
     LOCAL hbtobject
 
-    AltD()
+//    AltD()
 
     IF !::Fexecute
 
