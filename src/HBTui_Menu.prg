@@ -13,7 +13,6 @@ PUBLIC:
 
     METHOD AddAction()
     METHOD AddMenu()
-    METHOD AddSeparator()
 
 ENDCLASS
 
@@ -38,3 +37,5 @@ RETURN
 METHOD AddMenu() CLASS HBTui_Menu
 
 RETURN
+
+
