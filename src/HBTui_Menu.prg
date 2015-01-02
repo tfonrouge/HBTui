@@ -9,7 +9,7 @@ PROTECTED:
 
 PUBLIC:
 
-    CONSTRUCTOR METHOD New()
+    CONSTRUCTOR New()
 
     METHOD AddAction()
     METHOD AddMenu()
@@ -21,7 +21,7 @@ ENDCLASS
 */
 METHOD New() CLASS HBTui_Menu
 
-RETURN
+RETURN Self
 
 /*
     AddAction
@@ -29,13 +29,13 @@ RETURN
 
 METHOD AddAction() CLASS HBTui_Menu
 
-RETURN
+RETURN Self
 
 /*
     AddMenu
 */
 METHOD AddMenu() CLASS HBTui_Menu
 
-RETURN
+RETURN Self
 
 
