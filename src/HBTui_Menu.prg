@@ -10,18 +10,21 @@ PROTECTED:
 
 PUBLIC:
 
-    CONSTRUCTOR New()
+    CONSTRUCTOR New( nTop, nLeft, nWidth, nHeight, cColor, wId )
 
     METHOD AddAction()
-    METHOD PositionMenu()
     METHOD AddMenu()
+    METHOD PositionMenu()
+    
 
 ENDCLASS
 
 /*
     New
 */
-METHOD New() CLASS HBTui_Menu
+METHOD New( nTop, nLeft, nWidth, nHeight, cColor, wId ) CLASS HBTui_Menu
+
+    ::Super:New( nTop, nLeft, nWidth, nHeight, cColor, wId )
 
 RETURN Self
 
@@ -51,6 +54,12 @@ METHOD AddAction() CLASS HBTui_Menu
         CASE nKey == K_UP
 
 
+        CASE nKey == K_END
+
+
+        CASE nKey == K_HOME
+
+
         CASE nKey == K_LEFT
 
 
@@ -70,17 +79,16 @@ METHOD AddAction() CLASS HBTui_Menu
 RETURN Self
 
 /*
+    AddMenu
+*/
+METHOD AddMenu() CLASS HBTui_Menu
+
+RETURN Self
+/*
     PositionMenu()
 */
 METHOD PositionMenu() CLASS HBTui_Menu
 
      // ( nTop, nLeft, nBottom, nRight )
-
-RETURN Self
-
-/*
-    AddMenu
-*/
-METHOD AddMenu() CLASS HBTui_Menu
 
 RETURN Self
