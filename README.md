@@ -12,6 +12,6 @@ Features
 * Editing controls aware of data model
 * Multitask aware
 --------
-HBTui live source repository
+<h3>HBTui live source repository</h3>
 You'll need Git version control software installed on your system, and issue this command:
 <pre><code>$ git clone git://github.com/tfonrouge/HBTui</pre></code>
