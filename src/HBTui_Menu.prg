@@ -76,18 +76,18 @@ METHOD PROCEDURE AddAction() CLASS HBTui_Menu
 
     ENDDO
 
-RETURN Self
+RETURN
 
 /*
     AddMenu
 */
 METHOD PROCEDURE AddMenu() CLASS HBTui_Menu
 
-RETURN Self
+RETURN
 /*
     PositionMenu()
 */
-METHOD PositionMenu() CLASS HBTui_Menu
+METHOD FUNCTION PositionMenu() CLASS HBTui_Menu
 
      // ( nTop, nLeft, nBottom, nRight )
 
