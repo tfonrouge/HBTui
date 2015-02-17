@@ -9,32 +9,29 @@
 
 CLASS HBTui_Editor FROM HBTui_Widget
 
-   DATA cFile, nTop, nLeft, nBottom, nRight, cColor
+   VAR cFile                         AS CHARACTER INIT "Untitled.txt"
+   VAR nTop                          AS NUMERIC   INIT 0
+   VAR nLeft                         AS NUMERIC   INIT 0
+   VAR nBottom                       AS NUMERIC   INIT MAXROW()
+   VAR nRight                        AS NUMERIC   INIT MAXCOL()
+   VAR cColor                        AS CHARACTER INIT "W/B"
 
-   CONSTRUCTOR New( cFile, nTop, nLeft, nBottom, nRight, cColor )
-   METHOD View()
+   CONSTRUCTOR New()
+   METHOD View( cFile, nTop, nLeft, nBottom, nRight, cColor )
 
 ENDCLASS
+
 /*
    New
 */
-METHOD New( cFile, nTop, nLeft, nBottom, nRight, cColor ) CLASS HBTui_Editor
-
-   ::cFile   := cFile
-   ::nTop    := nTop
-   ::nLeft   := nLeft
-   ::nBottom := nBottom
-   ::nRight  := nRight
-   ::cColor  := cColor
+METHOD New() CLASS HBTui_Editor
 
 RETURN Self
 
 /*
    View
 */
-//METHOD View( cFile, nTop, nLeft, nBottom, nRight, cColor )
-METHOD View()
-
+METHOD View( cFile, nTop, nLeft, nBottom, nRight, cColor )
    LOCAL nHandle                             // nDeskryptor
    LOCAL nLength                             // nDługość
    LOCAL nVert, nHoriz
@@ -45,19 +42,24 @@ METHOD View()
    LOCAL nStart, nEnd, nIncrement
 
 
-   IF ( ISNIL( ::nTop )    .OR. ::nTop < 0 )
-      ::nTop := 0
+   IF ISNUL( cFile )
+      ::cFile := ::cFile
    ENDIF
-   IF ( ISNIL( ::nLeft )   .OR. ::nLeft < 0 )
-      ::nLeft := 0
+   IF ISNIL( nTop )
+      ::nTop := ::nTop
    ENDIF
-   IF ( ISNIL( ::nBottom ) .OR. ::nBottom > MaxRow() )
-      ::nBottom := MaxRow()
+   IF ISNIL( nLeft )
+      ::nLeft := ::nLeft
    ENDIF
-   IF ( ISNIL( ::nRight )  .OR. ::nRight > MaxCol() )
-      ::nRight := MaxCol()
+   IF ISNIL( nBottom )
+      ::nBottom := ::nBottom
    ENDIF
-
+   IF ISNIL( nRight )
+      ::nRight := ::nRight
+   ENDIF
+   IF ISNUL( cColor )
+      ::cColor := ::cColor
+   ENDIF
    ::cColor := SetColor( ::cColor )
 
    IF ( ( nHandle := FOpen( ::cFile, 32 ) ) != -1 )
