@@ -4,7 +4,7 @@
 
 #include "hbtui.ch"
 #include "common.ch"
-#include "Fileio.ch"
+#include "fileio.ch"
 #include "inkey.ch"
 
 CLASS HBTui_Editor FROM HBTui_Widget
