@@ -64,7 +64,7 @@ METHOD View( cFile, nTop, nLeft, nBottom, nRight, cColor )
    IF ISNIL( nRight )
       ::nRight := ::nRight
    ENDIF
-   IF ISNUL( cColor )
+   IF ISNIL( cColor )
       ::cColor := ::cColor
    ENDIF
    ::cColor := SetColor( ::cColor )
