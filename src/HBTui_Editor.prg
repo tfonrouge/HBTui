@@ -32,18 +32,25 @@ RETURN Self
    View
 */
 METHOD View( cFile, nTop, nLeft, nBottom, nRight, cColor )
-   LOCAL nHandle                             // nDeskryptor
-   LOCAL nLength                             // nDługość
+   LOCAL nHandle
+   LOCAL nLength
    LOCAL nVert, nHoriz
-   LOCAL aArray, aTarget                     // aTablica,
-   LOCAL i, lMore := .F.                     // lMore := .F. !
+   LOCAL aArray, aTarge
+   LOCAL i, lMore := .F.
    LOCAL nLines, nColumns := 0, nPosition := 1
    LOCAL nKey
    LOCAL nStart, nEnd, nIncrement
 
-
-   IF ISNUL( cFile )
-      ::cFile := ::cFile
+   IF EMPTY( cFile )
+      IF ( nHandle := FCREATE( ::cFile, FC_NORMAL ) ) = -1
+         ALERT( "File cannot be created:" + STR( FERROR() ) )
+         RETURN 0
+      ELSE
+         ::cFile := ::cFile
+         FCLOSE( nHandle )
+      ENDIF
+   ELSE
+      ::cFile := cFile
    ENDIF
    IF ISNIL( nTop )
       ::nTop := ::nTop
