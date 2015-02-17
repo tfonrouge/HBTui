@@ -35,7 +35,7 @@ METHOD View( cFile, nTop, nLeft, nBottom, nRight, cColor )
    LOCAL nHandle
    LOCAL nLength
    LOCAL nVert, nHoriz
-   LOCAL aArray, aTarge
+   LOCAL aArray, aTarget
    LOCAL i, lMore := .F.
    LOCAL nLines, nColumns := 0, nPosition := 1
    LOCAL nKey
