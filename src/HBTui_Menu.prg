@@ -1,94 +1,94 @@
 /*
- *   31-12-2014
- */
+   13-03-2014
+*/
 
 #include "hbtui.ch"
 #include "inkey.ch"
 
 CLASS HBTui_Menu FROM HBTui_Widget
+
 PROTECTED:
+   VAR items         AS ARRAY   INIT {}
+   VAR idVar         AS NUMERIC INIT 1
+   VAR parent        AS OBJECT
 
-PUBLIC:
+EXPORT:
+   METHOD New( aItems )
+   METHOD AddItem
+   METHOD Draw()
+   METHOD Exec( oParent )
+   METHOD NewMenuPos()
 
-    CONSTRUCTOR New( nTop, nLeft, nWidth, nHeight, cColor, wId )
+   MESSAGE SetKeys   IS DEFERRED
+   MESSAGE ClearKeys IS DEFERRED
 
-    METHOD AddAction()
-    METHOD AddMenu()
-    METHOD PositionMenu()
-    
-
-ENDCLASS
+END CLASS
 
 /*
-    New
+   New
 */
-METHOD New( nTop, nLeft, nWidth, nHeight, cColor, wId ) CLASS HBTui_Menu
+METHOD New( aItems ) CLASS HBTui_Menu
+   LOCAL i
 
-    ::Super:New( nTop, nLeft, nWidth, nHeight, cColor, wId )
+    // ::items := {}
+    // ::idVar := 1
+
+    IF aItems != NIL
+       FOR i := 1 TO LEN( aItems )
+          ::addItem( aItems[i, 1], aItems[i, 2] )
+       NEXT
+    ENDIF
 
 RETURN Self
 
 /*
-    AddAction
+   Draw
 */
-METHOD PROCEDURE AddAction() CLASS HBTui_Menu
-    LOCAL nKey
+METHOD Draw() CLASS HBTui_Menu
+   LOCAL i
 
-    DO WHILE .T.
-
-      nKey := Inkey( 0 )
-
-        DO CASE
-        CASE nKey == K_MOUSEMOVE
-
-
-        CASE nKey == K_LBUTTONDOWN
-
-
-        CASE nKey == K_LBUTTONUP
-
-
-        CASE nKey == K_DOWN
-
-
-        CASE nKey == K_UP
-
-
-        CASE nKey == K_END
-
-
-        CASE nKey == K_HOME
-
-
-        CASE nKey == K_LEFT
-
-
-        CASE nKey == K_RIGHT
-
-
-        CASE nKey == K_ENTER
-
-
-        CASE nKey == K_ESC
-
-
-        ENDCASE
-
-    ENDDO
-
-RETURN
-
-/*
-    AddMenu
-*/
-METHOD PROCEDURE AddMenu() CLASS HBTui_Menu
-
-RETURN
-/*
-    PositionMenu()
-*/
-METHOD FUNCTION PositionMenu() CLASS HBTui_Menu
-
-     // ( nTop, nLeft, nBottom, nRight )
+   FOR i := 1 TO LEN( ::items )
+      ::items[i]:Draw()
+   NEXT i
 
 RETURN Self
+
+/*
+   AddItem
+*/
+METHOD AddItem( nRow, nCol, cLabel, oAction, lActive ) CLASS HBTui_Menu
+
+   AADD( ::items, MenuItem():New( nRow, nCol, cLabel, oAction, lActive ) )
+
+RETURN Self
+
+/*
+   Exec
+*/
+METHOD Exec( oParent ) CLASS HBTui_Menu
+   LOCAL finished := .F.
+
+   ::parent := oParent
+
+   WHILE !finished
+      ::Draw()
+
+      ::SetKeys()
+      MENU TO ::idVar
+      ::ClearKeys()
+
+      finished := ( ::idVar == 0 )
+
+      IF !finished
+         ::items[::idVar]:Exec( Self )
+      ENDIF
+
+   ENDDO
+
+RETURN Self
+
+/*
+   NewMenuPos
+*/
+METHOD NewMenuPos() CLASS HBTui_Menu
+RETURN ::idVar
