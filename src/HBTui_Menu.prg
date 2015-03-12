@@ -35,7 +35,7 @@ METHOD New( aItems ) CLASS HBTui_Menu
 
     IF aItems != NIL
        FOR i := 1 TO LEN( aItems )
-          ::addItem( aItems[i, 1], aItems[i, 2] )
+          ::AddItem( aItems[i, 1], aItems[i, 2] )
        NEXT
     ENDIF
 
