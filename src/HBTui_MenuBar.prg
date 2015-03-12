@@ -1,94 +1,54 @@
 /*
- *   31-12-2014
- */
+   13-03-20144
+*/
 
 #include "hbtui.ch"
 #include "inkey.ch"
 
+#define OPTION_SPACING  4
+
 CLASS HBTui_MenuBar FROM HBTui_Menu
-PROTECTED:
 
-PUBLIC:
+EXPORT:
+   METHOD  Draw()
+   METHOD  AddItem( cLabel, oAction, isActive )
+   METHOD  NewMenuPos()
 
-    CONSTRUCTOR New( nTop, nLeft, nWidth, nHeight, cColor, wId )
-
-    METHOD AddAction()
-    METHOD AddMenu()
-    METHOD PositionMenu()
+   MESSAGE setKeys     IS NULL
+   MESSAGE clearKeys   IS NULL
 
 ENDCLASS
 
 /*
-    New
+   AddItem
 */
-METHOD New( nTop, nLeft, nWidth, nHeight, cColor, wId ) CLASS HBTui_MenuBar
+METHOD AddItem( cLabel, oAction, isActive )
+   LOCAL nCol
 
-    ::Super:New( nTop, nLeft, nWidth, nHeight, cColor, wId )
+   // establish screen column for new option
+   IF Len(::items) == 0
+      nCol := OPTION_SPACING
+   ELSE
+        nCol := ATAIL( ::items ):NextCol() + OPTION_SPACING
+   ENDIF
+
+   // invoke AddItem in the superclass (HBTui_Menu)
+   ::Super:AddItem( 0, nCol, cLabel, oAction, isActive )
 
 RETURN Self
 
 /*
-    AddAction
+   Draw()
 */
-METHOD AddAction() CLASS HBTui_MenuBar
-    LOCAL nKey
-
-    DO WHILE .T.
-
-      nKey := Inkey( 0 )
-
-        DO CASE
-        CASE nKey == K_MOUSEMOVE
-
-
-        CASE nKey == K_LBUTTONDOWN
-
-
-        CASE nKey == K_LBUTTONUP
-
-
-        CASE nKey == K_DOWN
-
-
-        CASE nKey == K_UP
-
-
-        CASE nKey == K_END
-
-
-        CASE nKey == K_HOME
-
-
-        CASE nKey == K_LEFT
-
-
-        CASE nKey == K_RIGHT
-
-
-        CASE nKey == K_ENTER
-
-
-        CASE nKey == K_ESC
-
-
-        ENDCASE
-
-    ENDDO
-
+METHOD Draw()
+   winCurrent( 0 )       // selects main screen
+   @ 0, 0                // draw the bar
+   ::Super:Draw()        // invoke superclass' draw method
 RETURN Self
 
 /*
-    AddMenu
+   NewMenuPos()
 */
-METHOD AddMenu() CLASS HBTui_MenuBar
-
-RETURN Self
-
-/*
-    PositionMenu()
-*/
-METHOD PositionMenu() CLASS HBTui_MenuBar
-
-     // ( nTop, nLeft, nBottom, nRight )
-
-RETURN Self
+METHOD NewMenuPos()
+// tells a child menu where to put itself
+RETURN ::items[ ::currPos ]:Col
