@@ -22,7 +22,7 @@ ENDCLASS
 /*
    AddItem
 */
-METHOD AddItem( cLabel, oAction, isActive )
+METHOD AddItem( cLabel, oAction, isActive ) CLASS HBTui_MenuBar
    LOCAL nCol
 
    // establish screen column for new option
@@ -40,7 +40,7 @@ RETURN Self
 /*
    Draw()
 */
-METHOD Draw()
+METHOD Draw() CLASS HBTui_MenuBar
    winCurrent( 0 )       // selects main screen
    @ 0, 0                // draw the bar
    ::Super:Draw()        // invoke superclass' draw method
@@ -49,6 +49,6 @@ RETURN Self
 /*
    NewMenuPos()
 */
-METHOD NewMenuPos()
+METHOD NewMenuPos() CLASS HBTui_MenuBar
 // tells a child menu where to put itself
 RETURN ::items[ ::currPos ]:Col
