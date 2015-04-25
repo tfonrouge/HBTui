@@ -4,7 +4,7 @@
 
 #include "hbtui.ch"
 
-CLASS HBTui_PushButton FROM HBTui_AbstractButton
+CLASS HTPushButton FROM HTAbstractButton
 PROTECTED:
 PUBLIC:
 
@@ -18,7 +18,7 @@ ENDCLASS
 /*
     New
 */
-METHOD New( ... ) CLASS HBTui_PushButton
+METHOD New( ... ) CLASS HTPushButton
     IF PCount() > 0
         IF PCount() > 1
             ::setText( hb_pValue( 1 ) )

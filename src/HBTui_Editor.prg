@@ -7,7 +7,7 @@
 #include "Fileio.ch"
 #include "inkey.ch"
 
-CLASS HBTui_Editor FROM HBTui_Widget
+CLASS HTEditor FROM HTWidget
 
    DATA cFile, nTop, nLeft, nBottom, nRight, cColor
 
@@ -18,7 +18,7 @@ ENDCLASS
 /*
    New
 */
-METHOD New( cFile, nTop, nLeft, nBottom, nRight, cColor ) CLASS HBTui_Editor
+METHOD New( cFile, nTop, nLeft, nBottom, nRight, cColor ) CLASS HTEditor
 
    ::cFile   := cFile
    ::nTop    := nTop

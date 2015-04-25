@@ -4,7 +4,7 @@
 
 #include "hbtui.ch"
 
-CLASS HBTui_LayoutItem FROM HBTui_Base
+CLASS HTLayoutItem FROM HTBase
 PUBLIC:
 
     CONSTRUCTOR New( alignment )
@@ -18,7 +18,7 @@ ENDCLASS
 /*
     New
 */
-METHOD New( alignment ) CLASS HBTui_LayoutItem
+METHOD New( alignment ) CLASS HTLayoutItem
     IF alignment = NIL
         alignment := 0
     ENDIF
@@ -28,6 +28,6 @@ RETURN Self
 /*
     setAlignment
 */
-METHOD PROCEDURE setAlignment( alignment ) CLASS HBTui_LayoutItem
+METHOD PROCEDURE setAlignment( alignment ) CLASS HTLayoutItem
     ::Falignment := alignment
 RETURN

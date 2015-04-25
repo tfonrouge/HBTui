@@ -4,7 +4,7 @@
 
 #include "hbtui.ch"
 
-CLASS HBTui_AbstractButton FROM HBTui_Widget
+CLASS HTAbstractButton FROM HTWidget
 PROTECTED:
 
     METHOD DrawControl()
@@ -27,13 +27,13 @@ ENDCLASS
 /*
     DrawControl
 */
-METHOD PROCEDURE DrawControl() CLASS HBTui_AbstractButton
+METHOD PROCEDURE DrawControl() CLASS HTAbstractButton
     ? "Drawing button..."
 RETURN
 
 /*
     setText
 */
-METHOD PROCEDURE setText( text ) CLASS HBTui_AbstractButton
+METHOD PROCEDURE setText( text ) CLASS HTAbstractButton
     ::Ftext := text
 RETURN

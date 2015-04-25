@@ -4,7 +4,7 @@
 
 #include "hbtui.ch"
 
-CLASS HBTui_MenuPopup FROM HBTui_MenuBox
+CLASS HTMenuPopup FROM HTMenuBox
 PROTECTED:
 
 PUBLIC:
@@ -16,7 +16,7 @@ ENDCLASS
 /*
     New
 */
-METHOD New() CLASS HBTui_MenuPopup
+METHOD New() CLASS HTMenuPopup
 
 
 

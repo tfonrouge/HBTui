@@ -8,9 +8,9 @@ STATIC s_FocusedWindow
 STATIC s_MainWidget
 
 /*
-    HBTui_Object
+    HTObject
 */
-CLASS HBTui_Object FROM HBTui_Base
+CLASS HTObject FROM HTBase
 PROTECTED:
     METHOD AddChild( child )
 PUBLIC:
@@ -27,23 +27,23 @@ ENDCLASS
 /*
   New
 */
-METHOD New( parent ) CLASS HBTui_Object
+METHOD New( parent ) CLASS HTObject
     ::SetParent( parent )
 RETURN Self
 
 /*
   AddChild
 */
-METHOD PROCEDURE AddChild( child ) CLASS HBTui_Object
+METHOD PROCEDURE AddChild( child ) CLASS HTObject
     AAdd( ::Fchildren, child )
 RETURN
 
 /*
   SetParent
 */
-METHOD PROCEDURE SetParent( parent ) CLASS HBTui_Object
+METHOD PROCEDURE SetParent( parent ) CLASS HTObject
     IF parent != NIL
-        IF parent:IsDerivedFrom("HBTui_Object")
+        IF parent:IsDerivedFrom("HTObject")
             ::Fparent := parent
             parent:AddChild( Self )
         ELSE
@@ -53,35 +53,35 @@ METHOD PROCEDURE SetParent( parent ) CLASS HBTui_Object
 RETURN
 
 /*
-    End HBTui_Object Class
+    End HTObject Class
 */
 
 /*
-    HBTui_UI_AddMainWidget
+    HTUI_AddMainWidget
 */
-FUNCTION HBTui_UI_AddMainWidget( widget )
+FUNCTION HTUI_AddMainWidget( widget )
     IF s_MainWidget = NIL
         s_MainWidget := {}
     ENDIF
     IF Len( s_MainWidget ) < widget:WId
         ASize( s_MainWidget, widget:WId )
     ENDIF
-    s_MainWidget[ widget:WId ] := HBTui_UI_UnRefCountCopy( widget )
+    s_MainWidget[ widget:WId ] := HTUI_UnRefCountCopy( widget )
 RETURN s_MainWidget
 
 /*
-  HBTui_UI_GetFocusedWindow
+  HTUI_GetFocusedWindow
 */
-FUNCTION HBTui_UI_GetFocusedWindow()
+FUNCTION HTUI_GetFocusedWindow()
     IF s_FocusedWindow = NIL
-        RETURN HBTui_Desktop()
+        RETURN HTDesktop()
     ENDIF
 RETURN s_FocusedWindow
 
 /*
-  HBTui_UI_SetFocusedWindow
+  HTUI_SetFocusedWindow
 */
-FUNCTION HBTui_UI_SetFocusedWindow( window )
+FUNCTION HTUI_SetFocusedWindow( window )
   LOCAL oldWindow
 
   oldWindow := s_FocusedWindow
@@ -90,13 +90,13 @@ FUNCTION HBTui_UI_SetFocusedWindow( window )
 RETURN oldWindow
 
 /*
-    HBTui_UI_WindowAtMousePos
+    HTUI_WindowAtMousePos
 */
-FUNCTION HBTui_UI_WindowAtMousePos()
-    LOCAL wId := HBTui_UI_WIdAtMousePos()
+FUNCTION HTUI_WindowAtMousePos()
+    LOCAL wId := HTUI_WIdAtMousePos()
 
     IF s_MainWidget != NIL .AND. wId > 0 .AND. wId <= Len( s_MainWidget )
         RETURN s_MainWidget[ wId ]
     ENDIF
 
-RETURN HBTui_Desktop()
+RETURN HTDesktop()

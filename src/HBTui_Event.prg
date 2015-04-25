@@ -4,7 +4,7 @@
 
 #include "hbtui.ch"
 
-CLASS HBTui_Event FROM HBTui_Base
+CLASS HTEvent FROM HTBase
 PUBLIC:
     CONSTRUCTOR New( nKey )
 
@@ -18,40 +18,40 @@ ENDCLASS
 /*
   New
 */
-METHOD New( nKey ) CLASS HBTui_Event
+METHOD New( nKey ) CLASS HTEvent
     ::FnKey := nKey
 RETURN Self
 
 /*
-  HBTui_EventClose
+  HTEventClose
 */
-CLASS HBTui_EventClose FROM HBTui_Event
+CLASS HTEventClose FROM HTEvent
 PUBLIC:
     PROPERTY EventType INIT HBTUI_UI_EVENT_TYPE_CLOSE
 ENDCLASS
 
 /*
-  HBTui_EventFocus
+  HTEventFocus
 */
-CLASS HBTui_EventFocus FROM HBTui_Event
+CLASS HTEventFocus FROM HTEvent
 PROTECTED:
 PUBLIC:
     PROPERTY EventType VALUE HBTUI_UI_EVENT_TYPE_FOCUS
 ENDCLASS
 
 /*
-  HBTui_EventKey
+  HTEventKey
 */
-CLASS HBTui_EventKey FROM HBTui_Event
+CLASS HTEventKey FROM HTEvent
 PROTECTED:
 PUBLIC:
     PROPERTY EventType VALUE HBTUI_UI_EVENT_TYPE_KEYBOARD
 ENDCLASS
 
 /*
-  HBTui_EventMouse
+  HTEventMouse
 */
-CLASS HBTui_EventMouse FROM HBTui_Event
+CLASS HTEventMouse FROM HTEvent
 PROTECTED:
 PUBLIC:
     CONSTRUCTOR New( nKey )
@@ -65,7 +65,7 @@ ENDCLASS
 /*
     New
 */
-METHOD New( nKey ) CLASS HBTui_EventMouse
+METHOD New( nKey ) CLASS HTEventMouse
     ::Super:New( nKey )
     ::FMouseAbsRow := MRow( .T. )
     ::FMouseAbsCol := MCol( .T. )
@@ -74,9 +74,9 @@ METHOD New( nKey ) CLASS HBTui_EventMouse
 RETURN Self
 
 /*
-  HBTui_EventMove
+  HTEventMove
 */
-CLASS HBTui_EventMove FROM HBTui_Event
+CLASS HTEventMove FROM HTEvent
 PROTECTED:
 PUBLIC:
     CONSTRUCTOR New( nKey )
@@ -90,7 +90,7 @@ ENDCLASS
 /*
     New
 */
-METHOD New( nKey ) CLASS HBTui_EventMove
+METHOD New( nKey ) CLASS HTEventMove
     ::Super:New( nKey )
     ::FMouseAbsRow := MRow( .T. )
     ::FMouseAbsCol := MCol( .T. )
@@ -99,9 +99,9 @@ METHOD New( nKey ) CLASS HBTui_EventMove
 RETURN Self
 
 /*
-  HBTui_EventPaint
+  HTEventPaint
 */
-CLASS HBTui_EventPaint FROM HBTui_Event
+CLASS HTEventPaint FROM HTEvent
 PROTECTED:
 PUBLIC:
     PROPERTY EventType VALUE HBTUI_UI_EVENT_TYPE_PAINT

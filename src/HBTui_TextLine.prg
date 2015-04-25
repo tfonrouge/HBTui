@@ -4,7 +4,7 @@
 
 #include "hbtui.ch"
 
-CLASS HBTui_TextLine FROM HBTui_Widget
+CLASS HTTextLine FROM HTWidget
 PUBLIC:
 
     CONSTRUCTOR New( parent, text )
@@ -18,7 +18,7 @@ ENDCLASS
 /*
     New
 */
-METHOD New( parent, text ) CLASS HBTui_TextLine
+METHOD New( parent, text ) CLASS HTTextLine
     ::Super:SetParent( parent )
     IF text != NIL
         ::text := text
@@ -28,7 +28,7 @@ RETURN Self
 /*
     PaintEvent
 */
-METHOD PROCEDURE PaintEvent( event ) CLASS HBTui_TextLine
+METHOD PROCEDURE PaintEvent( event ) CLASS HTTextLine
     HB_SYMBOL_UNUSED( event )
     DevPos( ::x, ::y )
     DevOut( ::text )

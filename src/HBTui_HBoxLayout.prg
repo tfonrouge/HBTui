@@ -4,7 +4,7 @@
 
 #include "hbtui.ch"
 
-CLASS HBTui_HBoxLayout FROM HBTui_BoxLayout
+CLASS HTHBoxLayout FROM HTBoxLayout
 PUBLIC:
 
     METHOD New( parent ) INLINE ::Super:New( 0, parent )

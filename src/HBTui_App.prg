@@ -5,7 +5,7 @@
 #include "hbtui.ch"
 #include "inkey.ch"
 
-SINGLETON CLASS HBTui_App FROM HBTui_Object
+SINGLETON CLASS HTApplication FROM HTObject
 PROTECTED:
 
     DATA Fexecute INIT .F.
@@ -18,7 +18,7 @@ PROTECTED:
 PUBLIC:
 
     METHOD Exec()
-    METHOD FocusWindow INLINE HBTui_UI_GetFocusedWindow()
+    METHOD FocusWindow INLINE HTUI_GetFocusedWindow()
     METHOD GetEvent()
 
     PROPERTY allWidgets
@@ -30,7 +30,7 @@ ENDCLASS
 /*
   Exec
 */
-METHOD FUNCTION Exec() CLASS HBTui_App
+METHOD FUNCTION Exec() CLASS HTApplication
     LOCAL result
     LOCAL event
     LOCAL hbtobject
@@ -94,7 +94,7 @@ RETURN result
 /*
     FocusEvent
 */
-METHOD PROCEDURE FocusEvent( event ) CLASS HBTui_App
+METHOD PROCEDURE FocusEvent( event ) CLASS HTApplication
     IF .T. //!::FocusWindow == event:hbtobject
         ::FocusWindow:FocusOutEvent( event )
         event:hbtobject:FocusInEvent( event )
@@ -104,7 +104,7 @@ RETURN
 /*
   GetEvent
 */
-METHOD PROCEDURE GetEvent() CLASS HBTui_App
+METHOD PROCEDURE GetEvent() CLASS HTApplication
     LOCAL nKey
     LOCAL mrow := MRow( .T. )
     LOCAL mcol := MCol( .T. )
@@ -116,7 +116,7 @@ METHOD PROCEDURE GetEvent() CLASS HBTui_App
     ENDIF
 
     IF mCoords[ 1 ] != mrow .OR. mCoords[ 2 ] != mcol
-        HBTui_App():FocusWindow():AddEvent( HBTui_EventMouse():New( K_MOUSEMOVE ) )
+        HTApplication():FocusWindow():AddEvent( HTEventMouse():New( K_MOUSEMOVE ) )
         mCoords[ 1 ] := mrow
         mCoords[ 2 ] := mcol
         RETURN
@@ -130,9 +130,9 @@ METHOD PROCEDURE GetEvent() CLASS HBTui_App
 
     IF nKey != 0
         IF nKey >= K_MINMOUSE .AND. nKey <= K_MAXMOUSE
-            HBTui_UI_WindowAtMousePos():AddEvent( HBTui_EventMouse():New( nKey ) )
+            HTUI_WindowAtMousePos():AddEvent( HTEventMouse():New( nKey ) )
         ELSE
-            HBTui_UI_WindowAtMousePos():AddEvent( HBTui_EventKey():New( nKey ) )
+            HTUI_WindowAtMousePos():AddEvent( HTEventKey():New( nKey ) )
         ENDIF
     ENDIF
 
@@ -141,7 +141,7 @@ RETURN
 /*
     SetEventStack
 */
-METHOD PROCEDURE SetEventStack( event ) CLASS HBTui_App
+METHOD PROCEDURE SetEventStack( event ) CLASS HTApplication
     IF ::FeventStack = NIL
         ::FeventStack := {}
     ENDIF

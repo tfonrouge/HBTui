@@ -4,7 +4,7 @@
 
 #include "hbtui.ch"
 
-CLASS HBTui_TextEdit FROM HBTui_Widget
+CLASS HTTextEdit FROM HTWidget
 PUBLIC:
 
     CONSTRUCTOR New( parent, text )

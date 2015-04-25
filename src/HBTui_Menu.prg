@@ -5,7 +5,7 @@
 #include "hbtui.ch"
 #include "inkey.ch"
 
-CLASS HBTui_Menu FROM HBTui_Widget
+CLASS HTMenu FROM HTWidget
 PROTECTED:
 
 PUBLIC:
@@ -22,7 +22,7 @@ ENDCLASS
 /*
     New
 */
-METHOD New( nTop, nLeft, nWidth, nHeight, cColor, wId ) CLASS HBTui_Menu
+METHOD New( nTop, nLeft, nWidth, nHeight, cColor, wId ) CLASS HTMenu
 
     ::Super:New( nTop, nLeft, nWidth, nHeight, cColor, wId )
 
@@ -31,7 +31,7 @@ RETURN Self
 /*
     AddAction
 */
-METHOD PROCEDURE AddAction() CLASS HBTui_Menu
+METHOD PROCEDURE AddAction() CLASS HTMenu
     LOCAL nKey
 
     DO WHILE .T.
@@ -81,13 +81,13 @@ RETURN
 /*
     AddMenu
 */
-METHOD PROCEDURE AddMenu() CLASS HBTui_Menu
+METHOD PROCEDURE AddMenu() CLASS HTMenu
 
 RETURN
 /*
     PositionMenu()
 */
-METHOD FUNCTION PositionMenu() CLASS HBTui_Menu
+METHOD FUNCTION PositionMenu() CLASS HTMenu
 
      // ( nTop, nLeft, nBottom, nRight )
 

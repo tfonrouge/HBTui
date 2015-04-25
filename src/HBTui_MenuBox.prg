@@ -4,7 +4,7 @@
 
 #include "hbtui.ch"
 
-CLASS HBTui_MenuBox FROM HBTui_Menu
+CLASS HTMenuBox FROM HTMenu
 PROTECTED:
 
 PUBLIC:
@@ -16,7 +16,7 @@ ENDCLASS
 /*
     New
 */
-METHOD New( nTop, nLeft, nWidth, nHeight, cColor, wId ) CLASS HBTui_MenuBox
+METHOD New( nTop, nLeft, nWidth, nHeight, cColor, wId ) CLASS HTMenuBox
 
     ::Super:New( nTop, nLeft, nWidth, nHeight, cColor, wId )
 
