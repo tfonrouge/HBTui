@@ -16,7 +16,7 @@ CLASS HTEditor FROM HTWidget
    VAR nRight                        AS NUMERIC   INIT MAXCOL()
    VAR cColor                        AS CHARACTER INIT "W/B"
 
-   CONSTRUCTOR New()
+   CONSTRUCTOR New( cFile, nTop, nLeft, nBottom, nRight, cColor )
    METHOD View( cFile, nTop, nLeft, nBottom, nRight, cColor )
 
 ENDCLASS

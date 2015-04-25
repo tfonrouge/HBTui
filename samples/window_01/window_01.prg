@@ -5,18 +5,14 @@
 #include "hbtui.ch"
 
 PROCEDURE Main()
-    LOCAL oApp
-    LOCAL oWin
-    LOCAL oBtn
+    LOCAL app
+    LOCAL win
 
-    oApp := HTApplication():New()
+    app := HTApplication():New()
 
-    oWin := HTWindow():New()
+    win := HTWindow():New()
 
-    btn := HTPushButton():New( oWin )
-    btn:text := "Ok"
-
-    w1:Show()
+    win:Show()
 
     app:Exec()
 
