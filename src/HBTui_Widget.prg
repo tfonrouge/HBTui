@@ -54,7 +54,7 @@ ENDCLASS
 */
 METHOD PROCEDURE AddEvent( event ) CLASS HTWidget
     OutStd("on AddEvent: " + event:ClassName +E"\n" )
-    event:hbtObject := HTUI_UnRefCountCopy( Self )
+    event:hbtObject := HBTui_UI_UnRefCountCopy( Self )
     HTApplication():eventStack := event
 RETURN
 

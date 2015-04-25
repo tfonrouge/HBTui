@@ -10,7 +10,7 @@ PROCEDURE Main()
 
     app := HTApplication():New()
 
-    win := HTWindow():New()
+    win := MainWindow():New()
 
     win:Show()
 

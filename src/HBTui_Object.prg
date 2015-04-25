@@ -66,7 +66,7 @@ FUNCTION HTUI_AddMainWidget( widget )
     IF Len( s_MainWidget ) < widget:WId
         ASize( s_MainWidget, widget:WId )
     ENDIF
-    s_MainWidget[ widget:WId ] := HTUI_UnRefCountCopy( widget )
+    s_MainWidget[ widget:WId ] := HBTui_UI_UnRefCountCopy( widget )
 RETURN s_MainWidget
 
 /*
@@ -93,7 +93,7 @@ RETURN oldWindow
     HTUI_WindowAtMousePos
 */
 FUNCTION HTUI_WindowAtMousePos()
-    LOCAL wId := HTUI_WIdAtMousePos()
+    LOCAL wId := _HT_WidgetAtMousePos()
 
     IF s_MainWidget != NIL .AND. wId > 0 .AND. wId <= Len( s_MainWidget )
         RETURN s_MainWidget[ wId ]
