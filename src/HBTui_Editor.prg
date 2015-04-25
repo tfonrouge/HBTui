@@ -4,17 +4,23 @@
 
 #include "hbtui.ch"
 #include "common.ch"
-#include "Fileio.ch"
+#include "fileio.ch"
 #include "inkey.ch"
 
 CLASS HTEditor FROM HTWidget
 
-   DATA cFile, nTop, nLeft, nBottom, nRight, cColor
+   VAR cFile                         AS CHARACTER INIT "Untitled.txt"
+   VAR nTop                          AS NUMERIC   INIT 0
+   VAR nLeft                         AS NUMERIC   INIT 0
+   VAR nBottom                       AS NUMERIC   INIT MAXROW()
+   VAR nRight                        AS NUMERIC   INIT MAXCOL()
+   VAR cColor                        AS CHARACTER INIT "W/B"
 
-   CONSTRUCTOR New( cFile, nTop, nLeft, nBottom, nRight, cColor )
-   METHOD View()
+   CONSTRUCTOR New()
+   METHOD View( cFile, nTop, nLeft, nBottom, nRight, cColor )
 
 ENDCLASS
+
 /*
    New
 */
@@ -32,32 +38,42 @@ RETURN Self
 /*
    View
 */
-//METHOD View( cFile, nTop, nLeft, nBottom, nRight, cColor )
-METHOD View()
-
-   LOCAL nHandle                             // nDeskryptor
-   LOCAL nLength                             // nDługość
+METHOD View( cFile, nTop, nLeft, nBottom, nRight, cColor )
+   LOCAL nHandle
+   LOCAL nLength
    LOCAL nVert, nHoriz
-   LOCAL aArray, aTarget                     // aTablica,
-   LOCAL i, lMore := .F.                     // lMore := .F. !
+   LOCAL aArray, aTarget
+   LOCAL i, lMore := .F.
    LOCAL nLines, nColumns := 0, nPosition := 1
    LOCAL nKey
    LOCAL nStart, nEnd, nIncrement
 
-
-   IF ( ISNIL( ::nTop )    .OR. ::nTop < 0 )
-      ::nTop := 0
+   IF EMPTY( cFile )
+      IF ( nHandle := FCREATE( ::cFile, FC_NORMAL ) ) = -1
+         ALERT( "File cannot be created:" + STR( FERROR() ) )
+         RETURN 0
+      ELSE
+         ::cFile := ::cFile
+         FCLOSE( nHandle )
+      ENDIF
+   ELSE
+      ::cFile := cFile
    ENDIF
-   IF ( ISNIL( ::nLeft )   .OR. ::nLeft < 0 )
-      ::nLeft := 0
+   IF ISNIL( nTop )
+      ::nTop := ::nTop
    ENDIF
-   IF ( ISNIL( ::nBottom ) .OR. ::nBottom > MaxRow() )
-      ::nBottom := MaxRow()
+   IF ISNIL( nLeft )
+      ::nLeft := ::nLeft
    ENDIF
-   IF ( ISNIL( ::nRight )  .OR. ::nRight > MaxCol() )
-      ::nRight := MaxCol()
+   IF ISNIL( nBottom )
+      ::nBottom := ::nBottom
    ENDIF
-
+   IF ISNIL( nRight )
+      ::nRight := ::nRight
+   ENDIF
+   IF ISNIL( cColor )
+      ::cColor := ::cColor
+   ENDIF
    ::cColor := SetColor( ::cColor )
 
    IF ( ( nHandle := FOpen( ::cFile, 32 ) ) != -1 )
