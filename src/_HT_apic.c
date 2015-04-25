@@ -11,9 +11,9 @@
 #include "hbapigt.h"
 
 /*
-    HBTUI_UI_UnRefCountCopy
+    HTUI_UnRefCountCopy
 */
-HB_FUNC( HBTUI_UI_UNREFCOUNTCOPY )
+HB_FUNC( HTUI_UNREFCOUNTCOPY )
 {
     PHB_ITEM pSelf = hb_param( 1, HB_IT_OBJECT );
 
@@ -27,9 +27,9 @@ HB_FUNC( HBTUI_UI_UNREFCOUNTCOPY )
 }
 
 /*
-    HBTUI_UI_RefCount
+    HTUI_RefCount
 */
-HB_FUNC( HBTUI_UI_REFCOUNT )
+HB_FUNC( HTUI_REFCOUNT )
 {
     PHB_ITEM pSelf = hb_param( 1, HB_IT_OBJECT );
 

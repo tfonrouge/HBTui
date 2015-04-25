@@ -66,7 +66,7 @@ FUNCTION HTUI_AddMainWidget( widget )
     IF Len( s_MainWidget ) < widget:WId
         ASize( s_MainWidget, widget:WId )
     ENDIF
-    s_MainWidget[ widget:WId ] := HBTui_UI_UnRefCountCopy( widget )
+    s_MainWidget[ widget:WId ] := HTUI_UnRefCountCopy( widget )
 RETURN s_MainWidget
 
 /*
