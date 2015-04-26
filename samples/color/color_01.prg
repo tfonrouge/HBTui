@@ -10,14 +10,17 @@ PROCEDURE Main()
     LOCAL n := 0
     LOCAL cColor
 
-    FOR i := 1 TO 16
+    CLS
+
+    SetBlink( .F. )
+
+    FOR i := 1 TO 32
         x := i - 1
         FOR j := 1 TO 16
             y := (j - 1) * 5
             cColor := NToColor( n )
 //            DispBox( x, y, x, y + 3, Replicate( "@", 9 ), cColor )
             DispOutAt( x, y, cColor, cColor )
-            OutStd( n, cColor, e"\n" )
             ++n
         NEXT
     NEXT
