@@ -19,12 +19,14 @@ PROCEDURE Main()
     w1:width := 40
 
     w2 := HTWidget():New()
+    w2:color := "10/02"
     w2:x := 7
     w2:y := 8
     w2:height := 20
     w2:width := 40
 
     w3 := HTWidget():New()
+    w3:color := "14/05"
     w3:x := 9
     w3:y := 11
     w3:height := 20
