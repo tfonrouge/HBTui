@@ -8,6 +8,11 @@
 CLASS HTWidget FROM HTObject
 PROTECTED:
 
+    DATA FAsDesktopWidget
+    DATA FClearA    INIT "07/15"
+    DATA FClearB    INIT Chr( 176 )
+    DATA FColor     INIT "00/07"
+    DATA FShadow    INIT "00/08"
     DATA FWid
     DATA FWinSysActMove     INIT .F.
     DATA FWinSysBtnClose    INIT .F.
@@ -18,7 +23,15 @@ PROTECTED:
     METHOD DisplayChildren()
     METHOD displayLayout()
     METHOD DrawWindow()
+    METHOD GetClearA INLINE ::FClearA
+    METHOD GetClearB INLINE ::FClearB
+    METHOD GetColor INLINE ::FColor
+    METHOD GetShadow INLINE ::FShadow
     METHOD GetWId()
+    METHOD SetClearA( clearA ) INLINE ::FClearA := clearA
+    METHOD SetClearB( clearB ) INLINE ::FClearB := clearB
+    METHOD SetColor( color ) INLINE ::FColor := color
+    METHOD SetShadow( shadow ) INLINE ::FShadow := shadow
     METHOD SetWId( wId )
 
 PUBLIC:
@@ -35,13 +48,22 @@ PUBLIC:
     METHOD MoveEvent( moveEvent )
     METHOD PaintEvent( event )
 
+    METHOD setAsDesktopWidget
+    METHOD setBackgroundColor( color )
+    METHOD setForegroundColor( color )
     METHOD setLayout( layout )
 
+    PROPERTY backgroundColor WRITE setBackgroundColor
     PROPERTY charWidgetClose INIT hb_BChar( 254 )
     PROPERTY charWidgetHide INIT Chr( 25 )
     PROPERTY charWidgetMaximize INIT Chr( 18 )
+    PROPERTY clearA READ GetClearA WRITE SetClearA
+    PROPERTY clearB READ GetClearB WRITE SetClearB
+    PROPERTY color READ GetColor WRITE SetColor
+    PROPERTY foregroundColor WRITE setForegroundColor
     PROPERTY height READWRITE
     PROPERTY layout WRITE setLayout
+    PROPERTY shadow READ GetShadow WRITE SetShadow
     PROPERTY WId READ GetWId WRITE SetWId /* only main windows have it */
     PROPERTY width READWRITE
     PROPERTY x READWRITE
@@ -64,6 +86,7 @@ RETURN
 METHOD PROCEDURE CloseEvent( closeEvent ) CLASS HTWidget
     HB_SYMBOL_UNUSED( closeEvent )
     WClose( ::FWId )
+    OutStd( "Closing...", WList(), e"\n" )
 RETURN
 
 /*
@@ -225,6 +248,25 @@ METHOD PROCEDURE PaintEvent( event ) CLASS HTWidget
 RETURN
 
 /*
+    setAsDesktopWidget
+*/
+METHOD PROCEDURE setAsDesktopWidget CLASS HTWidget
+
+    /* just one widget can be the desktop widget */
+    IF ::FAsDesktopWidget = NIL .AND. HTApplication():desktop = NIL
+        ::FAsDesktopWidget := .T.
+    ENDIF
+
+RETURN
+
+/*
+    setBackgroundColor
+*/
+METHOD FUNCTION setBackgroundColor( color ) CLASS HTWidget
+    ::FbackgroundColor := color
+RETURN ::FbackgroundColor
+
+/*
   SetFocus
 */
 METHOD PROCEDURE SetFocus() CLASS HTWidget
@@ -238,6 +280,13 @@ METHOD PROCEDURE SetFocus() CLASS HTWidget
     ENDIF
 
 RETURN
+
+/*
+    setForegroundColor
+*/
+METHOD FUNCTION setForegroundColor( color ) CLASS HTWidget
+    ::FforegroundColor := color
+RETURN ::FforegroundColor
 
 /*
     setLayout
@@ -262,6 +311,16 @@ RETURN
   Show
 */
 METHOD PROCEDURE Show() CLASS HTWidget
-    ::AddEvent( HTEventPaint():New() )
-    ::AddEvent( HTEventFocus():New() )
+    IF ::FAsDesktopWidget = .T.
+        WBoard() /* available physical screen */
+        WMode( .F., .F., .F., .F. ) /* windows cannot be moved outside of screen ( top, left, bottom, right ) */
+        WSetShadow( ::FShadow )
+        SetClearA( ::FClearA )
+        SetClearB( ::FClearB )
+        DispBox( 0, 0, MaxRow(), MaxCol(), Replicate( ::FClearB, 9 ), ::FColor )
+        SetPos( 0, 0 )
+    ELSE
+        ::AddEvent( HTEventPaint():New() )
+        ::AddEvent( HTEventFocus():New() )
+    ENDIF
 RETURN

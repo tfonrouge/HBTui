@@ -17,15 +17,32 @@ PROTECTED:
 
 PUBLIC:
 
+    CONSTRUCTOR New()
+
     METHOD Exec()
     METHOD FocusWindow INLINE HTUI_GetFocusedWindow()
     METHOD GetEvent()
 
     PROPERTY allWidgets
+    PROPERTY desktop
     PROPERTY eventStack WRITE SetEventStack
     PROPERTY eventStackLen INIT 0
 
 ENDCLASS
+
+/*
+    New
+*/
+METHOD New() CLASS HTApplication
+    LOCAL desktop
+
+    IF ::Fdesktop = NIL
+        desktop := HTWidget():New()
+        desktop:SetAsDesktopWidget()
+        ::Fdesktop := desktop
+    ENDIF
+
+RETURN Self
 
 /*
   Exec
@@ -43,6 +60,9 @@ METHOD FUNCTION Exec() CLASS HTApplication
         Set( _SET_EVENTMASK, INKEY_ALL )
 
         result := 0
+
+        /* paint desktop */
+        ::Fdesktop:Show()
 
         ::Fexecute := .T.
 
