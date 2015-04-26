@@ -6,9 +6,9 @@
 #include "inkey.ch"
 
 #define _DESKTOP_COLOR  "00/15"
-#define _DESKTOP_CHAR   e"\xB0"
+#define _DESKTOP_CHAR   e"\xB1"
 #define _WIDGET_COLOR   "11/09"
-#define _WIDGET_CHAR    e"\xB1"
+#define _WIDGET_CHAR    e"\x20"
 #define _WIDGET_SHADOW  "00/07"
 
 CLASS HTWidget FROM HTObject
@@ -142,7 +142,7 @@ METHOD PROCEDURE DrawWindow() CLASS HTWidget
         SetClearB( _WIDGET_CHAR )
         WBox( NIL, ::color )
         //DevOut( 0, 1, Chr( 254 ) )
-        @ -1, 0 SAY ::charWidgetClose + ::charWidgetHide + ::charWidgetMaximize
+        DispOutAt( -1, 0, ::charWidgetClose + ::charWidgetHide + ::charWidgetMaximize, ::color )
         HTUI_SetFocusedWindow( Self )
     ENDIF
 RETURN

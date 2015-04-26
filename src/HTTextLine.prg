@@ -30,6 +30,5 @@ RETURN Self
 */
 METHOD PROCEDURE PaintEvent( event ) CLASS HTTextLine
     HB_SYMBOL_UNUSED( event )
-    DevPos( ::x, ::y )
-    DevOut( ::text )
+    DevOutAt( ::x, ::y, ::text, ::color )
 RETURN
