@@ -5,14 +5,20 @@
 #include "hbtui.ch"
 #include "inkey.ch"
 
+#define _DESKTOP_COLOR  "00/15"
+#define _DESKTOP_CHAR   e"\xB0"
+#define _WIDGET_COLOR   "11/09"
+#define _WIDGET_CHAR    e"\xB1"
+#define _WIDGET_SHADOW  "00/07"
+
 CLASS HTWidget FROM HTObject
 PROTECTED:
 
     DATA FAsDesktopWidget
     DATA FClearA    INIT "07/15"
-    DATA FClearB    INIT Chr( 176 )
-    DATA FColor     INIT "00/07"
-    DATA FShadow    INIT "00/08"
+    DATA FClearB    INIT _DESKTOP_CHAR
+    DATA FColor
+    DATA FShadow    INIT _WIDGET_SHADOW
     DATA FWid
     DATA FWinSysActMove     INIT .F.
     DATA FWinSysBtnClose    INIT .F.
@@ -25,7 +31,7 @@ PROTECTED:
     METHOD DrawWindow()
     METHOD GetClearA INLINE ::FClearA
     METHOD GetClearB INLINE ::FClearB
-    METHOD GetColor INLINE ::FColor
+    METHOD GetColor
     METHOD GetShadow INLINE ::FShadow
     METHOD GetWId()
     METHOD SetClearA( clearA ) INLINE ::FClearA := clearA
@@ -133,7 +139,8 @@ METHOD PROCEDURE DrawWindow() CLASS HTWidget
             ::Fy := MaxCol() / 2 - ::Fwidth / 2
         ENDIF
         ::SetWId( WOpen( ::Fx, ::Fy, ::Fx + ::Fheight, ::Fy + ::Fwidth, .T. ) )
-        WBox()
+        SetClearB( _WIDGET_CHAR )
+        WBox( NIL, ::color )
         //DevOut( 0, 1, Chr( 254 ) )
         @ -1, 0 SAY ::charWidgetClose + ::charWidgetHide + ::charWidgetMaximize
         HTUI_SetFocusedWindow( Self )
@@ -159,6 +166,19 @@ METHOD PROCEDURE FocusOutEvent( eventFocus ) CLASS HTWidget
 
     ENDIF
 RETURN
+
+/*
+    GetColor
+*/
+METHOD FUNCTION GetColor CLASS HTWidget
+    IF ::FColor != NIL
+        RETURN ::FColor
+    ELSE
+        IF ::Fparent != NIL
+            RETURN ::Fparent:Color
+        ENDIF
+    ENDIF
+RETURN iif( ::FAsDesktopWidget = .T., _DESKTOP_COLOR, _WIDGET_COLOR )
 
 /*
     GetWId
@@ -317,7 +337,7 @@ METHOD PROCEDURE Show() CLASS HTWidget
         WSetShadow( ::FShadow )
         SetClearA( ::FClearA )
         SetClearB( ::FClearB )
-        DispBox( 0, 0, MaxRow(), MaxCol(), Replicate( ::FClearB, 9 ), ::FColor )
+        DispBox( 0, 0, MaxRow(), MaxCol(), Replicate( ::FClearB, 9 ), ::color )
         SetPos( 0, 0 )
     ELSE
         ::AddEvent( HTEventPaint():New() )

@@ -58,6 +58,7 @@ METHOD FUNCTION Exec() CLASS HTApplication
 
         //Set( _SET_EVENTMASK, INKEY_ALL + HB_INKEY_RAW + HB_INKEY_EXT + HB_INKEY_GTEVENT )
         Set( _SET_EVENTMASK, INKEY_ALL )
+        SetBlink( .F. )
 
         result := 0
 
