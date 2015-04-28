@@ -5,7 +5,7 @@
 #include "hbtui.ch"
 #include "inkey.ch"
 
-CLASS HTMenuBar FROM HTMenu
+CLASS HTMenuBar FROM HTWidget
 PROTECTED:
 
 PUBLIC:

@@ -22,3 +22,4 @@ src/*.c
 src/*.prg
 src/types/*.prg
 src/HTEvent/*.prg
+src/HTWidget/*.prg
