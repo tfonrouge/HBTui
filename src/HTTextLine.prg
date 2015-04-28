@@ -9,7 +9,7 @@ PUBLIC:
 
     CONSTRUCTOR New( parent, text )
     
-    METHOD PaintEvent( event )
+    METHOD paintEvent( event )
 
     PROPERTY text READWRITE INIT ""
 
@@ -26,9 +26,9 @@ METHOD New( parent, text ) CLASS HTTextLine
 RETURN Self
 
 /*
-    PaintEvent
+    paintEvent
 */
-METHOD PROCEDURE PaintEvent( event ) CLASS HTTextLine
+METHOD PROCEDURE paintEvent( event ) CLASS HTTextLine
     HB_SYMBOL_UNUSED( event )
     DispOutAt( ::x, ::y, ::text, ::color )
 RETURN

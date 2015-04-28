@@ -10,14 +10,17 @@
 
 #define HBTUI_UI_STACK_EVENT_SIZE           128
 
-#define HBTUI_UI_EVENT_TYPE_NULL            0
-#define HBTUI_UI_EVENT_TYPE_CLOSE           1
-#define HBTUI_UI_EVENT_TYPE_FOCUS           2
-#define HBTUI_UI_EVENT_TYPE_FOCUS_IN        3
-#define HBTUI_UI_EVENT_TYPE_FOCUS_OUT       4
-#define HBTUI_UI_EVENT_TYPE_KEYBOARD        5
-#define HBTUI_UI_EVENT_TYPE_MOUSE           6
-#define HBTUI_UI_EVENT_TYPE_MOVE            7
-#define HBTUI_UI_EVENT_TYPE_PAINT           8
+#define HT_EVENT_TYPE_NULL          0
+#define HT_EVENT_TYPE_CLOSE         1
+#define HT_EVENT_TYPE_FOCUSIN       2
+#define HT_EVENT_TYPE_FOCUSOUT      3
+#define HT_EVENT_TYPE_KEYBOARD      4
+#define HT_EVENT_TYPE_MOUSE         5
+#define HT_EVENT_TYPE_MOVE          6
+#define HT_EVENT_TYPE_PAINT         7
+#define HT_EVENT_TYPE_RESIZE        8
+#define HT_EVENT_TYPE_HIDE          9
+#define HT_EVENT_TYPE_MAXIMIZE      10
+#define HT_EVENT_TYPE_SHOW          11
 
 #endif

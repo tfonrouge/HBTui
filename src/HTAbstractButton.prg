@@ -7,8 +7,6 @@
 CLASS HTAbstractButton FROM HTWidget
 PROTECTED:
 
-    METHOD DrawControl()
-
 PUBLIC:
 
     METHOD New( parent ) INLINE ::Super:New( parent )
@@ -23,13 +21,6 @@ PUBLIC:
     PROPERTY text WRITE setText INIT ""
 
 ENDCLASS
-
-/*
-    DrawControl
-*/
-METHOD PROCEDURE DrawControl() CLASS HTAbstractButton
-    ? "Drawing button..."
-RETURN
 
 /*
     setText

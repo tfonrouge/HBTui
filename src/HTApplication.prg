@@ -11,7 +11,6 @@ PROTECTED:
     DATA Fexecute INIT .F.
     
     METHOD FocusEvent( event )
-    METHOD SetEventStack( event )
 
     PROPERTY StateOnMove INIT .F.
 
@@ -22,10 +21,11 @@ PUBLIC:
     METHOD Exec()
     METHOD FocusWindow INLINE HTUI_GetFocusedWindow()
     METHOD GetEvent()
+    METHOD queueEvent( event )
 
     PROPERTY allWidgets
     PROPERTY desktop
-    PROPERTY eventStack WRITE SetEventStack
+    PROPERTY eventStack
     PROPERTY eventStackLen INIT 0
 
 ENDCLASS
@@ -52,8 +52,6 @@ METHOD FUNCTION Exec() CLASS HTApplication
     LOCAL event
     LOCAL hbtobject
 
-//    AltD()
-
     IF !::Fexecute
 
         //Set( _SET_EVENTMASK, INKEY_ALL + HB_INKEY_RAW + HB_INKEY_EXT + HB_INKEY_GTEVENT )
@@ -79,26 +77,7 @@ METHOD FUNCTION Exec() CLASS HTApplication
 
                 hbtobject := iif( event:hbtobject = NIL, ::FocusWindow, event:hbtobject )
 
-                SWITCH event:EventType
-                CASE HBTUI_UI_EVENT_TYPE_CLOSE
-                    hbtobject:CloseEvent( event )
-                    EXIT
-                CASE HBTUI_UI_EVENT_TYPE_FOCUS
-                    ::FocusEvent( event )
-                    EXIT
-                CASE HBTUI_UI_EVENT_TYPE_KEYBOARD
-                    hbtobject:KeyEvent( event )
-                    EXIT
-                CASE HBTUI_UI_EVENT_TYPE_MOUSE
-                    hbtobject:MouseEvent( event )
-                    EXIT
-                CASE HBTUI_UI_EVENT_TYPE_MOVE
-                    hbtobject:MoveEvent( event )
-                    EXIT
-                CASE HBTUI_UI_EVENT_TYPE_PAINT
-                    hbtobject:PaintEvent( event )
-                    EXIT
-                ENDSWITCH
+                hbtobject:event( event )
 
             ENDIF
 
@@ -117,8 +96,8 @@ RETURN result
 */
 METHOD PROCEDURE FocusEvent( event ) CLASS HTApplication
     IF .T. //!::FocusWindow == event:hbtobject
-        ::FocusWindow:FocusOutEvent( event )
-        event:hbtobject:FocusInEvent( event )
+        ::FocusWindow:focusOutEvent( event )
+        event:hbtobject:focusInEvent( event )
     ENDIF
 RETURN
 
@@ -137,7 +116,7 @@ METHOD PROCEDURE GetEvent() CLASS HTApplication
     ENDIF
 
     IF mCoords[ 1 ] != mrow .OR. mCoords[ 2 ] != mcol
-        HTApplication():FocusWindow():AddEvent( HTEventMouse():New( K_MOUSEMOVE ) )
+        HTApplication():FocusWindow():AddEvent( HTMouseEvent():New( K_MOUSEMOVE ) )
         mCoords[ 1 ] := mrow
         mCoords[ 2 ] := mcol
         RETURN
@@ -151,18 +130,18 @@ METHOD PROCEDURE GetEvent() CLASS HTApplication
 
     IF nKey != 0
         IF nKey >= K_MINMOUSE .AND. nKey <= K_MAXMOUSE
-            HTUI_WindowAtMousePos():AddEvent( HTEventMouse():New( nKey ) )
+            HTUI_WindowAtMousePos():AddEvent( HTMouseEvent():New( nKey ) )
         ELSE
-            HTUI_WindowAtMousePos():AddEvent( HTEventKey():New( nKey ) )
+            HTUI_WindowAtMousePos():AddEvent( HTKeyEvent():New( nKey ) )
         ENDIF
     ENDIF
 
 RETURN
 
 /*
-    SetEventStack
+    queueEvent
 */
-METHOD PROCEDURE SetEventStack( event ) CLASS HTApplication
+METHOD PROCEDURE queueEvent( event ) CLASS HTApplication
     IF ::FeventStack = NIL
         ::FeventStack := {}
     ENDIF

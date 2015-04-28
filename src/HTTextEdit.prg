@@ -9,7 +9,7 @@ PUBLIC:
 
     CONSTRUCTOR New( parent, text )
 
-    METHOD PaintEvent( event )
+    METHOD paintEvent( event )
 
     PROPERTY text READWRITE INIT ""
 
