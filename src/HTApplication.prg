@@ -50,7 +50,7 @@ RETURN Self
 METHOD FUNCTION Exec() CLASS HTApplication
     LOCAL result
     LOCAL event
-    LOCAL hbtobject
+    LOCAL widget
     LOCAL priority
 
     IF !::Fexecute
@@ -77,10 +77,10 @@ METHOD FUNCTION Exec() CLASS HTApplication
                     ADel( ::FeventStack[ priority ], 1 )
                     --::FeventStackLen[ priority ]
 
-                    hbtobject := iif( event:hbtobject = NIL, ::FocusWindow, event:hbtobject )
+                    widget := iif( event:widget = NIL, ::FocusWindow, event:widget )
 
-                    OutStd( "Event ", event:ClassName, "priority:", priority, e"\n" )
-                    hbtobject:event( event )
+//                    OutStd( "Event ", event:ClassName, "priority:", priority, e"\n" )
+                    widget:event( event )
 
                 ENDDO
             NEXT
@@ -99,9 +99,9 @@ RETURN result
     FocusEvent
 */
 METHOD PROCEDURE FocusEvent( event ) CLASS HTApplication
-    IF .T. //!::FocusWindow == event:hbtobject
+    IF .T. //!::FocusWindow == event:widget
         ::FocusWindow:focusOutEvent( event )
-        event:hbtobject:focusInEvent( event )
+        event:widget:focusInEvent( event )
     ENDIF
 RETURN
 
@@ -144,7 +144,11 @@ RETURN
 METHOD PROCEDURE queueEvent( event, priority ) CLASS HTApplication
 
     IF priority = NIL
-        priority := HT_EVENT_PRIORITY_NORMAL    /* default priority if not given */
+        IF event:widget != NIL .AND. event:widget:isVisible
+            priority := HT_EVENT_PRIORITY_NORMAL    /* default priority if not given */
+        ELSE
+            priority := HT_EVENT_PRIORITY_LOW    /* LOW priority if widget not visible yet */
+        ENDIF
     ENDIF
 
     IF ::FeventStackLen[ priority ] < HBTUI_UI_STACK_EVENT_SIZE

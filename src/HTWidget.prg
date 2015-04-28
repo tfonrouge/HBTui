@@ -108,9 +108,7 @@ RETURN ::Super:New( ... )
     addEvent
 */
 METHOD PROCEDURE addEvent( event, priority ) CLASS HTWidget
-//    OutStd("on addEvent: " + event:ClassName +E"\n" )
-//    event:hbtObject := HTUI_UnRefCountCopy( Self )
-    event:hbtObject := Self
+    event:setWidget( Self )
     HTApplication():queueEvent( event, priority )
 RETURN
 
@@ -119,8 +117,9 @@ RETURN
 */
 METHOD PROCEDURE closeEvent( closeEvent ) CLASS HTWidget
     closeEvent:accept()
-    WClose( ::FWindowId )
-    OutStd( "Closing...", WList(), e"\n" )
+    IF ::FWindowId != NIL
+        WClose( ::FWindowId )
+    ENDIF
 RETURN
 
 /*
@@ -345,7 +344,7 @@ METHOD PROCEDURE paintEvent( event ) CLASS HTWidget
     IF ::parent = NIL
         IF ::FWindowId = NIL
             ::Fheight := 10
-            ::Fwidth := 20
+            ::Fwidth := 40
             IF ::Fx = NIL
                 ::Fx := MaxRow() / 2 - ::Fheight / 2
             ENDIF
@@ -500,6 +499,8 @@ RETURN
     Show
 */
 METHOD PROCEDURE Show() CLASS HTWidget
+
+    ::FisVisible := .T.
 
     ::addEvent( HTPaintEvent():New() )
     ::addEvent( HTFocusEvent():New( HT_EVENT_TYPE_FOCUSIN ) )
