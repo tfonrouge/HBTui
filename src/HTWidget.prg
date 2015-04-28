@@ -49,7 +49,7 @@ PUBLIC:
 
     CONSTRUCTOR New( ... )
 
-    METHOD AddEvent( event, priority )
+    METHOD addEvent( event, priority )
     METHOD SetFocus()
     METHOD Show()
 
@@ -105,11 +105,12 @@ METHOD New( ... ) CLASS HTWidget
 RETURN ::Super:New( ... )
 
 /*
-    AddEvent
+    addEvent
 */
-METHOD PROCEDURE AddEvent( event, priority ) CLASS HTWidget
-    OutStd("on AddEvent: " + event:ClassName +E"\n" )
-    event:hbtObject := HTUI_UnRefCountCopy( Self )
+METHOD PROCEDURE addEvent( event, priority ) CLASS HTWidget
+//    OutStd("on addEvent: " + event:ClassName +E"\n" )
+//    event:hbtObject := HTUI_UnRefCountCopy( Self )
+    event:hbtObject := Self
     HTApplication():queueEvent( event, priority )
 RETURN
 
@@ -246,7 +247,7 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
         ENDIF
 
         IF HTApplication():FocusWindow = NIL .OR. HTApplication():FocusWindow:WindowId != ::WindowId
-            ::AddEvent( HTFocusEvent():New( HT_EVENT_TYPE_FOCUSIN ) )
+            ::addEvent( HTFocusEvent():New( HT_EVENT_TYPE_FOCUSIN ) )
         ENDIF
 
         EXIT
@@ -255,17 +256,17 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
 
         /* Close Event */
         IF eventMouse:MouseRow = -1 .AND. ::FWinSysBtnClose .AND. eventMouse:MouseCol >= ::FbtnClosePos[ 1 ] .AND. eventMouse:MouseCol <= ::FbtnClosePos[ 2 ]
-            ::AddEvent( HTCloseEvent():New() )
+            ::addEvent( HTCloseEvent():New() )
         ENDIF
 
         /* Hide Event */
         IF eventMouse:MouseRow = -1 .AND. ::FWinSysBtnHide .AND. eventMouse:MouseCol >= ::FBtnHidePos[ 1 ] .AND. eventMouse:MouseCol <= ::FBtnHidePos[ 2 ]
-            ::AddEvent( HTHideEvent():New() )
+            ::addEvent( HTHideEvent():New() )
         ENDIF
 
         /* Maximize Event */
         IF eventMouse:MouseRow = -1 .AND. ::FWinSysBtnMaximize .AND. eventMouse:MouseCol >= ::FBtnMaximizePos[ 1 ] .AND. eventMouse:MouseCol <= ::FBtnMaximizePos[ 2 ]
-            ::AddEvent( HTMaximizeEvent():New() )
+            ::addEvent( HTMaximizeEvent():New() )
         ENDIF
 
         ::FWinSysBtnMove     := .F.
@@ -279,10 +280,10 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
 
         IF MLeftDown()
             IF ::FWinSysBtnMove
-                ::AddEvent( HTMoveEvent():New( HTPoint():New( MRow(), MCol() ), ::pos ) )
+                ::addEvent( HTMoveEvent():New( HTPoint():New( MRow(), MCol() ), ::pos ) )
             ENDIF
             IF ::FWinSysBtnResize
-                ::AddEvent( HTResizeEvent():New() )
+                ::addEvent( HTResizeEvent():New() )
             ENDIF
         ENDIF
 
@@ -309,7 +310,7 @@ METHOD PROCEDURE move( ... ) CLASS HTWidget
         EXIT
     ENDSWITCH
     IF moveEvent != NIL
-        ::AddEvent( moveEvent )
+        ::addEvent( moveEvent )
     ENDIF
 RETURN
 
@@ -322,14 +323,8 @@ METHOD PROCEDURE moveEvent( moveEvent ) CLASS HTWidget
 
     moveEvent:accept()
 
-    BEGIN SEQUENCE WITH {|oErr| Break( oErr ) }
     x := moveEvent:pos:x - moveEvent:oldPos:x
     y := moveEvent:pos:y - moveEvent:oldPos:y
-    RECOVER
-        AltD()
-    END SEQUENCE
-
-    OutStd( "move:" + ::windowTitle, x, y, e"\n" )
 
     IF ::FWindowId != NIL
         WMove( x, y )
@@ -423,7 +418,7 @@ METHOD PROCEDURE resize( ... ) CLASS HTWidget
         EXIT
     ENDSWITCH
     IF eventResize != NIL
-        ::AddEvent( eventResize )
+        ::addEvent( eventResize )
     ENDIF
 RETURN
 
@@ -506,9 +501,9 @@ RETURN
 */
 METHOD PROCEDURE Show() CLASS HTWidget
 
-    ::AddEvent( HTPaintEvent():New() )
-    ::AddEvent( HTFocusEvent():New( HT_EVENT_TYPE_FOCUSIN ) )
-    ::AddEvent( HTShowEvent():New() )
+    ::addEvent( HTPaintEvent():New() )
+    ::addEvent( HTFocusEvent():New( HT_EVENT_TYPE_FOCUSIN ) )
+    ::addEvent( HTShowEvent():New() )
 
 RETURN
 
@@ -533,7 +528,8 @@ FUNCTION HTUI_AddWindowWidget( widget )
     IF Len( s_WindowWidget ) < widget:WindowId
         ASize( s_WindowWidget, widget:WindowId )
     ENDIF
-    s_WindowWidget[ widget:WindowId ] := HTUI_UnRefCountCopy( widget )
+//    s_WindowWidget[ widget:WindowId ] := HTUI_UnRefCountCopy( widget )
+    s_WindowWidget[ widget:WindowId ] := widget
 RETURN s_WindowWidget
 
 /*
@@ -560,10 +556,12 @@ RETURN oldWindow
     HTUI_WindowAtMousePos
 */
 FUNCTION HTUI_WindowAtMousePos()
-    LOCAL WindowId := _HT_WidgetAtMousePos()
+    LOCAL windowId
 
-    IF s_WindowWidget != NIL .AND. WindowId > 0 .AND. WindowId <= Len( s_WindowWidget )
-        RETURN s_WindowWidget[ WindowId ]
+    windowId := _HT_WINDOWATMOUSEPOS()
+
+    IF s_WindowWidget != NIL .AND. windowId > 0 .AND. windowId <= Len( s_WindowWidget )
+        RETURN s_WindowWidget[ windowId ]
     ENDIF
 
 RETURN HTDesktop()

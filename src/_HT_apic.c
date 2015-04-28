@@ -40,9 +40,9 @@ HB_FUNC( HTUI_REFCOUNT )
 }
 
 /*
-    _HT_WIDGETATMOUSEPOS
+    _HT_WINDOWATMOUSEPOS
 */
-HB_FUNC( _HT_WIDGETATMOUSEPOS )
+HB_FUNC( _HT_WINDOWATMOUSEPOS )
 {
     int x,y;
     hb_mouseGetPos( &x, &y );

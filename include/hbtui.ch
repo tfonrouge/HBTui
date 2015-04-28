@@ -23,4 +23,8 @@
 #define HT_EVENT_TYPE_MAXIMIZE      10
 #define HT_EVENT_TYPE_SHOW          11
 
+#define HT_EVENT_PRIORITY_HIGH      1
+#define HT_EVENT_PRIORITY_NORMAL    2
+#define HT_EVENT_PRIORITY_LOW       3
+
 #endif

@@ -43,6 +43,8 @@ PROCEDURE Main()
     btn := HTPushButton():New( "Ok", w1 )
     btn:Move( 3, 0 )
 
+    OutStd( e"showing...\n" )
+
     w1:Show()
     w2:Show()
     w3:Show()

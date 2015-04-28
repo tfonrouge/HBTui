@@ -9,8 +9,8 @@ SINGLETON CLASS HTApplication FROM HTObject
 PROTECTED:
 
     DATA Fexecute INIT .F.
-    DATA FeventStack        INIT { 0 => {}, 1 => {}, 2 => {} }
-    DATA FeventStackLen     INIT { 0 => 0, 1 => 0, 2 => 0 }
+    DATA FeventStack        INIT { {}, {}, {} }
+    DATA FeventStackLen     INIT { 0, 0, 0 }
     
     METHOD FocusEvent( event )
 
@@ -70,10 +70,8 @@ METHOD FUNCTION Exec() CLASS HTApplication
 
             ::GetEvent()
 
-            FOR priority := 0 TO 2
-                IF ::FeventStackLen[ priority ] > 0
-            
-                    OutStd( "priority", priority, e"\n" )
+            FOR priority := HT_EVENT_PRIORITY_HIGH TO HT_EVENT_PRIORITY_LOW
+                WHILE ::FeventStackLen[ priority ] > 0
 
                     event := ::FeventStack[ priority, 1 ]
                     ADel( ::FeventStack[ priority ], 1 )
@@ -81,9 +79,10 @@ METHOD FUNCTION Exec() CLASS HTApplication
 
                     hbtobject := iif( event:hbtobject = NIL, ::FocusWindow, event:hbtobject )
 
+                    OutStd( "Event ", event:ClassName, "priority:", priority, e"\n" )
                     hbtobject:event( event )
 
-                ENDIF
+                ENDDO
             NEXT
 
         ENDDO
@@ -121,19 +120,19 @@ METHOD PROCEDURE GetEvent() CLASS HTApplication
     ENDIF
 
     IF mCoords[ 1 ] != mrow .OR. mCoords[ 2 ] != mcol
-        HTApplication():FocusWindow():AddEvent( HTMouseEvent():New( K_MOUSEMOVE ) )
+        HTApplication():FocusWindow():addEvent( HTMouseEvent():New( K_MOUSEMOVE ) )
         mCoords[ 1 ] := mrow
         mCoords[ 2 ] := mcol
         RETURN
     ENDIF
 
-    nKey := Inkey( 0.2 )
+    nKey := Inkey(  )
 
     IF nKey != 0
         IF nKey >= K_MINMOUSE .AND. nKey <= K_MAXMOUSE
-            HTUI_WindowAtMousePos():AddEvent( HTMouseEvent():New( nKey ) )
+            HTUI_WindowAtMousePos():addEvent( HTMouseEvent():New( nKey ) )
         ELSE
-            HTUI_WindowAtMousePos():AddEvent( HTKeyEvent():New( nKey ) )
+            HTUI_WindowAtMousePos():addEvent( HTKeyEvent():New( nKey ) )
         ENDIF
     ENDIF
 
@@ -145,7 +144,7 @@ RETURN
 METHOD PROCEDURE queueEvent( event, priority ) CLASS HTApplication
 
     IF priority = NIL
-        priority := 1
+        priority := HT_EVENT_PRIORITY_NORMAL    /* default priority if not given */
     ENDIF
 
     IF ::FeventStackLen[ priority ] < HBTUI_UI_STACK_EVENT_SIZE
