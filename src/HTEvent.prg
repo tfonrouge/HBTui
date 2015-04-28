@@ -6,7 +6,7 @@
 
 #include "hbtui.ch"
 
-CLASS HTEvent FROM HTBase
+CLASS HTEvent
 PUBLIC:
     CONSTRUCTOR New( nKey )
 

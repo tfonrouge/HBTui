@@ -9,6 +9,8 @@ SINGLETON CLASS HTApplication FROM HTObject
 PROTECTED:
 
     DATA Fexecute INIT .F.
+    DATA FeventStack        INIT { 0 => {}, 1 => {}, 2 => {} }
+    DATA FeventStackLen     INIT { 0 => 0, 1 => 0, 2 => 0 }
     
     METHOD FocusEvent( event )
 
@@ -21,12 +23,10 @@ PUBLIC:
     METHOD Exec()
     METHOD FocusWindow INLINE HTUI_GetFocusedWindow()
     METHOD GetEvent()
-    METHOD queueEvent( event )
+    METHOD queueEvent( event, priority )
 
     PROPERTY allWidgets
     PROPERTY desktop
-    PROPERTY eventStack
-    PROPERTY eventStackLen INIT 0
 
 ENDCLASS
 
@@ -37,8 +37,8 @@ METHOD New() CLASS HTApplication
     LOCAL desktop
 
     IF ::Fdesktop = NIL
-        desktop := HTWidget():New()
-        desktop:SetAsDesktopWidget()
+        desktop := HTDesktop():New()
+        desktop:setAsDesktopWidget()
         ::Fdesktop := desktop
     ENDIF
 
@@ -51,6 +51,7 @@ METHOD FUNCTION Exec() CLASS HTApplication
     LOCAL result
     LOCAL event
     LOCAL hbtobject
+    LOCAL priority
 
     IF !::Fexecute
 
@@ -69,17 +70,21 @@ METHOD FUNCTION Exec() CLASS HTApplication
 
             ::GetEvent()
 
-            IF ::eventStackLen > 0
+            FOR priority := 0 TO 2
+                IF ::FeventStackLen[ priority ] > 0
             
-                event := ::FeventStack[ 1 ]
-                ADel( ::FeventStack, 1 )
-                --::FeventStackLen
+                    OutStd( "priority", priority, e"\n" )
 
-                hbtobject := iif( event:hbtobject = NIL, ::FocusWindow, event:hbtobject )
+                    event := ::FeventStack[ priority, 1 ]
+                    ADel( ::FeventStack[ priority ], 1 )
+                    --::FeventStackLen[ priority ]
 
-                hbtobject:event( event )
+                    hbtobject := iif( event:hbtobject = NIL, ::FocusWindow, event:hbtobject )
 
-            ENDIF
+                    hbtobject:event( event )
+
+                ENDIF
+            NEXT
 
         ENDDO
 
@@ -122,11 +127,7 @@ METHOD PROCEDURE GetEvent() CLASS HTApplication
         RETURN
     ENDIF
 
-    IF ::eventStackLen > 0
-        nKey := Inkey()
-    ELSE
-        nKey := Inkey( 0.2 )
-    ENDIF
+    nKey := Inkey( 0.2 )
 
     IF nKey != 0
         IF nKey >= K_MINMOUSE .AND. nKey <= K_MAXMOUSE
@@ -141,15 +142,18 @@ RETURN
 /*
     queueEvent
 */
-METHOD PROCEDURE queueEvent( event ) CLASS HTApplication
-    IF ::FeventStack = NIL
-        ::FeventStack := {}
+METHOD PROCEDURE queueEvent( event, priority ) CLASS HTApplication
+
+    IF priority = NIL
+        priority := 1
     ENDIF
-    IF ::FeventStackLen < HBTUI_UI_STACK_EVENT_SIZE
-        ++::FeventStackLen
-        IF Len( ::FeventStack ) < ::FeventStackLen
-            ASize( ::FeventStack, ::FeventStackLen )
+
+    IF ::FeventStackLen[ priority ] < HBTUI_UI_STACK_EVENT_SIZE
+        ++::FeventStackLen[ priority ]
+        IF Len( ::FeventStack[ priority ] ) < ::FeventStackLen[ priority ]
+            ASize( ::FeventStack[ priority ], ::FeventStackLen[ priority ] )
         ENDIF
-        ::FeventStack[ ::FeventStackLen ] := event
+        ::FeventStack[ priority, ::FeventStackLen[ priority ] ] := event
     ENDIF
+
 RETURN

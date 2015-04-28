@@ -26,7 +26,9 @@ ENDCLASS
   New
 */
 METHOD New( parent ) CLASS HTObject
-    ::SetParent( parent )
+    IF PCount() = 1
+        ::SetParent( parent )
+    ENDIF
 RETURN Self
 
 /*

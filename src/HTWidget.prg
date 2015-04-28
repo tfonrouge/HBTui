@@ -49,7 +49,7 @@ PUBLIC:
 
     CONSTRUCTOR New( ... )
 
-    METHOD AddEvent( event )
+    METHOD AddEvent( event, priority )
     METHOD SetFocus()
     METHOD Show()
 
@@ -90,7 +90,7 @@ PUBLIC:
     PROPERTY size
     PROPERTY width
     PROPERTY WindowId READ GetWindowId WRITE SetWindowId /* only main windows have it */
-    PROPERTY windowTitle
+    PROPERTY windowTitle INIT ""
     PROPERTY x
     PROPERTY y
 
@@ -107,10 +107,10 @@ RETURN ::Super:New( ... )
 /*
     AddEvent
 */
-METHOD PROCEDURE AddEvent( event ) CLASS HTWidget
+METHOD PROCEDURE AddEvent( event, priority ) CLASS HTWidget
     OutStd("on AddEvent: " + event:ClassName +E"\n" )
     event:hbtObject := HTUI_UnRefCountCopy( Self )
-    HTApplication():queueEvent( event )
+    HTApplication():queueEvent( event, priority )
 RETURN
 
 /*
@@ -502,22 +502,14 @@ METHOD PROCEDURE setWindowTitle( title ) CLASS HTWidget
 RETURN
 
 /*
-  Show
+    Show
 */
 METHOD PROCEDURE Show() CLASS HTWidget
-    IF ::FAsDesktopWidget = .T.
-        WBoard() /* available physical screen */
-        WMode( .F., .F., .F., .F. ) /* windows cannot be moved outside of screen ( top, left, bottom, right ) */
-        WSetShadow( ::FShadow )
-        SetClearA( ::FClearA )
-        SetClearB( ::FClearB )
-        DispBox( 0, 0, MaxRow(), MaxCol(), Replicate( ::FClearB, 9 ), ::color )
-        SetPos( 0, 0 )
-    ELSE
-        ::AddEvent( HTPaintEvent():New() )
-        ::AddEvent( HTFocusEvent():New( HT_EVENT_TYPE_FOCUSIN ) )
-        ::AddEvent( HTShowEvent():New() )
-    ENDIF
+
+    ::AddEvent( HTPaintEvent():New() )
+    ::AddEvent( HTFocusEvent():New( HT_EVENT_TYPE_FOCUSIN ) )
+    ::AddEvent( HTShowEvent():New() )
+
 RETURN
 
 /*

@@ -26,6 +26,8 @@ ENDCLASS
 */
 METHOD New( cFile, nTop, nLeft, nBottom, nRight, cColor ) CLASS HTEditor
 
+    ::Super:New()
+
    ::cFile   := cFile
    ::nTop    := nTop
    ::nLeft   := nLeft

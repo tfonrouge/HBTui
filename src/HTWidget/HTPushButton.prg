@@ -19,12 +19,18 @@ ENDCLASS
     New
 */
 METHOD New( ... ) CLASS HTPushButton
+    LOCAL p
+
     IF PCount() > 0
-        IF PCount() > 1
-            ::setText( hb_pValue( 1 ) )
-            ::Super( hb_pValue( 2 ) )
+        p := hb_pValue( 1 )
+        IF hb_isObject( p )
+            ::Super:New( p )
         ELSE
-            ::Super( hb_pValue( 1 ) )
+            ::setText( p )
+            ::Super:New( hb_pValue( 2 ) )
         ENDIF
+    ELSE
+        ::Super:New()
     ENDIF
+
 RETURN Self

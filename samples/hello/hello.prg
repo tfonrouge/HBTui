@@ -16,7 +16,6 @@ PROCEDURE Main()
 
     w1 := HTWidget():New()
     w1:setWindowTitle( "Window 1" )
-    AltD()
     w1:move( 5, 5 )
     w1:resize( 40, 20 )
 
@@ -32,18 +31,17 @@ PROCEDURE Main()
     w3:move( 9, 11 )
     w3:resize( 40, 20 )
 
-    t := HTTextLine():New( w1, "Text ONE" )
+    t := HTLineEdit():New( "Text ONE", w1 )
     t:move( 0, 0 )
 
-    t := HTTextLine():New( w2, "Text TWO" )
+    t := HTLineEdit():New( "Text TWO", w2 )
     t:move( 0, 0 )
 
-    t := HTTextLine():New( w3, "Text THREE" )
+    t := HTLineEdit():New( "Text THREE", w3 )
     t:move( 0, 0 )
 
-    btn := HTPushButton():New( w1 )
+    btn := HTPushButton():New( "Ok", w1 )
     btn:Move( 3, 0 )
-    btn:text := "Ok"
 
     w1:Show()
     w2:Show()
