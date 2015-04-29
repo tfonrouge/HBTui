@@ -109,8 +109,8 @@ RETURN
 */
 METHOD PROCEDURE GetEvent() CLASS HTApplication
     LOCAL nKey
-    LOCAL mrow := MRow( .T. )
-    LOCAL mcol := MCol( .T. )
+    LOCAL mrow := mRow( .T. )
+    LOCAL mcol := mCol( .T. )
 
     STATIC mCoords
 

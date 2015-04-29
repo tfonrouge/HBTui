@@ -72,10 +72,12 @@ PUBLIC:
     METHOD setBackgroundColor( color )
     METHOD setForegroundColor( color )
     METHOD setLayout( layout )
+    METHOD setWindowFlags( type ) INLINE ::FwindowFlags := type
     METHOD setWindowTitle( title )
 
     METHOD showEvent( showEvent )
 
+    PROPERTY actions
     PROPERTY backgroundColor WRITE setBackgroundColor
     PROPERTY charWidgetClose INIT hb_BChar( 254 )
     PROPERTY charWidgetHide INIT Chr( 25 )
@@ -92,6 +94,7 @@ PUBLIC:
     PROPERTY shadow READ GetShadow WRITE SetShadow
     PROPERTY size
     PROPERTY width
+    PROPERTY windowFlags
     PROPERTY windowId READ GetWindowId WRITE SetWindowId /* only main windows have it */
     PROPERTY windowTitle INIT ""
     PROPERTY x INIT 0
@@ -103,8 +106,19 @@ ENDCLASS
     New
 */
 METHOD New( ... ) CLASS HTWidget
-    ::Fsize := HTSize():New( 20, 10 )
-RETURN ::Super:New( ... )
+    ::Factions := { }
+    SWITCH PCount()
+    CASE 0
+        EXIT
+    CASE 1
+    CASE 2
+        ::Super:New( hb_pValue( 1 ) )
+        ::setWindowFlags( hb_pValue( 2 ) )
+        EXIT
+    OTHERWISE
+        ::PARAM_ERROR()
+    ENDSWITCH
+RETURN Self
 
 /*
     addEvent

@@ -10,10 +10,10 @@ PROTECTED:
 
 PUBLIC:
 
-    CONSTRUCTOR New( nTop, nLeft, nWidth, nHeight, cColor, wId )
+    CONSTRUCTOR New( parent )
 
-    METHOD AddAction()
-    METHOD AddMenu()
+    METHOD addAction( ... )
+    METHOD AddMenu( ... )
     METHOD PositionMenu()
 
 ENDCLASS
@@ -21,66 +21,40 @@ ENDCLASS
 /*
     New
 */
-METHOD New( nTop, nLeft, nWidth, nHeight, cColor, wId ) CLASS HTMenuBar
-
-    ::Super:New( nTop, nLeft, nWidth, nHeight, cColor, wId )
-
-RETURN Self
+METHOD New( parent ) CLASS HTMenuBar
+RETURN ::Super:New( parent )
 
 /*
-    AddAction
+    addAction
 */
-METHOD AddAction() CLASS HTMenuBar
-    LOCAL nKey
+METHOD addAction( ... ) CLASS HTMenuBar
+    LOCAL action
+    LOCAL p
 
-    DO WHILE .T.
-
-      nKey := Inkey( 0 )
-
-        DO CASE
-        CASE nKey == K_MOUSEMOVE
-
-
-        CASE nKey == K_LBUTTONDOWN
-
-
-        CASE nKey == K_LBUTTONUP
-
-
-        CASE nKey == K_DOWN
-
-
-        CASE nKey == K_UP
-
-
-        CASE nKey == K_END
-
-
-        CASE nKey == K_HOME
-
-
-        CASE nKey == K_LEFT
-
-
-        CASE nKey == K_RIGHT
-
-
-        CASE nKey == K_ENTER
-
-
-        CASE nKey == K_ESC
-
-
-        ENDCASE
-
-    ENDDO
+    SWITCH PCount()
+    CASE 1
+        p := hb_pValue( 1 )
+        IF hb_isChar( p )
+            action := HTAction():New( p, Self )
+            AAdd( ::Factions, action )
+        ELSEIF hb_isObject( p )
+            AAdd( ::Factions, p )
+        ELSE
+            ::PARAM_ERROR()
+        ENDIF
+        EXIT
+    CASE 3
+        EXIT
+    OTHERWISE
+        ::PARAM_ERROR()
+    ENDSWITCH
 
 RETURN Self
 
 /*
     AddMenu
 */
-METHOD AddMenu() CLASS HTMenuBar
+METHOD AddMenu( ... ) CLASS HTMenuBar
 
 RETURN Self
 

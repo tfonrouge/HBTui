@@ -24,8 +24,8 @@ ENDCLASS
 */
 METHOD New( nKey ) CLASS HTMouseEvent
     ::FnKey := nKey
-    ::FMouseAbsCol := MCol( .T. )
-    ::FMouseAbsRow := MRow( .T. )
-    ::FmouseCol := MCol()
-    ::FmouseRow := MRow()
+    ::FMouseAbsCol := mCol( .T. )
+    ::FMouseAbsRow := mRow( .T. )
+    ::FmouseCol := mCol()
+    ::FmouseRow := mRow()
 RETURN Self
