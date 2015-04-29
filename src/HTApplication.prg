@@ -79,7 +79,6 @@ METHOD FUNCTION Exec() CLASS HTApplication
 
                     widget := iif( event:widget = NIL, ::FocusWindow, event:widget )
 
-//                    OutStd( "Event ", event:ClassName, "priority:", priority, e"\n" )
                     widget:event( event )
 
                 ENDDO

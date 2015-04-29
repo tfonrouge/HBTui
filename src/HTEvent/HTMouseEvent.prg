@@ -14,8 +14,8 @@ PUBLIC:
     CONSTRUCTOR New( nKey )
     PROPERTY MouseAbsRow
     PROPERTY MouseAbsCol
-    PROPERTY MouseCol
-    PROPERTY MouseRow
+    PROPERTY mouseCol
+    PROPERTY mouseRow
     PROPERTY nKey
 ENDCLASS
 
@@ -24,8 +24,8 @@ ENDCLASS
 */
 METHOD New( nKey ) CLASS HTMouseEvent
     ::FnKey := nKey
-    ::FMouseAbsRow := MRow( .T. )
     ::FMouseAbsCol := MCol( .T. )
-    ::FMouseRow := MRow()
-    ::FMouseCol := MCol()
+    ::FMouseAbsRow := MRow( .T. )
+    ::FmouseCol := MCol()
+    ::FmouseRow := MRow()
 RETURN Self
