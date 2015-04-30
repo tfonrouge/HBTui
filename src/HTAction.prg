@@ -16,7 +16,7 @@ ENDCLASS
     New
 */
 METHOD New( ... ) CLASS HTAction
-    SWITCH PValue()
+    SWITCH PCount()
     CASE 1  /* HTObject parent */
         ::Super:New( hb_pValue( 1 ) )
         EXIT

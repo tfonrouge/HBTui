@@ -13,7 +13,8 @@ PUBLIC:
     CONSTRUCTOR New( parent )
 
     METHOD addAction( ... )
-    METHOD AddMenu( ... )
+    METHOD addMenu( ... )
+    METHOD addSeparator()
     METHOD PositionMenu()
 
 ENDCLASS
@@ -22,7 +23,15 @@ ENDCLASS
     New
 */
 METHOD New( parent ) CLASS HTMenuBar
-RETURN ::Super:New( parent )
+    SWITCH PCount()
+    CASE 0
+    CASE 1
+        ::Super:New( parent )
+        EXIT
+    OTHERWISE
+        ::PARAM_ERROR()
+    ENDSWITCH
+RETURN Self
 
 /*
     addAction
@@ -52,9 +61,16 @@ METHOD addAction( ... ) CLASS HTMenuBar
 RETURN Self
 
 /*
-    AddMenu
+    addMenu
 */
-METHOD AddMenu( ... ) CLASS HTMenuBar
+METHOD addMenu( ... ) CLASS HTMenuBar
+
+RETURN Self
+
+/*
+    addSeparator
+*/
+METHOD addSeparator() CLASS HTMenuBar
 
 RETURN Self
 
