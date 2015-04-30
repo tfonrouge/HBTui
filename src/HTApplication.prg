@@ -11,8 +11,7 @@ PROTECTED:
     DATA Fexecute INIT .F.
     DATA FeventStack        INIT { {}, {}, {} }
     DATA FeventStackLen     INIT { 0, 0, 0 }
-    
-    METHOD FocusEvent( event )
+    DATA FtopLevelObjWindow
 
     PROPERTY StateOnMove INIT .F.
 
@@ -21,7 +20,7 @@ PUBLIC:
     CONSTRUCTOR New()
 
     METHOD Exec()
-    METHOD FocusWindow INLINE HTUI_GetFocusedWindow()
+    METHOD activeWindow()
     METHOD GetEvent()
     METHOD queueEvent( event, priority )
 
@@ -77,7 +76,7 @@ METHOD FUNCTION Exec() CLASS HTApplication
                     ADel( ::FeventStack[ priority ], 1 )
                     --::FeventStackLen[ priority ]
 
-                    widget := iif( event:widget = NIL, ::FocusWindow, event:widget )
+                    widget := iif( event:widget = NIL, ::activeWindow(), event:widget )
 
                     widget:event( event )
 
@@ -95,16 +94,6 @@ METHOD FUNCTION Exec() CLASS HTApplication
 RETURN result
 
 /*
-    FocusEvent
-*/
-METHOD PROCEDURE FocusEvent( event ) CLASS HTApplication
-    IF .T. //!::FocusWindow == event:widget
-        ::FocusWindow:focusOutEvent( event )
-        event:widget:focusInEvent( event )
-    ENDIF
-RETURN
-
-/*
   GetEvent
 */
 METHOD PROCEDURE GetEvent() CLASS HTApplication
@@ -119,7 +108,7 @@ METHOD PROCEDURE GetEvent() CLASS HTApplication
     ENDIF
 
     IF mCoords[ 1 ] != mrow .OR. mCoords[ 2 ] != mcol
-        HTApplication():FocusWindow():addEvent( HTMouseEvent():New( K_MOUSEMOVE ) )
+        HTApplication():activeWindow():addEvent( HTMouseEvent():New( K_MOUSEMOVE ) )
         mCoords[ 1 ] := mrow
         mCoords[ 2 ] := mcol
         RETURN

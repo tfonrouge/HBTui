@@ -70,10 +70,10 @@ PROCEDURE Main()
     btn := HTPushButton():New( "Ok", w1 )
     btn:Move( 3, 0 )
 
-    w1:Show()
-    w2:Show()
-    w3:Show()
+    w1:show()
+    w2:show()
+    w3:show()
 
-    app:Exec()
+    app:exec()
 
 RETURN

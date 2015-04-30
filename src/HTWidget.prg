@@ -11,7 +11,8 @@
 #define _WIDGET_CHAR    e"\x20"
 #define _WIDGET_SHADOW  "00/07"
 
-STATIC s_FocusedWindow
+REQUEST HB_ARRAYID
+
 STATIC s_WindowWidget
 
 CLASS HTWidget FROM HTObject
@@ -199,7 +200,6 @@ METHOD PROCEDURE focusInEvent( eventFocus ) CLASS HTWidget
     eventFocus:accept()
     IF eventFocus:isAccepted()
         WSelect( ::windowId )
-        HTUI_SetFocusedWindow( Self )
         IF MLeftDown()
             ::addEvent( HTMouseEvent():New( K_LBUTTONDOWN ) )
         ENDIF
@@ -270,7 +270,7 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
             ::FWinSysBtnMove := .T.
         ENDIF
 
-        IF HTApplication():FocusWindow = NIL .OR. HTApplication():FocusWindow:windowId != ::windowId
+        IF HTApplication():activeWindow() = NIL .OR. HTApplication():activeWindow():windowId != ::windowId
             ::addEvent( HTFocusEvent():New( HT_EVENT_TYPE_FOCUSIN ) )
         ENDIF
 
@@ -481,11 +481,11 @@ RETURN ::FbackgroundColor
   SetFocus
 */
 METHOD PROCEDURE SetFocus() CLASS HTWidget
-    LOCAL focusWindow := HTApplication():FocusWindow()
+    LOCAL activeWindow := HTApplication():activeWindow()
 
-    IF !focusWindow == Self
-        IF focusWindow != NIL
-            focusWindow:focusOutEvent( NIL )
+    IF !activeWindow == Self
+        IF activeWindow != NIL
+            activeWindow:focusOutEvent( NIL )
         ENDIF
         ::focusInEvent( NIL )
     ENDIF
@@ -562,26 +562,6 @@ FUNCTION HTUI_AddWindowWidget( widget )
 //    s_WindowWidget[ widget:windowId ] := HTUI_UnRefCountCopy( widget )
     s_WindowWidget[ widget:windowId ] := widget
 RETURN s_WindowWidget
-
-/*
-  HTUI_GetFocusedWindow
-*/
-FUNCTION HTUI_GetFocusedWindow()
-    IF s_FocusedWindow = NIL
-        RETURN HTDesktop()
-    ENDIF
-RETURN s_FocusedWindow
-
-/*
-  HTUI_SetFocusedWindow
-*/
-FUNCTION HTUI_SetFocusedWindow( window )
-  LOCAL oldWindow
-
-  oldWindow := s_FocusedWindow
-  s_FocusedWindow := window
-
-RETURN oldWindow
 
 /*
     HTUI_WindowAtMousePos

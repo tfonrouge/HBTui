@@ -6,6 +6,7 @@
 
 SINGLETON CLASS HTDesktop FROM HTWidget
 PROTECTED:
+    METHOD paintMenu()
 PUBLIC:
     METHOD addEvent( event )
     METHOD paintEvent( paintEvent )
@@ -32,4 +33,10 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTDesktop
     DispBox( 0, 0, MaxRow(), MaxCol(), Replicate( ::FClearB, 9 ), ::color )
     SetPos( 0, 0 )
     ::FisVisible := .T.
+RETURN
+
+/*
+    paintMenu
+*/
+METHOD PROCEDURE paintMenu() CLASS HTDesktop
 RETURN
