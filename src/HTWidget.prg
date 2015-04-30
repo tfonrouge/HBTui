@@ -11,10 +11,6 @@
 #define _WIDGET_CHAR    e"\x20"
 #define _WIDGET_SHADOW  "00/07"
 
-REQUEST HB_ARRAYID
-
-STATIC s_WindowWidget
-
 CLASS HTWidget FROM HTObject
 PROTECTED:
 
@@ -47,7 +43,7 @@ PROTECTED:
     METHOD SetClearB( clearB ) INLINE ::FClearB := clearB
     METHOD SetColor( color ) INLINE ::FColor := color
     METHOD SetShadow( shadow ) INLINE ::FShadow := shadow
-    METHOD SetWindowId( windowId )
+    METHOD setWindowId( windowId )
 
 PUBLIC:
 
@@ -96,7 +92,7 @@ PUBLIC:
     PROPERTY size
     PROPERTY width
     PROPERTY windowFlags
-    PROPERTY windowId READ GetWindowId WRITE SetWindowId /* only main windows have it */
+    PROPERTY windowId READ GetWindowId WRITE setWindowId /* only main windows have it */
     PROPERTY windowTitle INIT ""
     PROPERTY x INIT 0
     PROPERTY y INIT 0
@@ -381,7 +377,7 @@ METHOD PROCEDURE paintEvent( event ) CLASS HTWidget
             IF ::Fy = NIL
                 ::Fy := MaxCol() / 2 - ::Fwidth / 2
             ENDIF
-            ::SetWindowId( WOpen( ::Fx, ::Fy, ::Fx + ::Fheight, ::Fy + ::Fwidth, .T. ) )
+            ::setWindowId( WOpen( ::Fx, ::Fy, ::Fx + ::Fheight, ::Fy + ::Fwidth, .T. ) )
             WFormat()
             SetClearB( _WIDGET_CHAR )
             WBox( NIL, ::color )
@@ -509,12 +505,12 @@ METHOD PROCEDURE setLayout( layout ) CLASS HTWidget
 RETURN
 
 /*
-    SetWindowId
+    setWindowId
 */
-METHOD PROCEDURE SetWindowId( windowId ) CLASS HTWidget
+METHOD PROCEDURE setWindowId( windowId ) CLASS HTWidget
     IF ::FwindowId = NIL
         ::FwindowId := windowId
-        HTUI_AddWindowWidget( Self )  
+        HTApplication():addTopLevelWindow( windowId, Self )
     ENDIF
 RETURN
 
@@ -548,31 +544,3 @@ RETURN
 /*
     EndClass
 */
-
-/*
-    HTUI_AddWindowWidget
-*/
-FUNCTION HTUI_AddWindowWidget( widget )
-    IF s_WindowWidget = NIL
-        s_WindowWidget := {}
-    ENDIF
-    IF Len( s_WindowWidget ) < widget:windowId
-        ASize( s_WindowWidget, widget:windowId )
-    ENDIF
-//    s_WindowWidget[ widget:windowId ] := HTUI_UnRefCountCopy( widget )
-    s_WindowWidget[ widget:windowId ] := widget
-RETURN s_WindowWidget
-
-/*
-    HTUI_WindowAtMousePos
-*/
-FUNCTION HTUI_WindowAtMousePos()
-    LOCAL windowId
-
-    windowId := _HT_WINDOWATMOUSEPOS()
-
-    IF s_WindowWidget != NIL .AND. windowId > 0 .AND. windowId <= Len( s_WindowWidget )
-        RETURN s_WindowWidget[ windowId ]
-    ENDIF
-
-RETURN HTDesktop()

@@ -19,6 +19,6 @@ PROCEDURE Main()
 
     win:Show()
 
-    app:Exec()
+    app:exec()
 
 RETURN

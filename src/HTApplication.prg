@@ -11,7 +11,6 @@ PROTECTED:
     DATA Fexecute INIT .F.
     DATA FeventStack        INIT { {}, {}, {} }
     DATA FeventStackLen     INIT { 0, 0, 0 }
-    DATA FtopLevelObjWindow
 
     PROPERTY StateOnMove INIT .F.
 
@@ -19,13 +18,16 @@ PUBLIC:
 
     CONSTRUCTOR New()
 
-    METHOD Exec()
     METHOD activeWindow()
+    METHOD addTopLevelWindow( windowId, widget )
+    METHOD exec()
     METHOD GetEvent()
+    METHOD getTopLevelWindowFromWindowId( windowId )
     METHOD queueEvent( event, priority )
 
     PROPERTY allWidgets
     PROPERTY desktop
+    PROPERTY topLevelWindows INIT { => }
 
 ENDCLASS
 
@@ -44,9 +46,29 @@ METHOD New() CLASS HTApplication
 RETURN Self
 
 /*
-  Exec
+    activeWindow
 */
-METHOD FUNCTION Exec() CLASS HTApplication
+METHOD FUNCTION activeWindow() CLASS HTApplication
+RETURN ::getTopLevelWindowFromWindowId( WSelect() )
+
+/*
+    addTopLevelWindow
+*/
+METHOD PROCEDURE addTopLevelWindow( windowId, widget ) CLASS HTApplication
+    LOCAL arrayId
+
+    IF hb_hHasKey( ::FtopLevelWindows, windowId )
+        ::ERROR_DUPLICATE_TOP_LEVEL_WINDOW()
+    ELSE
+        arrayId := __vmItemId( widget )
+        ::FtopLevelWindows[ windowId ] := arrayId
+    ENDIF
+RETURN
+
+/*
+  exec
+*/
+METHOD FUNCTION exec() CLASS HTApplication
     LOCAL result
     LOCAL event
     LOCAL widget
@@ -100,6 +122,7 @@ METHOD PROCEDURE GetEvent() CLASS HTApplication
     LOCAL nKey
     LOCAL mrow := mRow( .T. )
     LOCAL mcol := mCol( .T. )
+    LOCAL window
 
     STATIC mCoords
 
@@ -117,14 +140,29 @@ METHOD PROCEDURE GetEvent() CLASS HTApplication
     nKey := Inkey(  )
 
     IF nKey != 0
+        window := ::getTopLevelWindowFromWindowId( hb_windowAtMousePos() )
         IF nKey >= K_MINMOUSE .AND. nKey <= K_MAXMOUSE
-            HTUI_WindowAtMousePos():addEvent( HTMouseEvent():New( nKey ) )
+            window:addEvent( HTMouseEvent():New( nKey ) )
         ELSE
-            HTUI_WindowAtMousePos():addEvent( HTKeyEvent():New( nKey ) )
+            window:addEvent( HTKeyEvent():New( nKey ) )
         ENDIF
     ENDIF
 
 RETURN
+
+/*
+    getTopLevelWindowFromWindowId
+*/
+METHOD FUNCTION getTopLevelWindowFromWindowId( windowId ) CLASS HTApplication
+    LOCAL window
+    LOCAL arrayId
+
+    IF hb_hHasKey( ::FtopLevelWindows, windowId )
+        arrayId := ::FtopLevelWindows[ windowId ]
+        window := hb_arrayFromId( arrayId )
+    ENDIF
+
+RETURN window
 
 /*
     queueEvent

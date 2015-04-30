@@ -33,6 +33,7 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTDesktop
     DispBox( 0, 0, MaxRow(), MaxCol(), Replicate( ::FClearB, 9 ), ::color )
     SetPos( 0, 0 )
     ::FisVisible := .T.
+    ::setWindowId( 0 )
 RETURN
 
 /*
