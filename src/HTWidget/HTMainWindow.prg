@@ -9,6 +9,7 @@ PROTECTED:
     DATA FmenuBar
 PUBLIC:
     METHOD menuBar()
+    METHOD show()
 ENDCLASS
 
 /*
@@ -19,3 +20,10 @@ METHOD FUNCTION menuBar() CLASS HTMainWindow
         ::FmenuBar := HTMenuBar():New( Self )
     ENDIF
 RETURN ::FmenuBar
+
+/*
+    show
+*/
+METHOD PROCEDURE show() CLASS HTMainWindow
+    ::Super:show()
+RETURN

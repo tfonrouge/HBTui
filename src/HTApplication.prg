@@ -83,7 +83,7 @@ METHOD FUNCTION exec() CLASS HTApplication
         result := 0
 
         /* paint desktop */
-        ::Fdesktop:Show()
+        ::Fdesktop:show()
 
         ::Fexecute := .T.
 
@@ -140,11 +140,12 @@ METHOD PROCEDURE GetEvent() CLASS HTApplication
     nKey := Inkey(  )
 
     IF nKey != 0
-        window := ::getTopLevelWindowFromWindowId( hb_windowAtMousePos() )
-        IF nKey >= K_MINMOUSE .AND. nKey <= K_MAXMOUSE
-            window:addEvent( HTMouseEvent():New( nKey ) )
-        ELSE
-            window:addEvent( HTKeyEvent():New( nKey ) )
+        IF !Empty( window := ::getTopLevelWindowFromWindowId( hb_windowAtMousePos() ) )
+            IF nKey >= K_MINMOUSE .AND. nKey <= K_MAXMOUSE
+                window:addEvent( HTMouseEvent():New( nKey ) )
+            ELSE
+                window:addEvent( HTKeyEvent():New( nKey ) )
+            ENDIF
         ENDIF
     ENDIF
 

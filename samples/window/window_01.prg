@@ -11,13 +11,13 @@ ENDCLASS
 
 PROCEDURE Main()
     LOCAL app
-    LOCAL win
+//    LOCAL win
 
     app := HTApplication():New()
 
-    win := MainWindow():New()
+//    win := MainWindow():New()
 
-    win:Show()
+//    win:show()
 
     app:exec()
 

@@ -50,8 +50,6 @@ PUBLIC:
     CONSTRUCTOR New( ... )
 
     METHOD addEvent( event, priority )
-    METHOD SetFocus()
-    METHOD Show()
 
     METHOD closeEvent( closeEvent )
     METHOD event( event )
@@ -67,11 +65,13 @@ PUBLIC:
 
     METHOD setAsDesktopWidget
     METHOD setBackgroundColor( color )
+    METHOD setFocus()
     METHOD setForegroundColor( color )
     METHOD setLayout( layout )
     METHOD setWindowFlags( type ) INLINE ::FwindowFlags := type
     METHOD setWindowTitle( title )
 
+    METHOD show()
     METHOD showEvent( showEvent )
 
     PROPERTY actions
@@ -474,12 +474,12 @@ METHOD FUNCTION setBackgroundColor( color ) CLASS HTWidget
 RETURN ::FbackgroundColor
 
 /*
-  SetFocus
+    setFocus
 */
-METHOD PROCEDURE SetFocus() CLASS HTWidget
+METHOD PROCEDURE setFocus() CLASS HTWidget
     LOCAL activeWindow := HTApplication():activeWindow()
 
-    IF !activeWindow == Self
+    IF ! activeWindow == Self
         IF activeWindow != NIL
             activeWindow:focusOutEvent( NIL )
         ENDIF
@@ -522,9 +522,9 @@ METHOD PROCEDURE setWindowTitle( title ) CLASS HTWidget
 RETURN
 
 /*
-    Show
+    show
 */
-METHOD PROCEDURE Show() CLASS HTWidget
+METHOD PROCEDURE show() CLASS HTWidget
 
     ::FisVisible := .T.
 
