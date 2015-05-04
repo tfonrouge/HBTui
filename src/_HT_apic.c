@@ -21,9 +21,9 @@ HB_FUNC( HB_WINDOWATMOUSEPOS )
 }
 
 /*
-    HB_ARRAYFROMID
+    HT_ARRAYFROMID
 */
-HB_FUNC( HB_ARRAYFROMID )
+HB_FUNC( HT_ARRAYFROMID )
 {
     void *pArrayId = hb_parptr( 1 );
 

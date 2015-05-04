@@ -155,15 +155,15 @@ RETURN
     getTopLevelWindowFromWindowId
 */
 METHOD FUNCTION getTopLevelWindowFromWindowId( windowId ) CLASS HTApplication
-    LOCAL window
-    LOCAL arrayId
+    LOCAL nPos
 
-    IF hb_hHasKey( ::FtopLevelWindows, windowId )
-        arrayId := ::FtopLevelWindows[ windowId ]
-        window := hb_arrayFromId( arrayId )
+    nPos := hb_hPos( ::FtopLevelWindows, windowId )
+
+    IF nPos > 0
+        RETURN ht_arrayFromId( hb_hValueAt( ::FtopLevelWindows, nPos ) )
     ENDIF
 
-RETURN window
+RETURN NIL
 
 /*
     queueEvent
