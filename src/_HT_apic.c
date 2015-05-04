@@ -16,6 +16,7 @@
 HB_FUNC( HB_WINDOWATMOUSEPOS )
 {
     int x,y;
+
     hb_mouseGetPos( &x, &y );
     hb_retni( hb_ctwGetPosWindow( x, y ) );
 }
