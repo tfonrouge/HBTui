@@ -84,8 +84,8 @@
 /* PROPERTY READWRITE */
 #xcommand PROPERTY <name> [<clauses1,...>] READWRITE [<clauses2,...>] ;
                     => ;
-                    METHOD Set<name>( value ) INLINE ::F<name> := value PROTECTED ;; 
-                    PROPERTY <name> [<clauses1>] WRITE Set<name> [<clauses2>]
+                    METHOD set<name>( value ) INLINE ::F<name> := value PROTECTED ;; 
+                    PROPERTY <name> [<clauses1>] WRITE set<name> [<clauses2>]
 
 #xcommand PROCEDURE <ProcedureNameParams> CLASS <className> => ERROR
 

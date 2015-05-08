@@ -26,7 +26,7 @@ ENDCLASS
 */
 METHOD new( cFile, nTop, nLeft, nBottom, nRight, cColor ) CLASS HTEditor
 
-    ::Super:new()
+    ::super:new()
 
    ::cFile   := cFile
    ::nTop    := nTop
@@ -50,7 +50,7 @@ METHOD View( cFile, nTop, nLeft, nBottom, nRight, cColor )
    LOCAL nKey
    LOCAL nStart, nEnd, nIncrement
 
-   IF EMPTY( cFile )
+   IF Empty( cFile )
       IF ( nHandle := FCREATE( ::cFile, FC_NORMAL ) ) = -1
          ALERT( "File cannot be created:" + STR( FERROR() ) )
          RETURN 0
@@ -115,7 +115,7 @@ METHOD View( cFile, nTop, nLeft, nBottom, nRight, cColor )
             DispBegin()
 
             FOR i := 1 TO nVert
-               SetPos( ::nTop + i - 1, ::nLeft )
+               setPos( ::nTop + i - 1, ::nLeft )
                DispOut( Pad( SubStr( aTarget[ i ], nPosition ), nHoriz ) )
             NEXT
 
@@ -140,7 +140,7 @@ METHOD View( cFile, nTop, nLeft, nBottom, nRight, cColor )
 
             FOR i := nStart TO nEnd STEP nIncrement
 
-               SetPos( ::nTop - 1 + i, ::nLeft )
+               setPos( ::nTop - 1 + i, ::nLeft )
 
                DispOut( SubStr( aTarget[i], nPosition, nHoriz ) )
 
@@ -348,7 +348,7 @@ FUNCTION AMax( aTarget )
 
    LOCAL nLarger := 0
 
-   AEval( aTarget, {| w | nLarger := Max( nLarger, Len( w ) ) } )           //P.
+   AEval( aTarget, {| w | nLarger := Max( nLarger, len( w ) ) } )           //P.
 
 RETURN nLarger
 //----------------------------------------------------------------------------//

@@ -24,7 +24,7 @@ ENDCLASS
 */
 METHOD new( nTop, nLeft, nWidth, nHeight, cColor, wId ) CLASS HTMenu
 
-    ::Super:new( nTop, nLeft, nWidth, nHeight, cColor, wId )
+    ::super:new( nTop, nLeft, nWidth, nHeight, cColor, wId )
 
 RETURN Self
 

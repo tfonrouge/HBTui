@@ -25,5 +25,5 @@ RETURN ::FmenuBar
     show
 */
 METHOD PROCEDURE show() CLASS HTMainWindow
-    ::Super:show()
+    ::super:show()
 RETURN

@@ -23,16 +23,16 @@ ENDCLASS
 METHOD new( ... ) CLASS HTLineEdit
     LOCAL p
 
-    IF PCount() > 0
+    IF pCount() > 0
         p := hb_pValue( 1 )
         IF hb_isObject( p )
-            ::Super:new( p )
+            ::super:new( p )
         ELSE
             ::setText( p ) /* TODO: this could be a HTString object too ... */
-            ::Super:new( hb_pValue( 2 ) )
+            ::super:new( hb_pValue( 2 ) )
         ENDIF
     ELSE
-        ::Super:new()
+        ::super:new()
     ENDIF
 
 RETURN Self
@@ -42,5 +42,5 @@ RETURN Self
 */
 METHOD PROCEDURE paintEvent( event ) CLASS HTLineEdit
     HB_SYMBOL_UNUSED( event )
-    DispOutAt( ::x, ::y, ::text, ::color )
+    dispOutAt( ::x, ::y, ::text, ::color )
 RETURN

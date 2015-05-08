@@ -23,10 +23,10 @@ ENDCLASS
     new
 */
 METHOD new( parent ) CLASS HTMenuBar
-    SWITCH PCount()
+    SWITCH pCount()
     CASE 0
     CASE 1
-        ::Super:new( parent )
+        ::super:new( parent )
         EXIT
     OTHERWISE
         ::PARAM_ERROR()
@@ -40,7 +40,7 @@ METHOD addAction( ... ) CLASS HTMenuBar
     LOCAL action
     LOCAL p
 
-    SWITCH PCount()
+    SWITCH pCount()
     CASE 1
         p := hb_pValue( 1 )
         IF hb_isChar( p )

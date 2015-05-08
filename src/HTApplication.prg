@@ -47,7 +47,7 @@ RETURN Self
     activeWindow
 */
 METHOD FUNCTION activeWindow() CLASS HTApplication
-RETURN ::getTopLevelWindowFromWindowId( WSelect() )
+RETURN ::getTopLevelWindowFromWindowId( wSelect() )
 
 /*
     addTopLevelWindow
@@ -74,9 +74,9 @@ METHOD FUNCTION exec() CLASS HTApplication
 
     IF !::Fexecute
 
-        //Set( _SET_EVENTMASK, INKEY_ALL + HB_INKEY_RAW + HB_INKEY_EXT + HB_INKEY_GTEVENT )
-        Set( _SET_EVENTMASK, INKEY_ALL )
-        SetBlink( .F. )
+        //set( _SET_EVENTMASK, INKEY_ALL + HB_INKEY_RAW + HB_INKEY_EXT + HB_INKEY_GTEVENT )
+        set( _SET_EVENTMASK, INKEY_ALL )
+        setBlink( .F. )
 
         result := 0
 
@@ -93,7 +93,7 @@ METHOD FUNCTION exec() CLASS HTApplication
                 WHILE ::FeventStackLen[ priority ] > 0
 
                     event := ::FeventStack[ priority, 1 ]
-                    ADel( ::FeventStack[ priority ], 1 )
+                    aDel( ::FeventStack[ priority ], 1 )
                     --::FeventStackLen[ priority ]
 
                     widget := iif( event:widget = NIL, ::activeWindow(), event:widget )
@@ -178,7 +178,7 @@ METHOD PROCEDURE queueEvent( event, priority ) CLASS HTApplication
 
     IF ::FeventStackLen[ priority ] < HBTUI_UI_STACK_EVENT_SIZE
         ++::FeventStackLen[ priority ]
-        IF Len( ::FeventStack[ priority ] ) < ::FeventStackLen[ priority ]
+        IF len( ::FeventStack[ priority ] ) < ::FeventStackLen[ priority ]
             ASize( ::FeventStack[ priority ], ::FeventStackLen[ priority ] )
         ENDIF
         ::FeventStack[ priority, ::FeventStackLen[ priority ] ] := event

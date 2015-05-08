@@ -14,7 +14,7 @@ METHOD new( ... ) CLASS MyMainWindow
     LOCAL menuBar
     LOCAL menu
 
-    ::Super:new( ... )
+    ::super:new( ... )
 
     menuBar := ::menuBar
 

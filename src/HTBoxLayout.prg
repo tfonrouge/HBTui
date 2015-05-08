@@ -24,7 +24,7 @@ ENDCLASS
 */
 METHOD new( dir, parent ) CLASS HTBoxLayout
     ::setDirection( dir )
-RETURN ::Super:new( parent )
+RETURN ::super:new( parent )
 
 /*
     addWidget
