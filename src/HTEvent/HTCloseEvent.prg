@@ -11,11 +11,11 @@ CLASS HTCloseEvent FROM HTEvent
 PROTECTED:
     DATA Ftype INIT HT_EVENT_TYPE_CLOSE
 PUBLIC:
-    CONSTRUCTOR New()
+    CONSTRUCTOR new()
 ENDCLASS
 
 /*
-    New
+    new
 */
-METHOD New() CLASS HTCloseEvent
+METHOD new() CLASS HTCloseEvent
 RETURN Self

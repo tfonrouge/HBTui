@@ -11,11 +11,11 @@ CLASS HTHideEvent FROM HTEvent
 PROTECTED:
     DATA Ftype INIT HT_EVENT_TYPE_HIDE
 PUBLIC:
-    CONSTRUCTOR New()
+    CONSTRUCTOR new()
 ENDCLASS
 
 /*
-    New
+    new
 */
-METHOD New() CLASS HTHideEvent
+METHOD new() CLASS HTHideEvent
 RETURN Self

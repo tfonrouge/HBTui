@@ -9,7 +9,7 @@
 CREATE CLASS HTSize
 PROTECTED:
 PUBLIC:
-    CONSTRUCTOR New( width, height )
+    CONSTRUCTOR new( width, height )
     METHOD isNull() INLINE ::Fwidth = 0 .AND. ::Fheight = 0
     METHOD setHeight( height ) INLINE ::Fheight := height
     METHOD setWidth( width ) INLINE ::Fwidth := width
@@ -18,9 +18,9 @@ PUBLIC:
 ENDCLASS
 
 /*
-    New
+    new
 */
-METHOD New( width, height ) CLASS HTSize
+METHOD new( width, height ) CLASS HTSize
     ::Fwidth := width
     ::Fheight := height
 RETURN Self

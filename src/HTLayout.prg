@@ -7,16 +7,16 @@
 CLASS HTLayout FROM HTObject, HTLayoutItem
 PUBLIC:
 
-    CONSTRUCTOR New( parent )
+    CONSTRUCTOR new( parent )
 
     METHOD addWidget( w ) VIRTUAL
 
 ENDCLASS
 
 /*
-    New
+    new
 */
-METHOD New( parent ) CLASS HTLayout
+METHOD new( parent ) CLASS HTLayout
     IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
         parent:setLayout( Self )
     ENDIF

@@ -12,16 +12,14 @@ PROTECTED:
     DATA FeventStack        INIT { {}, {}, {} }
     DATA FeventStackLen     INIT { 0, 0, 0 }
 
-    PROPERTY StateOnMove INIT .F.
-
 PUBLIC:
 
-    CONSTRUCTOR New()
+    CONSTRUCTOR new()
 
     METHOD activeWindow()
     METHOD addTopLevelWindow( windowId, widget )
     METHOD exec()
-    METHOD GetEvent()
+    METHOD getEvent()
     METHOD getTopLevelWindowFromWindowId( windowId )
     METHOD queueEvent( event, priority )
 
@@ -32,13 +30,13 @@ PUBLIC:
 ENDCLASS
 
 /*
-    New
+    new
 */
-METHOD New() CLASS HTApplication
+METHOD new() CLASS HTApplication
     LOCAL desktop
 
     IF ::Fdesktop = NIL
-        desktop := HTDesktop():New()
+        desktop := HTDesktop():new()
         desktop:setAsDesktopWidget()
         ::Fdesktop := desktop
     ENDIF
@@ -89,7 +87,7 @@ METHOD FUNCTION exec() CLASS HTApplication
 
         WHILE ::Fexecute
 
-            ::GetEvent()
+            ::getEvent()
 
             FOR priority := HT_EVENT_PRIORITY_HIGH TO HT_EVENT_PRIORITY_LOW
                 WHILE ::FeventStackLen[ priority ] > 0
@@ -116,9 +114,9 @@ METHOD FUNCTION exec() CLASS HTApplication
 RETURN result
 
 /*
-  GetEvent
+  getEvent
 */
-METHOD PROCEDURE GetEvent() CLASS HTApplication
+METHOD PROCEDURE getEvent() CLASS HTApplication
     LOCAL nKey
     LOCAL mrow := mRow( .T. )
     LOCAL mcol := mCol( .T. )
@@ -131,7 +129,7 @@ METHOD PROCEDURE GetEvent() CLASS HTApplication
     ENDIF
 
     IF mCoords[ 1 ] != mrow .OR. mCoords[ 2 ] != mcol
-        HTApplication():activeWindow():addEvent( HTMouseEvent():New( K_MOUSEMOVE ) )
+        HTApplication():activeWindow():addEvent( HTMouseEvent():new( K_MOUSEMOVE ) )
         mCoords[ 1 ] := mrow
         mCoords[ 2 ] := mcol
         RETURN
@@ -142,9 +140,9 @@ METHOD PROCEDURE GetEvent() CLASS HTApplication
     IF nKey != 0
         IF !Empty( window := ::getTopLevelWindowFromWindowId( hb_windowAtMousePos() ) )
             IF nKey >= K_MINMOUSE .AND. nKey <= K_MAXMOUSE
-                window:addEvent( HTMouseEvent():New( nKey ) )
+                window:addEvent( HTMouseEvent():new( nKey ) )
             ELSE
-                window:addEvent( HTKeyEvent():New( nKey ) )
+                window:addEvent( HTKeyEvent():new( nKey ) )
             ENDIF
         ENDIF
     ENDIF

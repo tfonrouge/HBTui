@@ -11,11 +11,11 @@ CLASS HTShowEvent FROM HTEvent
 PROTECTED:
     DATA Ftype INIT HT_EVENT_TYPE_SHOW
 PUBLIC:
-    CONSTRUCTOR New()
+    CONSTRUCTOR new()
 ENDCLASS
 
 /*
-    New
+    new
 */
-METHOD New() CLASS HTShowEvent
+METHOD new() CLASS HTShowEvent
 RETURN Self

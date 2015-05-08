@@ -11,11 +11,11 @@ CLASS HTPaintEvent FROM HTEvent
 PROTECTED:
     DATA Ftype INIT HT_EVENT_TYPE_PAINT
 PUBLIC:
-    CONSTRUCTOR New()
+    CONSTRUCTOR new()
 ENDCLASS
 
 /*
-    New
+    new
 */
-METHOD New() CLASS HTPaintEvent
+METHOD new() CLASS HTPaintEvent
 RETURN Self

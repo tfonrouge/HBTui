@@ -9,7 +9,7 @@ PROTECTED:
 
 PUBLIC:
 
-    METHOD New( parent ) INLINE ::Super:New( parent )
+    METHOD new( parent ) INLINE ::Super:new( parent )
 
     METHOD setText( text )
 

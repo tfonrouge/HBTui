@@ -10,7 +10,7 @@ PROTECTED:
 
 PUBLIC:
 
-    CONSTRUCTOR New( parent )
+    CONSTRUCTOR new( parent )
 
     METHOD addAction( ... )
     METHOD addMenu( ... )
@@ -20,13 +20,13 @@ PUBLIC:
 ENDCLASS
 
 /*
-    New
+    new
 */
-METHOD New( parent ) CLASS HTMenuBar
+METHOD new( parent ) CLASS HTMenuBar
     SWITCH PCount()
     CASE 0
     CASE 1
-        ::Super:New( parent )
+        ::Super:new( parent )
         EXIT
     OTHERWISE
         ::PARAM_ERROR()
@@ -44,7 +44,7 @@ METHOD addAction( ... ) CLASS HTMenuBar
     CASE 1
         p := hb_pValue( 1 )
         IF hb_isChar( p )
-            action := HTAction():New( p, Self )
+            action := HTAction():new( p, Self )
             AAdd( ::Factions, action )
         ELSEIF hb_isObject( p )
             AAdd( ::Factions, p )

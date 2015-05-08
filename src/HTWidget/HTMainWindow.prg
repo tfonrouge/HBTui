@@ -17,7 +17,7 @@ ENDCLASS
 */
 METHOD FUNCTION menuBar() CLASS HTMainWindow
     IF ::FmenuBar = NIL
-        ::FmenuBar := HTMenuBar():New( Self )
+        ::FmenuBar := HTMenuBar():new( Self )
     ENDIF
 RETURN ::FmenuBar
 

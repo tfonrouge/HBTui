@@ -8,7 +8,7 @@ CLASS HTPushButton FROM HTAbstractButton
 PROTECTED:
 PUBLIC:
 
-    METHOD New( ... )
+    METHOD new( ... )
 
     PROPERTY autoDefault
     PROPERTY default
@@ -16,21 +16,21 @@ PUBLIC:
 ENDCLASS
 
 /*
-    New
+    new
 */
-METHOD New( ... ) CLASS HTPushButton
+METHOD new( ... ) CLASS HTPushButton
     LOCAL p
 
     IF PCount() > 0
         p := hb_pValue( 1 )
         IF hb_isObject( p )
-            ::Super:New( p )
+            ::Super:new( p )
         ELSE
             ::setText( p )
-            ::Super:New( hb_pValue( 2 ) )
+            ::Super:new( hb_pValue( 2 ) )
         ENDIF
     ELSE
-        ::Super:New()
+        ::Super:new()
     ENDIF
 
 RETURN Self

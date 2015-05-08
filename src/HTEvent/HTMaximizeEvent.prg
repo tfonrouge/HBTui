@@ -11,11 +11,11 @@ CLASS HTMaximizeEvent FROM HTEvent
 PROTECTED:
     DATA Ftype INIT HT_EVENT_TYPE_MAXIMIZE
 PUBLIC:
-    CONSTRUCTOR New()
+    CONSTRUCTOR new()
 ENDCLASS
 
 /*
-    New
+    new
 */
-METHOD New() CLASS HTMaximizeEvent
+METHOD new() CLASS HTMaximizeEvent
 RETURN Self

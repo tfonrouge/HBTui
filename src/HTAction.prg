@@ -7,22 +7,22 @@
 CLASS HTAction FROM HTObject
 PROTECTED:
 PUBLIC:
-    CONSTRUCTOR New( ... )
+    CONSTRUCTOR new( ... )
     METHOD setText( text ) INLINE ::Ftext := text
     PROPERTY text
 ENDCLASS
 
 /*
-    New
+    new
 */
-METHOD New( ... ) CLASS HTAction
+METHOD new( ... ) CLASS HTAction
     SWITCH PCount()
     CASE 1  /* HTObject parent */
-        ::Super:New( hb_pValue( 1 ) )
+        ::Super:new( hb_pValue( 1 ) )
         EXIT
     CASE 2 /* text, HTObject parent */
         ::setText( hb_pValue( 1 ) )
-        ::Super:New( hb_pValue( 2 ) )
+        ::Super:new( hb_pValue( 2 ) )
         EXIT
     OTHERWISE
         ::PARAM_ERROR()

@@ -9,7 +9,7 @@ PROTECTED:
     DATA FwidgetList INIT {}
 PUBLIC:
 
-    CONSTRUCTOR New( dir, parent )
+    CONSTRUCTOR new( dir, parent )
 
     METHOD addWidget( w )
 
@@ -20,11 +20,11 @@ PUBLIC:
 ENDCLASS
 
 /*
-    New
+    new
 */
-METHOD New( dir, parent ) CLASS HTBoxLayout
+METHOD new( dir, parent ) CLASS HTBoxLayout
     ::setDirection( dir )
-RETURN ::Super:New( parent )
+RETURN ::Super:new( parent )
 
 /*
     addWidget

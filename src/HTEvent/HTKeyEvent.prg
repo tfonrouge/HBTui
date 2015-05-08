@@ -11,13 +11,13 @@ CLASS HTKeyEvent FROM HTEvent
 PROTECTED:
     DATA Ftype INIT HT_EVENT_TYPE_KEYBOARD
 PUBLIC:
-    CONSTRUCTOR New( nKey )
+    CONSTRUCTOR new( nKey )
     PROPERTY nKey
 ENDCLASS
 
 /*
-    New
+    new
 */
-METHOD New( nKey ) CLASS HTKeyEvent
+METHOD new( nKey ) CLASS HTKeyEvent
     ::FnKey := nKey
 RETURN Self

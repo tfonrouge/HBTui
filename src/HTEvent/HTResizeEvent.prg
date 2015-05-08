@@ -11,15 +11,15 @@ CLASS HTResizeEvent FROM HTEvent
 PROTECTED:
     DATA Ftype INIT HT_EVENT_TYPE_RESIZE
 PUBLIC:
-    CONSTRUCTOR New( size, oldSize )
+    CONSTRUCTOR new( size, oldSize )
     PROPERTY oldSize
     PROPERTY size
 ENDCLASS
 
 /*
-    New
+    new
 */
-METHOD New( size, oldSize ) CLASS HTResizeEvent
+METHOD new( size, oldSize ) CLASS HTResizeEvent
     ::Fsize := size
     ::FoldSize := oldSize
 RETURN Self

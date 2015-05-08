@@ -11,15 +11,15 @@ CLASS HTMoveEvent FROM HTEvent
 PROTECTED:
     DATA Ftype INIT HT_EVENT_TYPE_MOVE
 PUBLIC:
-    CONSTRUCTOR New( pos, oldPos )
+    CONSTRUCTOR new( pos, oldPos )
     PROPERTY oldPos
     PROPERTY pos
 ENDCLASS
 
 /*
-    New
+    new
 */
-METHOD New( pos, oldPos ) CLASS HTMoveEvent
+METHOD new( pos, oldPos ) CLASS HTMoveEvent
     ::Fpos := pos
     ::FoldPos := oldPos
 RETURN Self

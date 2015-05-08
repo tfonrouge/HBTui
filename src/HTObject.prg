@@ -9,32 +9,32 @@
 */
 CLASS HTObject FROM HTBase
 PROTECTED:
-    METHOD AddChild( child )
+    METHOD addChild( child )
 PUBLIC:
 
-    CONSTRUCTOR New( parent )
+    CONSTRUCTOR new( parent )
 
     METHOD event( event )
-    METHOD SetParent( parent )
+    METHOD setParent( parent )
 
     PROPERTY children INIT {}
-    PROPERTY parent WRITE SetParent
+    PROPERTY parent WRITE setParent
 
 ENDCLASS
 
 /*
-  New
+  new
 */
-METHOD New( parent ) CLASS HTObject
+METHOD new( parent ) CLASS HTObject
     IF PCount() = 1
-        ::SetParent( parent )
+        ::setParent( parent )
     ENDIF
 RETURN Self
 
 /*
-  AddChild
+  addChild
 */
-METHOD PROCEDURE AddChild( child ) CLASS HTObject
+METHOD PROCEDURE addChild( child ) CLASS HTObject
     AAdd( ::Fchildren, child )
 RETURN
 
@@ -45,13 +45,13 @@ METHOD FUNCTION event( event ) CLASS HTObject
 RETURN event:isAccepted()
 
 /*
-  SetParent
+  setParent
 */
-METHOD PROCEDURE SetParent( parent ) CLASS HTObject
+METHOD PROCEDURE setParent( parent ) CLASS HTObject
     IF parent != NIL
         IF parent:IsDerivedFrom("HTObject")
             ::Fparent := parent
-            parent:AddChild( Self )
+            parent:addChild( Self )
         ELSE
             ::Error_Parent_Is_Not_Derived_From_TXObject()
         ENDIF

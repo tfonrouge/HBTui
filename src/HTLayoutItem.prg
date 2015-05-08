@@ -7,7 +7,7 @@
 CLASS HTLayoutItem FROM HTBase
 PUBLIC:
 
-    CONSTRUCTOR New( alignment )
+    CONSTRUCTOR new( alignment )
 
     METHOD setAlignment( alignment )
 
@@ -16,9 +16,9 @@ PUBLIC:
 ENDCLASS
 
 /*
-    New
+    new
 */
-METHOD New( alignment ) CLASS HTLayoutItem
+METHOD new( alignment ) CLASS HTLayoutItem
     IF alignment = NIL
         alignment := 0
     ENDIF

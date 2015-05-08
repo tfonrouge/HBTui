@@ -10,7 +10,7 @@ PROTECTED:
 
 PUBLIC:
 
-    CONSTRUCTOR New( nTop, nLeft, nWidth, nHeight, cColor, wId )
+    CONSTRUCTOR new( nTop, nLeft, nWidth, nHeight, cColor, wId )
 
     METHOD AddAction()
     METHOD AddMenu()
@@ -20,11 +20,11 @@ PUBLIC:
 ENDCLASS
 
 /*
-    New
+    new
 */
-METHOD New( nTop, nLeft, nWidth, nHeight, cColor, wId ) CLASS HTMenu
+METHOD new( nTop, nLeft, nWidth, nHeight, cColor, wId ) CLASS HTMenu
 
-    ::Super:New( nTop, nLeft, nWidth, nHeight, cColor, wId )
+    ::Super:new( nTop, nLeft, nWidth, nHeight, cColor, wId )
 
 RETURN Self
 

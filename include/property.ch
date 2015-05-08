@@ -21,7 +21,7 @@
 #xcommand PROPERTY <name> [AS <astype>] INDEX <i> [READ <rm>] [WRITE <wm>] ;
                     => ;
                     METHOD <name> INLINE ::<rm>( <i> ) ;;
-                    METHOD _<name>( xNewVal ) INLINE ::<wm>( <i>, xNewVal )
+                    METHOD _<name>( xnewVal ) INLINE ::<wm>( <i>, xnewVal )
 
 // With INDEX
 // With READ
@@ -37,7 +37,7 @@
                     => ;
                     DATA F<name> PROTECTED ;;
                     METHOD <name> INLINE ::F<name> ;;
-                    METHOD _<name>( xNewVal ) INLINE ::<wm>( <i>, xNewVal )
+                    METHOD _<name>( xnewVal ) INLINE ::<wm>( <i>, xnewVal )
 
 // Without INDEX
 // With READ
@@ -46,7 +46,7 @@
                     [<scope: EXPORTED, EXPORT, VISIBLE, PUBLIC, PROTECTED, HIDDEN, PRIVATE, READONLY, RO, PUBLISHED >] ;
                     => ;
                     METHOD <name> BLOCK {|Self,...| ::<rm> } [<scope>] ;;
-                    METHOD _<name>( xNewVal ) INLINE ::<wm>( xNewVal ) [<scope>]
+                    METHOD _<name>( xnewVal ) INLINE ::<wm>( xnewVal ) [<scope>]
 
 // Without INDEX
 // With READ
@@ -62,7 +62,7 @@
                     => ;
                     DATA F<name> PROTECTED ;;
                     METHOD <name> INLINE ::F<name> ;;
-                    METHOD _<name>( xNewVal ) INLINE ::<wm>( xNewVal )
+                    METHOD _<name>( xnewVal ) INLINE ::<wm>( xnewVal )
 
 /* PROPERTY with INIT value, READ is direct to F<name> DATA */
 #xcommand PROPERTY <name> [INDEX <i>] [WRITE <wm>] INIT <value> ;

@@ -7,7 +7,7 @@
 CLASS HTLineEdit FROM HTWidget
 PUBLIC:
 
-    CONSTRUCTOR New( ... )
+    CONSTRUCTOR new( ... )
     
     METHOD paintEvent( event )
 
@@ -18,21 +18,21 @@ PUBLIC:
 ENDCLASS
 
 /*
-    New
+    new
 */
-METHOD New( ... ) CLASS HTLineEdit
+METHOD new( ... ) CLASS HTLineEdit
     LOCAL p
 
     IF PCount() > 0
         p := hb_pValue( 1 )
         IF hb_isObject( p )
-            ::Super:New( p )
+            ::Super:new( p )
         ELSE
             ::setText( p ) /* TODO: this could be a HTString object too ... */
-            ::Super:New( hb_pValue( 2 ) )
+            ::Super:new( hb_pValue( 2 ) )
         ENDIF
     ELSE
-        ::Super:New()
+        ::Super:new()
     ENDIF
 
 RETURN Self

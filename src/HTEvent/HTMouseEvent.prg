@@ -11,21 +11,21 @@ CLASS HTMouseEvent FROM HTEvent
 PROTECTED:
     DATA Ftype INIT HT_EVENT_TYPE_MOUSE
 PUBLIC:
-    CONSTRUCTOR New( nKey )
-    PROPERTY MouseAbsRow
-    PROPERTY MouseAbsCol
+    CONSTRUCTOR new( nKey )
+    PROPERTY mouseAbsRow
+    PROPERTY mouseAbsCol
     PROPERTY mouseCol
     PROPERTY mouseRow
     PROPERTY nKey
 ENDCLASS
 
 /*
-    New
+    new
 */
-METHOD New( nKey ) CLASS HTMouseEvent
+METHOD new( nKey ) CLASS HTMouseEvent
     ::FnKey := nKey
-    ::FMouseAbsCol := mCol( .T. )
-    ::FMouseAbsRow := mRow( .T. )
+    ::FmouseAbsCol := mCol( .T. )
+    ::FmouseAbsRow := mRow( .T. )
     ::FmouseCol := mCol()
     ::FmouseRow := mRow()
 RETURN Self

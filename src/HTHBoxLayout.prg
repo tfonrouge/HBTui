@@ -7,7 +7,7 @@
 CLASS HTHBoxLayout FROM HTBoxLayout
 PUBLIC:
 
-    METHOD New( parent ) INLINE ::Super:New( 0, parent )
+    METHOD new( parent ) INLINE ::Super:new( 0, parent )
 
     METHOD addWidget( w ) VIRTUAL
 

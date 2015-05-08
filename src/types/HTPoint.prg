@@ -9,7 +9,7 @@
 CREATE CLASS HTPoint
 PROTECTED:
 PUBLIC:
-    CONSTRUCTOR New( x, y )
+    CONSTRUCTOR new( x, y )
     METHOD isNull INLINE ::Fx = 0 .AND. ::Fy = 0
     METHOD setX( x ) INLINE ::Fx := x
     METHOD setY( y ) INLINE ::Fy := y
@@ -18,9 +18,9 @@ PUBLIC:
 ENDCLASS
 
 /*
-    New
+    new
 */
-METHOD New( x, y ) CLASS HTPoint
+METHOD new( x, y ) CLASS HTPoint
     ::Fx := x
     ::Fy := y
 RETURN Self

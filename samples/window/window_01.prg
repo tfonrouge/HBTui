@@ -13,9 +13,9 @@ PROCEDURE Main()
     LOCAL app
     LOCAL win
 
-    app := HTApplication():New()
+    app := HTApplication():new()
 
-    win := MainWindow():New()
+    win := MainWindow():new()
 
     win:show()
 
