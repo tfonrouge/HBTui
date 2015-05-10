@@ -35,7 +35,7 @@ RETURN Self
   addChild
 */
 METHOD PROCEDURE addChild( child ) CLASS HTObject
-    AAdd( ::Fchildren, child )
+    aAdd( ::Fchildren, child )
 RETURN
 
 /*

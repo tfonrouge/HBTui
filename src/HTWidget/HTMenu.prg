@@ -3,92 +3,67 @@
  */
 
 #include "hbtui.ch"
-#include "inkey.ch"
 
 CLASS HTMenu FROM HTWidget
 PROTECTED:
 
 PUBLIC:
 
-    CONSTRUCTOR new( nTop, nLeft, nWidth, nHeight, cColor, wId )
+    CONSTRUCTOR new( ... )
 
-    METHOD AddAction()
-    METHOD AddMenu()
-    METHOD PositionMenu()
-    
+    METHOD addAction()
+    METHOD addMenu()
+    METHOD setTitle( title ) INLINE ::Ftitle := title
+
+    PROPERTY title
 
 ENDCLASS
 
 /*
     new
 */
-METHOD new( nTop, nLeft, nWidth, nHeight, cColor, wId ) CLASS HTMenu
+METHOD new( ... ) CLASS HTMenu
+    LOCAL version := 0
+    LOCAL parent
+    LOCAL title
 
-    ::super:new( nTop, nLeft, nWidth, nHeight, cColor, wId )
+    IF pCount() <= 1
+        parent := hb_pValue( 1 )
+        IF hb_isNil( parent ) .OR. hb_isObject( parent )
+            version := 1
+        ENDIF
+    ELSEIF pCount() <= 2
+        title := hb_pValue( 1 )
+        parent := hb_pValue( 2 )
+        IF hb_isChar( title ) .AND. hb_isNil( parent ) .OR. hb_isObject( parent )
+            version := 2
+        ENDIF
+    ENDIF
+
+    SWITCH version
+    CASE 1
+        ::super:new( parent )
+        EXIT
+    CASE 2
+        ::setTitle( title )
+        ::super:new( parent )
+        EXIT
+    OTHERWISE
+        ::PARAM_ERROR()
+    ENDSWITCH
 
 RETURN Self
 
 /*
-    AddAction
+    addAction
 */
-METHOD PROCEDURE AddAction() CLASS HTMenu
-    LOCAL nKey
-
-    DO WHILE .T.
-
-      nKey := Inkey( 0 )
-
-        DO CASE
-        CASE nKey == K_MOUSEMOVE
-
-
-        CASE nKey == K_LBUTTONDOWN
-
-
-        CASE nKey == K_LBUTTONUP
-
-
-        CASE nKey == K_DOWN
-
-
-        CASE nKey == K_UP
-
-
-        CASE nKey == K_END
-
-
-        CASE nKey == K_HOME
-
-
-        CASE nKey == K_LEFT
-
-
-        CASE nKey == K_RIGHT
-
-
-        CASE nKey == K_ENTER
-
-
-        CASE nKey == K_ESC
-
-
-        ENDCASE
-
-    ENDDO
+METHOD PROCEDURE addAction() CLASS HTMenu
 
 RETURN
 
 /*
-    AddMenu
+    addMenu
 */
-METHOD PROCEDURE AddMenu() CLASS HTMenu
+METHOD PROCEDURE addMenu() CLASS HTMenu
 
 RETURN
-/*
-    PositionMenu()
-*/
-METHOD FUNCTION PositionMenu() CLASS HTMenu
-
-     // ( nTop, nLeft, nBottom, nRight )
-
-RETURN Self

@@ -7,9 +7,18 @@
 SINGLETON CLASS HTDesktop FROM HTWidget
 PROTECTED:
 PUBLIC:
+    CONSTRUCTOR new( ... )
     METHOD addEvent( event )
     METHOD paintEvent( paintEvent )
+    PROPERTY menuBar
 ENDCLASS
+
+METHOD new( ... ) CLASS HTDesktop
+
+    ::FmenuBar := HTMenuBar():new()
+    ::FmenuBar:addMenu("Inicio")
+
+RETURN ::super:new( ... )
 
 /*
     addEvent
@@ -33,4 +42,7 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTDesktop
     setPos( 0, 0 )
     ::FisVisible := .T.
     ::setWindowId( 0 )
+    ::Fwidth := maxCol()
+    ::Fheight := maxRow()
+    ::paintMenu()
 RETURN

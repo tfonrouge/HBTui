@@ -96,8 +96,8 @@ METHOD View( cFile, nTop, nLeft, nBottom, nRight, cColor )
 
       DO WHILE ( i < nVert .AND. ATail( aArray ) < nLength )
 
-         AAdd( aTarget, NextLine( nHandle ) )
-         AAdd( aArray, FSeek( nHandle, FS_SET, FS_RELATIVE ) )
+         aAdd( aTarget, NextLine( nHandle ) )
+         aAdd( aArray, FSeek( nHandle, FS_SET, FS_RELATIVE ) )
 
          i++
 

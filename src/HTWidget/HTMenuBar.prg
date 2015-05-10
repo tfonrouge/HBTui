@@ -15,7 +15,6 @@ PUBLIC:
     METHOD addAction( ... )
     METHOD addMenu( ... )
     METHOD addSeparator()
-    METHOD PositionMenu()
 
 ENDCLASS
 
@@ -23,14 +22,22 @@ ENDCLASS
     new
 */
 METHOD new( parent ) CLASS HTMenuBar
-    SWITCH pCount()
-    CASE 0
+    LOCAL version := 0
+
+    IF pCount() <= 1
+        IF hb_isNil( parent ) .OR. hb_isObject( parent )
+            version := 1
+        ENDIF
+    ENDIF
+
+    SWITCH version
     CASE 1
         ::super:new( parent )
         EXIT
     OTHERWISE
         ::PARAM_ERROR()
     ENDSWITCH
+
 RETURN Self
 
 /*
@@ -45,9 +52,9 @@ METHOD addAction( ... ) CLASS HTMenuBar
         p := hb_pValue( 1 )
         IF hb_isChar( p )
             action := HTAction():new( p, Self )
-            AAdd( ::Factions, action )
+            aAdd( ::Factions, action )
         ELSEIF hb_isObject( p )
-            AAdd( ::Factions, p )
+            aAdd( ::Factions, p )
         ELSE
             ::PARAM_ERROR()
         ENDIF
@@ -71,14 +78,5 @@ RETURN Self
     addSeparator
 */
 METHOD addSeparator() CLASS HTMenuBar
-
-RETURN Self
-
-/*
-    PositionMenu()
-*/
-METHOD PositionMenu() CLASS HTMenuBar
-
-     // ( nTop, nLeft, nBottom, nRight )
 
 RETURN Self
