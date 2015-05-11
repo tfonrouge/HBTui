@@ -8,7 +8,7 @@
 SINGLETON CLASS HTApplication FROM HTObject
 PROTECTED:
 
-    DATA Fexecute INIT .F.
+    DATA Fexecute INIT .f.
     DATA FeventStack        INIT { {}, {}, {} }
     DATA FeventStackLen     INIT { 0, 0, 0 }
 
@@ -76,14 +76,14 @@ METHOD FUNCTION exec() CLASS HTApplication
 
         //set( _SET_EVENTMASK, INKEY_ALL + HB_INKEY_RAW + HB_INKEY_EXT + HB_INKEY_GTEVENT )
         set( _SET_EVENTMASK, INKEY_ALL )
-        setBlink( .F. )
+        setBlink( .f. )
 
         result := 0
 
         /* paint desktop */
         ::Fdesktop:show()
 
-        ::Fexecute := .T.
+        ::Fexecute := .t.
 
         WHILE ::Fexecute
 
@@ -118,8 +118,8 @@ RETURN result
 */
 METHOD PROCEDURE getEvent() CLASS HTApplication
     LOCAL nKey
-    LOCAL mrow := mRow( .T. )
-    LOCAL mcol := mCol( .T. )
+    LOCAL mrow := mRow( .t. )
+    LOCAL mcol := mCol( .t. )
     LOCAL window
 
     STATIC mCoords

@@ -14,6 +14,7 @@
 CLASS HTWidget FROM HTObject
 PROTECTED:
 
+    DATA Factions
     DATA FAsDesktopWidget
     DATA FbtnClosePos
     DATA FBtnHidePos
@@ -26,11 +27,11 @@ PROTECTED:
     DATA FposUp
     DATA FShadow    INIT _WIDGET_SHADOW
     DATA FwindowId  /* CT Handle */
-    DATA FwinSysBtnMove     INIT .F.
-    DATA FwinSysBtnClose    INIT .F.
-    DATA FwinSysBtnHide     INIT .F.
-    DATA FwinSysBtnMaximize INIT .F.
-    DATA FwinSysBtnResize   INIT .F.
+    DATA FwinSysBtnMove     INIT .f.
+    DATA FwinSysBtnClose    INIT .f.
+    DATA FwinSysBtnHide     INIT .f.
+    DATA FwinSysBtnMaximize INIT .f.
+    DATA FwinSysBtnResize   INIT .f.
 
     METHOD displayLayout()
     METHOD getClearA INLINE ::FClearA
@@ -50,6 +51,8 @@ PUBLIC:
 
     CONSTRUCTOR new( ... )
 
+    METHOD actions INLINE iif( ::Factions = NIL, ::Factions := {}, NIL ), ::Factions
+    METHOD addAction( action )
     METHOD addEvent( event, priority )
 
     METHOD closeEvent( closeEvent )
@@ -75,7 +78,6 @@ PUBLIC:
     METHOD show()
     METHOD showEvent( showEvent )
 
-    PROPERTY actions
     PROPERTY backgroundColor WRITE setBackgroundColor
     PROPERTY charWidgetClose INIT hb_BChar( 254 )
     PROPERTY charWidgetHide INIT Chr( 25 )
@@ -86,7 +88,7 @@ PUBLIC:
     PROPERTY color READ getColor WRITE SetColor
     PROPERTY foregroundColor WRITE setForegroundColor
     PROPERTY height INIT 0
-    PROPERTY isVisible INIT .F.
+    PROPERTY isVisible INIT .f.
     PROPERTY layout WRITE setLayout
     PROPERTY pos READ getPos()
     PROPERTY shadow READ getShadow WRITE setShadow
@@ -126,6 +128,15 @@ METHOD new( ... ) CLASS HTWidget
     ENDSWITCH
 
 RETURN Self
+
+/*
+    addAction
+*/
+METHOD PROCEDURE addAction( action ) CLASS HTWidget
+    IF aScan( ::actions, action ) = 0
+        aAdd( ::actions, action )
+    ENDIF
+RETURN
 
 /*
     addEvent
@@ -232,7 +243,7 @@ METHOD FUNCTION getColor CLASS HTWidget
             RETURN ::Fparent:Color
         ENDIF
     ENDIF
-RETURN iif( ::FAsDesktopWidget = .T., _DESKTOP_COLOR, _WIDGET_COLOR )
+RETURN iif( ::FAsDesktopWidget = .t., _DESKTOP_COLOR, _WIDGET_COLOR )
 
 /*
     getWindowId
@@ -273,7 +284,7 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
         ::FwinSysBtnResize := ::FbtnResizePos != NIL .AND. ::FposDown:y = ( ::Fheight - 1 ) .AND. ::FposDown:x >= ::FbtnResizePos[ 1 ] .AND. ::FposDown:x <= ::FbtnResizePos[ 2 ]
 
         IF ::FposDown:y = -1 .AND. ! ::FwinSysBtnClose .AND. ! ::FwinSysBtnHide .AND. ! ::FwinSysBtnMaximize .AND. ! ::FwinSysBtnResize
-            ::FwinSysBtnMove := .T.
+            ::FwinSysBtnMove := .t.
         ENDIF
 
         IF HTApplication():activeWindow() = NIL .OR. HTApplication():activeWindow():windowId != ::windowId
@@ -302,10 +313,10 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
             ::addEvent( HTMaximizeEvent():new() )
         ENDIF
 
-        ::FwinSysBtnMove     := .F.
-        ::FwinSysBtnClose    := .F.
-        ::FwinSysBtnHide     := .F.
-        ::FwinSysBtnMaximize := .F.
+        ::FwinSysBtnMove     := .f.
+        ::FwinSysBtnClose    := .f.
+        ::FwinSysBtnHide     := .f.
+        ::FwinSysBtnMaximize := .f.
 
         EXIT
 
@@ -313,8 +324,8 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
 
         IF ::FposDown != NIL
 
-            x := mCol( .T. ) - ( ::FposDown:x + 1 )
-            y := mRow( .T. )
+            x := mCol( .t. ) - ( ::FposDown:x + 1 )
+            y := mRow( .t. )
 
             IF MLeftDown()
                 IF ::FwinSysBtnMove
@@ -387,7 +398,7 @@ METHOD PROCEDURE paintEvent( event ) CLASS HTWidget
             IF ::Fy = NIL
                 ::Fy := maxCol() / 2 - ::Fwidth / 2
             ENDIF
-            ::setWindowId( wOpen( ::Fx, ::Fy, ::Fx + ::Fheight, ::Fy + ::Fwidth, .T. ) )
+            ::setWindowId( wOpen( ::Fx, ::Fy, ::Fx + ::Fheight, ::Fy + ::Fwidth, .t. ) )
             wFormat()
             setClearB( _WIDGET_CHAR )
             wBox( NIL, ::color )
@@ -446,8 +457,8 @@ RETURN
 METHOD PROCEDURE paintMenu() CLASS HTWidget
 
     IF ::FwindowId != NIL
-        wSelect( ::FwindowId, .F. )
-        dispOutAt( 0, 0, padR( " Inicio ", ::Fwidth, "#" ), "00/07" )
+        wSelect( ::FwindowId, .f. )
+        dispOutAt( 0, 0, padR( e" \xfe ", ::Fwidth, e"\x20" ), "00/07" )
     ENDIF
 
 RETURN
@@ -484,7 +495,7 @@ METHOD PROCEDURE setAsDesktopWidget CLASS HTWidget
 
     /* just one widget can be the desktop widget */
     IF ::FAsDesktopWidget = NIL .AND. HTApplication():desktop = NIL
-        ::FAsDesktopWidget := .T.
+        ::FAsDesktopWidget := .t.
     ENDIF
 
 RETURN
@@ -549,7 +560,7 @@ RETURN
 */
 METHOD PROCEDURE show() CLASS HTWidget
 
-    ::FisVisible := .T.
+    ::FisVisible := .t.
 
     ::addEvent( HTPaintEvent():new() )
     ::addEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ) )

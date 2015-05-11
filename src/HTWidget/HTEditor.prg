@@ -45,7 +45,7 @@ METHOD View( cFile, nTop, nLeft, nBottom, nRight, cColor )
    LOCAL nLength
    LOCAL nVert, nHoriz
    LOCAL aArray, aTarget
-   LOCAL i, lMore := .F.
+   LOCAL i, lMore := .f.
    LOCAL nLines, nColumns := 0, nPosition := 1
    LOCAL nKey
    LOCAL nStart, nEnd, nIncrement
@@ -154,7 +154,7 @@ METHOD View( cFile, nTop, nLeft, nBottom, nRight, cColor )
 
          DO CASE
             CASE nKey == K_ESC
-               lMore := .T.
+               lMore := .t.
 
             CASE nKey == K_DOWN
                nLines := 1
@@ -256,7 +256,7 @@ FUNCTION NextLine( nHandle )
    LOCAL nBytes
    LOCAL nPos_1, nPos_2
 
-   LOCAL nBuffer := .F., nTeo_help := .F.
+   LOCAL nBuffer := .f., nTeo_help := .f.
 
    DO WHILE ( ! ( nBuffer .OR. nTeo_help ) )
 
@@ -295,7 +295,7 @@ FUNCTION PrevLine( nHandle )
    LOCAL cSubstring := ""
 //   LOCAL nCount1 := 0       // Help
    LOCAL nOffset
-   LOCAL nBytes := .F., nTeo_help := .F.
+   LOCAL nBytes := .f., nTeo_help := .f.
    LOCAL nPos_1, nPos_2
 
    IF ( FSeek( nHandle, FS_SET, FS_RELATIVE ) > 0 )

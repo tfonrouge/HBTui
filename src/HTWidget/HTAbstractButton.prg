@@ -13,10 +13,10 @@ PUBLIC:
 
     METHOD setText( text )
 
-    PROPERTY autoExclusive  INIT .F.
-    PROPERTY checkable      INIT .F.
-    PROPERTY checked        INIT .F.
-    PROPERTY down           INIT .F.
+    PROPERTY autoExclusive  INIT .f.
+    PROPERTY checkable      INIT .f.
+    PROPERTY checked        INIT .f.
+    PROPERTY down           INIT .f.
     PROPERTY shortcut
     PROPERTY text WRITE setText INIT ""
 

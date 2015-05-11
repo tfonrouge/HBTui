@@ -7,7 +7,8 @@
 
 CLASS HTMenuBar FROM HTWidget
 PROTECTED:
-
+    DATA FmenuList
+    METHOD menuList INLINE iif( ::FmenuList = NIL, ::FmenuList := {}, NIL ), ::FmenuList
 PUBLIC:
 
     CONSTRUCTOR new( parent )
@@ -43,21 +44,45 @@ RETURN Self
 /*
     addAction
 */
-METHOD addAction( ... ) CLASS HTMenuBar
+METHOD FUNCTION addAction( ... ) CLASS HTMenuBar
+    LOCAL version := 0
     LOCAL action
-    LOCAL p
+    LOCAL text
+    LOCAL receiver
+    LOCAL member
+    LOCAL retValue
 
-    SWITCH pCount()
-    CASE 1
-        p := hb_pValue( 1 )
-        IF hb_isChar( p )
-            action := HTAction():new( p, Self )
-            aAdd( ::Factions, action )
-        ELSEIF hb_isObject( p )
-            aAdd( ::Factions, p )
-        ELSE
-            ::PARAM_ERROR()
+    IF pCount() = 1
+        text := hb_pValue( 1 )
+        IF hb_isChar( text )
+            version := 1
         ENDIF
+    ENDIF
+
+    IF pCount() = 3
+        text := hb_pValue( 1 )
+        receiver := hb_pValue( 2 )
+        member := hb_pValue( 3 )
+        IF hb_isChar( text ) .AND. hb_isObject( receiver ) .AND. hb_isChar( member )
+            version := 2
+        ENDIF
+    ENDIF
+
+    IF pCount() = 1
+        action := hb_pValue( 1 )
+        IF hb_isObject( action )
+            version := 3
+        ENDIF
+    ENDIF
+
+    SWITCH version
+    CASE 1
+        action := HTAction():new( text, Self )
+        retValue := action
+        EXIT
+    CASE 2
+        action := HTAction():new( text, receiver )
+        retValue := action
         EXIT
     CASE 3
         EXIT
@@ -65,18 +90,52 @@ METHOD addAction( ... ) CLASS HTMenuBar
         ::PARAM_ERROR()
     ENDSWITCH
 
-RETURN Self
+    ::super:addAction( action )
+
+RETURN retValue
 
 /*
     addMenu
 */
-METHOD addMenu( ... ) CLASS HTMenuBar
+METHOD FUNCTION addMenu( ... ) CLASS HTMenuBar
+    LOCAL version := 0
+    LOCAL menu
+    LOCAL title
+    LOCAL retValue
 
-RETURN Self
+    IF pCount() = 1
+        menu := hb_pValue( 1 )
+        IF hb_isObject( menu ) .AND. menu:isDerivedFrom("HTMenu")
+            version := 1
+        ENDIF
+    ENDIF
+
+    IF pCount() = 1
+        title := hb_pValue( 1 )
+        IF hb_isChar( title )
+            version := 2
+        ENDIF
+    ENDIF
+
+    SWITCH version
+    CASE 1
+        retValue := menu:menuAction()
+        EXIT
+    CASE 2
+        menu := HTMenu():new( Self )
+        retValue := menu
+        EXIT
+    OTHERWISE
+        ::PARAM_ERROR()
+    ENDSWITCH
+
+    aAdd( ::menuList, menu )
+
+RETURN retValue
 
 /*
     addSeparator
 */
-METHOD addSeparator() CLASS HTMenuBar
+METHOD FUNCTION addSeparator() CLASS HTMenuBar
 
 RETURN Self

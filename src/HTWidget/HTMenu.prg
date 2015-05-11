@@ -13,6 +13,7 @@ PUBLIC:
 
     METHOD addAction()
     METHOD addMenu()
+    METHOD addSeparator()
     METHOD setTitle( title ) INLINE ::Ftitle := title
 
     PROPERTY title
@@ -32,7 +33,9 @@ METHOD new( ... ) CLASS HTMenu
         IF hb_isNil( parent ) .OR. hb_isObject( parent )
             version := 1
         ENDIF
-    ELSEIF pCount() <= 2
+    ENDIF
+
+    IF pCount() <= 2
         title := hb_pValue( 1 )
         parent := hb_pValue( 2 )
         IF hb_isChar( title ) .AND. hb_isNil( parent ) .OR. hb_isObject( parent )
@@ -67,3 +70,16 @@ RETURN
 METHOD PROCEDURE addMenu() CLASS HTMenu
 
 RETURN
+
+/*
+    addSeparator
+*/
+METHOD FUNCTION addSeparator() CLASS HTMenu
+    LOCAL action
+
+    action := HTAction():New( Self )
+    action:setSeparator( .t. )
+
+    ::addAction( action )
+
+RETURN action

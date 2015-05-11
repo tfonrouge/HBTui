@@ -6,25 +6,52 @@
 
 CLASS HTAction FROM HTObject
 PROTECTED:
+    DATA FisSeparator INIT .f.
 PUBLIC:
+
     CONSTRUCTOR new( ... )
+
+    METHOD isSeparator() INLINE ::FisSeparator
+    METHOD setSeparator( b ) INLINE ::FisSeparator := b
     METHOD setText( text ) INLINE ::Ftext := text
+
     PROPERTY text
+
 ENDCLASS
 
 /*
     new
 */
 METHOD new( ... ) CLASS HTAction
-    SWITCH pCount()
-    CASE 1  /* HTObject parent */
-        ::super:new( hb_pValue( 1 ) )
+    LOCAL version := 0
+    LOCAL parent
+    LOCAL text
+
+    IF pCount() = 1
+        parent := hb_pValue( 1 )
+        IF hb_isObject( parent ) .AND. parent:isDerivedFrom("HTObject")
+            version := 1
+        ENDIF
+    ENDIF
+
+    IF pCount() = 2
+        text := hb_pValue( 1 )
+        parent := hb_pValue( 2 )
+        IF hb_isChar( text ) .AND. hb_isObject( parent ) .AND. parent:isDerivedFrom("HTObject")
+            version := 2
+        ENDIF
+    ENDIF
+
+    SWITCH version
+    CASE 1
+        ::super:new( parent )
         EXIT
-    CASE 2 /* text, HTObject parent */
-        ::setText( hb_pValue( 1 ) )
-        ::super:new( hb_pValue( 2 ) )
+    CASE 2
+        ::setText( text )
+        ::super:new( parent )
         EXIT
     OTHERWISE
         ::PARAM_ERROR()
     ENDSWITCH
+
 RETURN Self
