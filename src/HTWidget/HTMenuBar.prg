@@ -7,8 +7,6 @@
 
 CLASS HTMenuBar FROM HTWidget
 PROTECTED:
-    DATA FmenuList
-    METHOD menuList INLINE iif( ::FmenuList = NIL, ::FmenuList := {}, NIL ), ::FmenuList
 PUBLIC:
 
     CONSTRUCTOR new( parent )
@@ -119,17 +117,17 @@ METHOD FUNCTION addMenu( ... ) CLASS HTMenuBar
 
     SWITCH version
     CASE 1
+        menu:setParent( Self )
         retValue := menu:menuAction()
         EXIT
     CASE 2
         menu := HTMenu():new( Self )
+        menu:setTitle( title )
         retValue := menu
         EXIT
     OTHERWISE
         ::PARAM_ERROR()
     ENDSWITCH
-
-    aAdd( ::menuList, menu )
 
 RETURN retValue
 

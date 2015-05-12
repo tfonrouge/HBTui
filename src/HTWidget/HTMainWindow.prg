@@ -6,7 +6,6 @@
 
 CLASS HTMainWindow FROM HTWidget
 PROTECTED:
-    DATA FmenuBar
 PUBLIC:
     METHOD menuBar()
     METHOD show()
@@ -17,9 +16,9 @@ ENDCLASS
 */
 METHOD FUNCTION menuBar() CLASS HTMainWindow
     IF ::FmenuBar = NIL
-        ::FmenuBar := HTMenuBar():new( Self )
+        HTMenuBar():new( Self )
     ENDIF
-RETURN ::FmenuBar
+RETURN ht_objectFromId( ::FmenuBar )
 
 /*
     show

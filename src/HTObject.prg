@@ -14,6 +14,8 @@ PRIVATE:
     DATA Fparent
     METHOD addChild( child )
 PROTECTED:
+    DATA FmenuBar
+    METHOD setMenuBar( menuBar )
 PUBLIC:
 
     CONSTRUCTOR new( parent )
@@ -27,7 +29,7 @@ PUBLIC:
 ENDCLASS
 
 /*
-  new
+    new
 */
 METHOD new( parent ) CLASS HTObject
     ::Fchildren := {}
@@ -37,12 +39,19 @@ METHOD new( parent ) CLASS HTObject
 RETURN Self
 
 /*
-  addChild
+    addChild
 */
 METHOD PROCEDURE addChild( child ) CLASS HTObject
     IF aScan( ::Fchildren, {|e| e == child } ) = 0
         aAdd( ::Fchildren, child )
     ENDIF
+RETURN
+
+/*
+    setMenuBar
+*/
+METHOD PROCEDURE setMenuBar( menuBar ) CLASS HTObject
+    ::FmenuBar := ht_objectId( menuBar )
 RETURN
 
 /*
@@ -65,9 +74,12 @@ RETURN NIL
 */
 METHOD PROCEDURE setParent( parent ) CLASS HTObject
     IF parent != NIL
-        IF parent:IsDerivedFrom("HTObject")
+        IF parent:isDerivedFrom("HTObject")
             ::Fparent := ht_objectId( parent )
             parent:addChild( Self )
+            IF ::isDerivedFrom("HTMenuBar")
+                parent:setMenuBar( Self )
+            ENDIF
         ELSE
             ::PARAM_ERROR()
         ENDIF

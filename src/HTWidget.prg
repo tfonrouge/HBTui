@@ -23,7 +23,6 @@ PROTECTED:
     DATA FclearA    INIT "07/15"
     DATA FclearB    INIT _DESKTOP_CHAR
     DATA FColor
-    DATA FmenuBar
     DATA FposDown
     DATA FposUp
     DATA FShadow    INIT _WIDGET_SHADOW
@@ -454,7 +453,7 @@ METHOD PROCEDURE paintEvent( event ) CLASS HTWidget
         ::displayLayout()
     ELSE
         FOR EACH child IN ::Fchildren
-            IF child:IsDerivedFrom( "HTWidget" )
+            IF child:isDerivedFrom( "HTWidget" )
                 child:paintEvent()
             ENDIF
         NEXT
@@ -466,9 +465,12 @@ RETURN
     paintMenuBar
 */
 METHOD PROCEDURE paintMenuBar() CLASS HTWidget
+    LOCAL menuBar := ht_objectFromId( ::FmenuBar )
 
-    IF ::FwindowId != NIL
-        wSelect( ::FwindowId, .f. )
+    AltD()
+
+    IF menuBar != NIL
+        wSelect( ::windowId, .f. )
         dispOutAt( 0, 0, padR( e" \xfe ", ::Fwidth, e"\x20" ), "00/07" )
     ENDIF
 

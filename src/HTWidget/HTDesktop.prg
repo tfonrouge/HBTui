@@ -7,10 +7,12 @@
 SINGLETON CLASS HTDesktop FROM HTWidget
 PROTECTED:
 PUBLIC:
+
     CONSTRUCTOR new()
+
     METHOD addEvent( event )
     METHOD paintEvent( paintEvent )
-    PROPERTY menuBar
+
 ENDCLASS
 
 /*
@@ -18,10 +20,11 @@ ENDCLASS
 */
 METHOD new() CLASS HTDesktop
 
-    ::FmenuBar := HTMenuBar():new()
-    ::FmenuBar:addMenu(e"\fe")
+    ::super:new( NIL, HT_DESKTOP )
 
-RETURN ::super:new( NIL, HT_DESKTOP )
+    HTMenuBar():new( Self ):addMenu(e" \xfe ") /* always present menu */
+
+RETURN Self
 
 /*
     addEvent
