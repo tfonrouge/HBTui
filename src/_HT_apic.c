@@ -11,7 +11,35 @@
 #include "hbapigt.h"
 
 /*
-    HB_WINDOWATMOUSEPOS
+    ht_objectFromId
+*/
+HB_FUNC( HT_OBJECTFROMID )
+{
+    void *pObjectId = hb_parptr( 1 );
+
+    if ( pObjectId ) {
+        PHB_ITEM pItem = hb_arrayFromId( NULL, pObjectId );
+        if( pItem && hb_arrayIsObject( pItem ) ) {
+            hb_itemReturnRelease( pItem );
+        }
+    }
+}
+
+/*
+    ht_objectId
+*/
+HB_FUNC( HT_OBJECTID )
+{
+    PHB_ITEM pItem = hb_param( 1, HB_IT_ARRAY );
+
+    if( pItem && hb_arrayIsObject( pItem ) )
+    {
+        hb_retptr( hb_arrayId( pItem ) );
+    }
+}
+
+/*
+    ht_windowAtMousePos
 */
 HB_FUNC( HB_WINDOWATMOUSEPOS )
 {
@@ -19,17 +47,4 @@ HB_FUNC( HB_WINDOWATMOUSEPOS )
 
     hb_mouseGetPos( &x, &y );
     hb_retni( hb_ctwGetPosWindow( x, y ) );
-}
-
-/*
-    HT_ARRAYFROMID
-*/
-HB_FUNC( HT_ARRAYFROMID )
-{
-    void *pArrayId = hb_parptr( 1 );
-
-    if ( pArrayId ) {
-        PHB_ITEM pItem = hb_arrayFromId( NULL, pArrayId );
-        hb_itemReturnRelease( pItem );
-    }
 }

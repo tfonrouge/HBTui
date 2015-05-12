@@ -4,21 +4,25 @@
 
 #include "hbtui.ch"
 
+THREAD STATIC __s_childList := {=>}
+
 /*
     HTObject
 */
 CLASS HTObject FROM HTBase
-PROTECTED:
+PRIVATE:
+    DATA Fparent
     METHOD addChild( child )
+PROTECTED:
 PUBLIC:
 
     CONSTRUCTOR new( parent )
 
     METHOD event( event )
+    METHOD parent()
     METHOD setParent( parent )
 
     PROPERTY children
-    PROPERTY parent WRITE setParent
 
 ENDCLASS
 
@@ -36,7 +40,9 @@ RETURN Self
   addChild
 */
 METHOD PROCEDURE addChild( child ) CLASS HTObject
-    aAdd( ::Fchildren, child )
+    IF aScan( ::Fchildren, {|e| e == child } ) = 0
+        aAdd( ::Fchildren, child )
+    ENDIF
 RETURN
 
 /*
@@ -46,12 +52,21 @@ METHOD FUNCTION event( event ) CLASS HTObject
 RETURN event:isAccepted()
 
 /*
+    parent
+*/
+METHOD FUNCTION parent() CLASS HTObject
+    IF ::Fparent != NIL
+        RETURN ht_objectFromId( ::Fparent )
+    ENDIF
+RETURN NIL
+
+/*
   setParent
 */
 METHOD PROCEDURE setParent( parent ) CLASS HTObject
     IF parent != NIL
         IF parent:IsDerivedFrom("HTObject")
-            ::Fparent := parent
+            ::Fparent := ht_objectId( parent )
             parent:addChild( Self )
         ELSE
             ::PARAM_ERROR()

@@ -23,6 +23,7 @@ PROTECTED:
     DATA FclearA    INIT "07/15"
     DATA FclearB    INIT _DESKTOP_CHAR
     DATA FColor
+    DATA FmenuBar
     DATA FposDown
     DATA FposUp
     DATA FShadow    INIT _WIDGET_SHADOW
@@ -173,6 +174,7 @@ RETURN
     event
 */
 METHOD FUNCTION event( event ) CLASS HTWidget
+    LOCAL parent
 
     SWITCH event:type
     CASE HT_EVENT_TYPE_CLOSE
@@ -206,8 +208,10 @@ METHOD FUNCTION event( event ) CLASS HTWidget
         RETURN ::super:event( event )
     ENDSWITCH
 
-    IF ! event:isAccepted() .AND. ::Fparent != NIL
-        RETURN ::Fparent:event( event )
+    parent := ::parent()
+
+    IF ! event:isAccepted() .AND. parent != NIL
+        RETURN parent:event( event )
     ENDIF
 
 RETURN event:accept()
@@ -238,11 +242,14 @@ RETURN
     getColor
 */
 METHOD FUNCTION getColor CLASS HTWidget
+    LOCAL parent
+
     IF ::FColor != NIL
         RETURN ::FColor
     ELSE
-        IF ::Fparent != NIL
-            RETURN ::Fparent:Color
+        parent := ::parent()
+        IF parent != NIL
+            RETURN parent:Color
         ENDIF
     ENDIF
 RETURN iif( ::FAsDesktopWidget = .t., _DESKTOP_COLOR, _WIDGET_COLOR )
@@ -251,8 +258,9 @@ RETURN iif( ::FAsDesktopWidget = .t., _DESKTOP_COLOR, _WIDGET_COLOR )
     getWindowId
 */
 METHOD FUNCTION getWindowId() CLASS HTWidget
-    IF ::FwindowId = NIL .AND. ::Fparent != NIL
-        RETURN ::parent:windowId
+    LOCAL parent := ::parent()
+    IF ::FwindowId = NIL .AND. parent != NIL
+        RETURN parent:windowId
     ENDIF
 RETURN ::FwindowId
 
@@ -437,9 +445,10 @@ METHOD PROCEDURE paintEvent( event ) CLASS HTWidget
             ENDIF
             wFormat()
             wFormat( 1, 1, 1, 1 )
-            ::paintMenuBar()
         ENDIF
     ENDIF
+
+    ::paintMenuBar()
 
     IF ::Flayout != NIL
         ::displayLayout()
