@@ -17,7 +17,7 @@ PUBLIC:
     METHOD event( event )
     METHOD setParent( parent )
 
-    PROPERTY children INIT {}
+    PROPERTY children
     PROPERTY parent WRITE setParent
 
 ENDCLASS
@@ -26,6 +26,7 @@ ENDCLASS
   new
 */
 METHOD new( parent ) CLASS HTObject
+    ::Fchildren := {}
     IF pCount() = 1
         ::setParent( parent )
     ENDIF
@@ -53,7 +54,7 @@ METHOD PROCEDURE setParent( parent ) CLASS HTObject
             ::Fparent := parent
             parent:addChild( Self )
         ELSE
-            ::Error_Parent_Is_Not_Derived_From_TXObject()
+            ::PARAM_ERROR()
         ENDIF
     ENDIF
 RETURN

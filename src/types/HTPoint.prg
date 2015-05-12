@@ -6,7 +6,7 @@
 
 #include "hbtui.ch"
 
-CREATE CLASS HTPoint
+CLASS HTPoint
 PROTECTED:
 PUBLIC:
     CONSTRUCTOR new( x, y )

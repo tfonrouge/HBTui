@@ -27,4 +27,13 @@
 #define HT_EVENT_PRIORITY_NORMAL    2
 #define HT_EVENT_PRIORITY_LOW       3
 
+
+#define HT_WIDGET                   0x00000000
+#define HT_WINDOW                   0x00000001
+#define HT_DIALOG                   hb_bitOr( 0x00000002, HT_WINDOW )
+#define HT_SHEET                    hb_bitOr( 0x00000004, HT_WINDOW )
+#define HT_POPUP                    hb_bitOr( 0x00000008, HT_WINDOW )
+#define HT_TOOPTIP                  hb_bitOr( HT_POPUP, HT_SHEET )
+#define HT_DESKTOP                  hb_bitOr( 0x00000010, HT_WINDOW )
+
 #endif

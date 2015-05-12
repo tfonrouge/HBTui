@@ -7,7 +7,7 @@
 SINGLETON CLASS HTDesktop FROM HTWidget
 PROTECTED:
 PUBLIC:
-    CONSTRUCTOR new( ... )
+    CONSTRUCTOR new()
     METHOD addEvent( event )
     METHOD paintEvent( paintEvent )
     PROPERTY menuBar
@@ -16,12 +16,12 @@ ENDCLASS
 /*
     new
 */
-METHOD new( ... ) CLASS HTDesktop
+METHOD new() CLASS HTDesktop
 
     ::FmenuBar := HTMenuBar():new()
     ::FmenuBar:addMenu(e"\fe")
 
-RETURN ::super:new( ... )
+RETURN ::super:new( NIL, HT_DESKTOP )
 
 /*
     addEvent
@@ -39,14 +39,14 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTDesktop
     wBoard() /* available physical screen */
     wMode( .f., .f., .f., .f. ) /* windows cannot be moved outside of screen ( top, left, bottom, right ) */
     wSetShadow( ::FShadow )
-    setClearA( ::FClearA )
-    setClearB( ::FClearB )
-    dispBox( 0, 0, maxRow(), maxCol(), replicate( ::FClearB, 9 ), ::color )
+    setClearA( ::FclearA )
+    setClearB( ::FclearB )
+    dispBox( 0, 0, maxRow(), maxCol(), replicate( ::FclearB, 9 ), ::color )
     setPos( 0, 0 )
     ::FisVisible := .t.
     ::setWindowId( 0 )
     ::Fwidth := maxCol() + 1
     ::Fheight := maxRow() + 1
-    ::paintMenu()
+    ::paintMenuBar()
     wBoard( 1, NIL, NIL, NIL )
 RETURN

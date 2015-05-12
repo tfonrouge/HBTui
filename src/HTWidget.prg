@@ -20,8 +20,8 @@ PROTECTED:
     DATA FBtnHidePos
     DATA FbtnMaximizePos
     DATA FbtnResizePos
-    DATA FClearA    INIT "07/15"
-    DATA FClearB    INIT _DESKTOP_CHAR
+    DATA FclearA    INIT "07/15"
+    DATA FclearB    INIT _DESKTOP_CHAR
     DATA FColor
     DATA FposDown
     DATA FposUp
@@ -34,15 +34,15 @@ PROTECTED:
     DATA FwinSysBtnResize   INIT .f.
 
     METHOD displayLayout()
-    METHOD getClearA INLINE ::FClearA
-    METHOD getClearB INLINE ::FClearB
+    METHOD getClearA INLINE ::FclearA
+    METHOD getClearB INLINE ::FclearB
     METHOD getColor
     METHOD getPos() INLINE HTPoint():new( ::x, ::y )
     METHOD getShadow INLINE ::FShadow
     METHOD getWindowId()
-    METHOD paintMenu()
-    METHOD setClearA( clearA ) INLINE ::FClearA := clearA
-    METHOD setClearB( clearB ) INLINE ::FClearB := clearB
+    METHOD paintMenuBar()
+    METHOD setClearA( clearA ) INLINE ::FclearA := clearA
+    METHOD setClearB( clearB ) INLINE ::FclearB := clearB
     METHOD SetColor( color ) INLINE ::FColor := color
     METHOD setShadow( shadow ) INLINE ::FShadow := shadow
     METHOD setWindowId( windowId )
@@ -78,6 +78,8 @@ PUBLIC:
     METHOD show()
     METHOD showEvent( showEvent )
 
+    METHOD windowType() INLINE hb_bitAnd( ::windowFlags, 0x000000ff )
+
     PROPERTY backgroundColor WRITE setBackgroundColor
     PROPERTY charWidgetClose INIT hb_BChar( 254 )
     PROPERTY charWidgetHide INIT Chr( 25 )
@@ -94,7 +96,7 @@ PUBLIC:
     PROPERTY shadow READ getShadow WRITE setShadow
     PROPERTY size
     PROPERTY width INIT 0
-    PROPERTY windowFlags
+    PROPERTY windowFlags INIT 0
     PROPERTY windowId READ getWindowId WRITE setWindowId /* only main windows have it */
     PROPERTY windowTitle INIT ""
     PROPERTY x INIT 0
@@ -435,7 +437,7 @@ METHOD PROCEDURE paintEvent( event ) CLASS HTWidget
             ENDIF
             wFormat()
             wFormat( 1, 1, 1, 1 )
-            ::paintMenu()
+            ::paintMenuBar()
         ENDIF
     ENDIF
 
@@ -452,9 +454,9 @@ METHOD PROCEDURE paintEvent( event ) CLASS HTWidget
 RETURN
 
 /*
-    paintMenu
+    paintMenuBar
 */
-METHOD PROCEDURE paintMenu() CLASS HTWidget
+METHOD PROCEDURE paintMenuBar() CLASS HTWidget
 
     IF ::FwindowId != NIL
         wSelect( ::FwindowId, .f. )

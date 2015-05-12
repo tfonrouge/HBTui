@@ -6,7 +6,7 @@
 
 #include "hbtui.ch"
 
-CREATE CLASS HTSize
+CLASS HTSize
 PROTECTED:
 PUBLIC:
     CONSTRUCTOR new( width, height )
