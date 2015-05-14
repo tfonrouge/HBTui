@@ -23,4 +23,4 @@ ENDCLASS
 METHOD new( width, height ) CLASS HTSize
     ::Fwidth := width
     ::Fheight := height
-RETURN Self
+RETURN self

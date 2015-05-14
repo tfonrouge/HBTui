@@ -18,4 +18,4 @@ ENDCLASS
     new
 */
 METHOD new() CLASS HTPaintEvent
-RETURN Self
+RETURN self

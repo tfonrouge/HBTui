@@ -41,7 +41,7 @@ METHOD new() CLASS HTApplication
         ::Fdesktop := desktop
     ENDIF
 
-RETURN Self
+RETURN self
 
 /*
     activeWindow

@@ -9,28 +9,26 @@ PROCEDURE Main()
     LOCAL win
     LOCAL menu
 
-    setMode( 40, 100 )
+    setMode( 30, 90 )
 
     app := HTApplication():new()
 
     win := HTMainWindow():new()
 
-    AltD()
-
     menu := win:menuBar():addMenu("File")
 
-    menu:addMenu("New")
-    menu:addMenu("Open")
-    menu:addMenu("Print")
+    menu:addAction("New")
+    menu:addAction("Open")
+    menu:addAction("Print")
     menu:addSeparator()
-    menu:addMenu("Close")
+    menu:addAction("Close")
     menu:addAction("Quit")
 
     menu := win:menuBar():addMenu("Edit")
 
-    menu:addMenu("Insert")
-    menu:addMenu("Delete")
-    menu:addMenu("Change")
+    menu:addAction("Insert")
+    menu:addAction("Delete")
+    menu:addAction("Change")
     menu:addSeparator()
     menu:addAction("Authorize")
 

@@ -18,4 +18,4 @@ ENDCLASS
     new
 */
 METHOD new() CLASS HTMaximizeEvent
-RETURN Self
+RETURN self

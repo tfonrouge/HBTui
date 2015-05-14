@@ -37,7 +37,7 @@ METHOD new( parent ) CLASS HTMenuBar
         ::PARAM_ERROR()
     ENDSWITCH
 
-RETURN Self
+RETURN self
 
 /*
     addAction
@@ -75,7 +75,7 @@ METHOD FUNCTION addAction( ... ) CLASS HTMenuBar
 
     SWITCH version
     CASE 1
-        action := HTAction():new( text, Self )
+        action := HTAction():new( text, self )
         retValue := action
         EXIT
     CASE 2
@@ -117,12 +117,11 @@ METHOD FUNCTION addMenu( ... ) CLASS HTMenuBar
 
     SWITCH version
     CASE 1
-        menu:setParent( Self )
+        menu:setParent( self )
         retValue := menu:menuAction()
         EXIT
     CASE 2
-        menu := HTMenu():new( Self )
-        menu:setTitle( title )
+        menu := HTMenu():new( title, self )
         retValue := menu
         EXIT
     OTHERWISE
@@ -136,4 +135,4 @@ RETURN retValue
 */
 METHOD FUNCTION addSeparator() CLASS HTMenuBar
 
-RETURN Self
+RETURN self

@@ -20,4 +20,4 @@ ENDCLASS
 */
 METHOD new( nKey ) CLASS HTKeyEvent
     ::FnKey := nKey
-RETURN Self
+RETURN self

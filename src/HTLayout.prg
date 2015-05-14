@@ -18,6 +18,6 @@ ENDCLASS
 */
 METHOD new( parent ) CLASS HTLayout
     IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
-        parent:setLayout( Self )
+        parent:setLayout( self )
     ENDIF
-RETURN Self
+RETURN self

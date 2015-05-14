@@ -29,7 +29,7 @@ METHOD new( ... ) CLASS MyMainWindow
     menu:addAction( "Delete" )
     menu:addAction( "Edit" )
 
-RETURN Self
+RETURN self
 
 PROCEDURE Main()
     LOCAL app

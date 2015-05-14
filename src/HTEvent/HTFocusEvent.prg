@@ -22,4 +22,4 @@ ENDCLASS
 METHOD new( type, reason ) CLASS HTFocusEvent
     ::Ftype := type
     ::Freason := reason
-RETURN Self
+RETURN self

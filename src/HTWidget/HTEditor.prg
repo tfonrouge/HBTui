@@ -35,7 +35,7 @@ METHOD new( cFile, nTop, nLeft, nBottom, nRight, cColor ) CLASS HTEditor
    ::nRight  := nRight
    ::cColor  := cColor
 
-RETURN Self
+RETURN self
 
 /*
    View
@@ -242,7 +242,7 @@ METHOD View( cFile, nTop, nLeft, nBottom, nRight, cColor )
 
    SET COLOR TO ( ::cColor )
 
-RETURN Self
+RETURN self
 
 /*
    NextLine

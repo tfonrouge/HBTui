@@ -51,7 +51,7 @@ PUBLIC:
 
     CONSTRUCTOR new( ... )
 
-    METHOD actions INLINE iif( ::Factions = NIL, ::Factions := {}, NIL ), ::Factions
+    METHOD actions()
     METHOD addAction( action )
     METHOD addEvent( event, priority )
 
@@ -112,6 +112,8 @@ METHOD new( ... ) CLASS HTWidget
     LOCAL parent
     LOCAL f
 
+    ::Factions := {}
+
     IF pCount() <= 2
         parent := hb_pValue( 1 )
         f := hb_pValue( 2 )
@@ -129,14 +131,21 @@ METHOD new( ... ) CLASS HTWidget
         ::PARAM_ERROR()
     ENDSWITCH
 
-RETURN Self
+RETURN self
+
+/*
+    actions
+*/
+METHOD FUNCTION actions() CLASS HTWidget
+
+RETURN ::Factions
 
 /*
     addAction
 */
 METHOD PROCEDURE addAction( action ) CLASS HTWidget
-    IF aScan( ::actions, action ) = 0
-        aAdd( ::actions, action )
+    IF aScan( ::Factions, action ) = 0
+        aAdd( ::Factions, action )
     ENDIF
 RETURN
 
@@ -144,7 +153,7 @@ RETURN
     addEvent
 */
 METHOD PROCEDURE addEvent( event, priority ) CLASS HTWidget
-    event:setWidget( Self )
+    event:setWidget( self )
     HTApplication():queueEvent( event, priority )
 RETURN
 
@@ -296,6 +305,8 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
             ::FwinSysBtnMove := .t.
         ENDIF
 
+        OutStd( ::FposDown:x, ::FposDown:y, e"\n" )
+
         IF HTApplication():activeWindow() = NIL .OR. HTApplication():activeWindow():windowId != ::windowId
             ::addEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ) )
         ENDIF
@@ -366,9 +377,11 @@ METHOD PROCEDURE move( ... ) CLASS HTWidget
         moveEvent := HTMoveEvent():new( hb_pValue( 1 ), ::pos )
         EXIT
     ENDSWITCH
+
     IF moveEvent != NIL
         ::addEvent( moveEvent )
     ENDIF
+
 RETURN
 
 /*
@@ -379,7 +392,7 @@ METHOD PROCEDURE moveEvent( moveEvent ) CLASS HTWidget
     moveEvent:accept()
 
     IF ::FwindowId != NIL
-        wSelect( ::FwindowId )
+        wSelect( ::FwindowId, .f. )
         wMove( moveEvent:pos:y, moveEvent:pos:x )
         ::Fx := wCol()
         ::Fy := wRow()
@@ -443,9 +456,11 @@ METHOD PROCEDURE paintEvent( event ) CLASS HTWidget
                 dispOutAt( ::Fheight - 1, ::FbtnResizePos[ 1 ], ::charWidgetResize, ::color )
             ENDIF
             wFormat()
-            wFormat( 1, 1, 1, 1 )
         ENDIF
     ENDIF
+
+    wFormat()
+    wFormat( 1, 1, 1, 1 )
 
     ::paintMenuBar()
 
@@ -466,12 +481,22 @@ RETURN
 */
 METHOD PROCEDURE paintMenuBar() CLASS HTWidget
     LOCAL menuBar := ht_objectFromId( ::FmenuBar )
-
-    AltD()
+    LOCAL itm
+    LOCAL row := 0
 
     IF menuBar != NIL
         wSelect( ::windowId, .f. )
-        dispOutAt( 0, 0, padR( e" \xfe ", ::Fwidth, e"\x20" ), "00/07" )
+        wFormat()
+        wFormat( 1, 0, 1, 0 )
+        dispOutAt( 0, 0, space( ::Fwidth ), "00/07" )
+        FOR EACH itm IN menuBar:children
+            IF itm:isDerivedFrom("HTMenu")
+                itm:move( 0, ++row )
+                row += len( itm:title )
+            ENDIF
+        NEXT
+        wFormat()
+        wFormat( 1, 1, 1, 1 )
     ENDIF
 
 RETURN
@@ -526,7 +551,7 @@ RETURN ::FbackgroundColor
 METHOD PROCEDURE setFocus() CLASS HTWidget
     LOCAL activeWindow := HTApplication():activeWindow()
 
-    IF ! activeWindow == Self
+    IF ! activeWindow == self
         IF activeWindow != NIL
             activeWindow:focusOutEvent( NIL )
         ENDIF
@@ -557,7 +582,7 @@ RETURN
 METHOD PROCEDURE setWindowId( windowId ) CLASS HTWidget
     IF ::FwindowId = NIL
         ::FwindowId := windowId
-        HTApplication():addTopLevelWindow( windowId, Self )
+        HTApplication():addTopLevelWindow( windowId, self )
     ENDIF
 RETURN
 

@@ -11,9 +11,10 @@ PUBLIC:
 
     CONSTRUCTOR new( ... )
 
-    METHOD addAction()
+    METHOD addAction( ... )
     METHOD addMenu()
     METHOD addSeparator()
+    METHOD menuAction()
     METHOD setTitle( title ) INLINE ::Ftitle := title
 
     PROPERTY title
@@ -55,21 +56,100 @@ METHOD new( ... ) CLASS HTMenu
         ::PARAM_ERROR()
     ENDSWITCH
 
-RETURN Self
+RETURN self
 
 /*
     addAction
 */
-METHOD PROCEDURE addAction() CLASS HTMenu
+METHOD FUNCTION addAction( ... ) CLASS HTMenu
+    LOCAL version := 0
+    LOCAL text
+    LOCAL action
+    LOCAL receiver
+    LOCAL member
+    LOCAL shortcut
 
-RETURN
+    IF pCount() = 1
+        text := hb_pValue( 1 )
+        IF hb_isChar( text )
+            version := 1
+        ENDIF
+    ENDIF
+
+    IF pCount() <= 4
+        text := hb_pValue( 1 )
+        receiver := hb_pValue( 2 )
+        member := hb_pValue( 3 )
+        shortcut := hb_pValue( 4 )
+        IF hb_isChar( text ) .AND. hb_isObject( receiver ) .AND. receiver:isDerivedFrom("HTObject") .AND. hb_isChar( member ) .AND. !empty( member ) .AND. ( hb_isNil( shortcut ) .OR. hb_isObject( shortcut ) .AND. shortcut:isDerivedFrom("HTKeySequence") )
+            version := 3
+        ENDIF
+    ENDIF
+
+    IF pCount() = 1
+        action := hb_pValue( 1 )
+        IF hb_isObject( action ) .AND. action:isDerivedFrom("HTAction")
+            version := 5
+        ENDIF
+    ENDIF
+
+    SWITCH version
+    CASE 1
+        action := HTAction():New( text, self )
+        EXIT
+    CASE 3
+        action := HTAction():New( text, self )
+        IF shortcut != NIL
+            action:setShortcut( shortcut )
+        ENDIF
+        EXIT
+    CASE 5
+        EXIT
+    OTHERWISE
+        ::PARAM_ERROR()
+    ENDSWITCH
+
+    ::super:addAction( action )
+
+RETURN action
 
 /*
     addMenu
 */
-METHOD PROCEDURE addMenu() CLASS HTMenu
+METHOD FUNCTION addMenu() CLASS HTMenu
+    LOCAL version := 0
+    LOCAL menu
+    LOCAL retValue
+    LOCAL title
 
-RETURN
+    IF pCount() = 1
+        menu := hb_pValue( 1 )
+        IF hb_isObject( menu ) .AND. menu:isDerivedFrom("HTMenu")
+            version := 1
+            menu:setParent( self )
+            retValue := menu:menuAction()
+        ENDIF
+    ENDIF
+
+    IF pCount() = 1
+        title := hb_pValue( 1 )
+        IF hb_isChar( title )
+            version := 2
+            menu := HTMenu():New( title, self )
+            retValue := menu
+        ENDIF
+    ENDIF
+
+    SWITCH version
+    CASE 1
+        EXIT
+    CASE 2
+        EXIT
+    OTHERWISE
+        ::PARAM_ERROR()
+    ENDSWITCH
+
+RETURN retValue
 
 /*
     addSeparator
@@ -77,9 +157,16 @@ RETURN
 METHOD FUNCTION addSeparator() CLASS HTMenu
     LOCAL action
 
-    action := HTAction():New( Self )
+    action := HTAction():New( self )
     action:setSeparator( .t. )
 
     ::addAction( action )
 
+RETURN action
+
+/*
+    menuAction
+*/
+METHOD FUNCTION menuAction() CLASS HTMenu
+    LOCAL action := NIL
 RETURN action

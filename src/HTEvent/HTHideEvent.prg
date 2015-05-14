@@ -18,4 +18,4 @@ ENDCLASS
     new
 */
 METHOD new() CLASS HTHideEvent
-RETURN Self
+RETURN self

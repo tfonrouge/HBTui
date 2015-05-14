@@ -22,4 +22,4 @@ ENDCLASS
 METHOD new( size, oldSize ) CLASS HTResizeEvent
     ::Fsize := size
     ::FoldSize := oldSize
-RETURN Self
+RETURN self

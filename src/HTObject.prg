@@ -36,7 +36,7 @@ METHOD new( parent ) CLASS HTObject
     IF pCount() = 1
         ::setParent( parent )
     ENDIF
-RETURN Self
+RETURN self
 
 /*
     addChild
@@ -76,9 +76,9 @@ METHOD PROCEDURE setParent( parent ) CLASS HTObject
     IF parent != NIL
         IF parent:isDerivedFrom("HTObject")
             ::Fparent := ht_objectId( parent )
-            parent:addChild( Self )
+            parent:addChild( self )
             IF ::isDerivedFrom("HTMenuBar")
-                parent:setMenuBar( Self )
+                parent:setMenuBar( self )
             ENDIF
         ELSE
             ::PARAM_ERROR()

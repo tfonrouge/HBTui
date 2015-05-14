@@ -22,4 +22,4 @@ ENDCLASS
 METHOD new( pos, oldPos ) CLASS HTMoveEvent
     ::Fpos := pos
     ::FoldPos := oldPos
-RETURN Self
+RETURN self

@@ -19,12 +19,17 @@ ENDCLASS
     new
 */
 METHOD new() CLASS HTDesktop
+    LOCAL menu
 
     ::super:new( NIL, HT_DESKTOP )
 
-    HTMenuBar():new( Self ):addMenu(e" \xfe ") /* always present menu */
+    menu := HTMenuBar():new( self ):addMenu(e"\xfe") /* always present menu */
 
-RETURN Self
+    menu:addAction("About")
+    menu:addSeparator()
+    menu:addAction("Quit")
+
+RETURN self
 
 /*
     addEvent

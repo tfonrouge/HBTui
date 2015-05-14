@@ -23,7 +23,7 @@ METHOD new( alignment ) CLASS HTLayoutItem
         alignment := 0
     ENDIF
     ::setAlignment( alignment )
-RETURN Self
+RETURN self
 
 /*
     setAlignment

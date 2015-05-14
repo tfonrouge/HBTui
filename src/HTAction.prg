@@ -13,8 +13,10 @@ PUBLIC:
 
     METHOD isSeparator() INLINE ::FisSeparator
     METHOD setSeparator( b ) INLINE ::FisSeparator := b
+    METHOD setShortcut( shortcut )
     METHOD setText( text ) INLINE ::Ftext := text
 
+    PROPERTY shortcut
     PROPERTY text
 
 ENDCLASS
@@ -54,4 +56,11 @@ METHOD new( ... ) CLASS HTAction
         ::PARAM_ERROR()
     ENDSWITCH
 
-RETURN Self
+RETURN self
+
+/*
+    setShortcut
+*/
+METHOD PROCEDURE setShortcut( shortcut ) CLASS HTAction
+    ::Fshortcut := shortcut
+RETURN

@@ -23,4 +23,4 @@ ENDCLASS
 METHOD new( x, y ) CLASS HTPoint
     ::Fx := x
     ::Fy := y
-RETURN Self
+RETURN self

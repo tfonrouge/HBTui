@@ -35,7 +35,7 @@ METHOD new( ... ) CLASS HTLineEdit
         ::super:new()
     ENDIF
 
-RETURN Self
+RETURN self
 
 /*
     paintEvent

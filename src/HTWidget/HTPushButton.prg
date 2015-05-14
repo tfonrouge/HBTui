@@ -33,4 +33,4 @@ METHOD new( ... ) CLASS HTPushButton
         ::super:new()
     ENDIF
 
-RETURN Self
+RETURN self

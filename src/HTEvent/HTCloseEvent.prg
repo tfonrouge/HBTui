@@ -18,4 +18,4 @@ ENDCLASS
     new
 */
 METHOD new() CLASS HTCloseEvent
-RETURN Self
+RETURN self

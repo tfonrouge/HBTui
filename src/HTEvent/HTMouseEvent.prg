@@ -28,4 +28,4 @@ METHOD new( nKey ) CLASS HTMouseEvent
     ::FmouseAbsRow := mRow( .t. )
     ::FmouseCol := mCol()
     ::FmouseRow := mRow()
-RETURN Self
+RETURN self
