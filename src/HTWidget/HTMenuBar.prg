@@ -15,6 +15,8 @@ PUBLIC:
     METHOD addMenu( ... )
     METHOD addSeparator()
 
+    METHOD paintEvent( event )
+
 ENDCLASS
 
 /*
@@ -136,3 +138,27 @@ RETURN retValue
 METHOD FUNCTION addSeparator() CLASS HTMenuBar
 
 RETURN self
+
+/*
+    paintEvent
+*/
+METHOD PROCEDURE paintEvent( event ) CLASS HTMenuBar
+    LOCAL itm
+    LOCAL row := 0
+
+    IF menuBar != NIL
+        wSelect( ::windowId, .f. )
+        wFormat()
+        wFormat( 1, 0, 1, 0 )
+        dispOutAt( 0, 0, space( ::Fwidth ), "00/07" )
+        FOR EACH itm IN menuBar:children
+            IF itm:isDerivedFrom("HTMenu")
+                itm:move( 0, ++row )
+                row += len( itm:title )
+            ENDIF
+        NEXT
+        wFormat()
+        wFormat( 1, 1, 1, 1 )
+    ENDIF
+
+RETURN

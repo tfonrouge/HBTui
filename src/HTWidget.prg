@@ -40,7 +40,7 @@ PROTECTED:
     METHOD getPos() INLINE HTPoint():new( ::x, ::y )
     METHOD getShadow INLINE ::FShadow
     METHOD getWindowId()
-    METHOD paintMenuBar()
+    METHOD paintChildren()
     METHOD setClearA( clearA ) INLINE ::FclearA := clearA
     METHOD setClearB( clearB ) INLINE ::FclearB := clearB
     METHOD SetColor( color ) INLINE ::FColor := color
@@ -64,6 +64,7 @@ PUBLIC:
     METHOD move( ... )
     METHOD moveEvent( moveEvent )
     METHOD paintEvent( event )
+    METHOD repaint()
     METHOD resize( ... )
     METHOD resizeEvent( event )
 
@@ -401,6 +402,28 @@ METHOD PROCEDURE moveEvent( moveEvent ) CLASS HTWidget
 RETURN
 
 /*
+    paintChildren
+*/
+METHOD PROCEDURE paintChildren() CLASS HTWidget
+    LOCAL menuBar := ht_objectFromId( ::FmenuBar )
+
+    IF menuBar != NIL
+        menuBar:repaint()
+    ENDIF
+
+    IF ::Flayout != NIL
+        ::displayLayout()
+    ELSE
+        FOR EACH child IN ::Fchildren
+            IF child:isDerivedFrom( "HTWidget" )
+                child:repaint()
+            ENDIF
+        NEXT
+    ENDIF
+
+RETURN
+
+/*
     paintEvent
 */
 METHOD PROCEDURE paintEvent( event ) CLASS HTWidget
@@ -462,43 +485,15 @@ METHOD PROCEDURE paintEvent( event ) CLASS HTWidget
     wFormat()
     wFormat( 1, 1, 1, 1 )
 
-    ::paintMenuBar()
-
-    IF ::Flayout != NIL
-        ::displayLayout()
-    ELSE
-        FOR EACH child IN ::Fchildren
-            IF child:isDerivedFrom( "HTWidget" )
-                child:paintEvent()
-            ENDIF
-        NEXT
-    ENDIF
+    ::paintChildren()
 
 RETURN
 
 /*
-    paintMenuBar
+    repaint
 */
-METHOD PROCEDURE paintMenuBar() CLASS HTWidget
-    LOCAL menuBar := ht_objectFromId( ::FmenuBar )
-    LOCAL itm
-    LOCAL row := 0
-
-    IF menuBar != NIL
-        wSelect( ::windowId, .f. )
-        wFormat()
-        wFormat( 1, 0, 1, 0 )
-        dispOutAt( 0, 0, space( ::Fwidth ), "00/07" )
-        FOR EACH itm IN menuBar:children
-            IF itm:isDerivedFrom("HTMenu")
-                itm:move( 0, ++row )
-                row += len( itm:title )
-            ENDIF
-        NEXT
-        wFormat()
-        wFormat( 1, 1, 1, 1 )
-    ENDIF
-
+METHOD PROCEDURE repaint() CLASS HTWidget
+    ::paintEvent()
 RETURN
 
 /*

@@ -55,6 +55,6 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTDesktop
     ::setWindowId( 0 )
     ::Fwidth := maxCol() + 1
     ::Fheight := maxRow() + 1
-    ::paintMenuBar()
+    ::paintChildren()
     wBoard( 1, NIL, NIL, NIL )
 RETURN
