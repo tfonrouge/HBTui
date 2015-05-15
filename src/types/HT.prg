@@ -7,6 +7,6 @@
 #include "hbtui.ch"
 
 SINGLETON CLASS HT
+PROTECTED:
 PUBLIC:
-    PROPERTY classH_htPoint()
 ENDCLASS
