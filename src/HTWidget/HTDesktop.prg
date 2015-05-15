@@ -46,7 +46,7 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTDesktop
     paintEvent:accept()
     wBoard() /* available physical screen */
     wMode( .f., .f., .f., .f. ) /* windows cannot be moved outside of screen ( top, left, bottom, right ) */
-    wSetShadow( ::FShadow )
+    wSetShadow( ::Fshadow )
     setClearA( ::FclearA )
     setClearB( ::FclearB )
     dispBox( 0, 0, maxRow(), maxCol(), replicate( ::FclearB, 9 ), ::color )

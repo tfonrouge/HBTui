@@ -15,6 +15,7 @@ PUBLIC:
     METHOD addMenu()
     METHOD addSeparator()
     METHOD menuAction()
+    METHOD paintEvent( event )
     METHOD setTitle( title ) INLINE ::Ftitle := title
 
     PROPERTY title
@@ -170,3 +171,11 @@ RETURN action
 METHOD FUNCTION menuAction() CLASS HTMenu
     LOCAL action := NIL
 RETURN action
+
+/*
+    paintEvent
+*/
+METHOD PROCEDURE paintEvent( event ) CLASS HTMenu
+    HB_SYMBOL_UNUSED( event )
+    dispOutAt( ::x, ::y, ::title, "00/07" )
+RETURN

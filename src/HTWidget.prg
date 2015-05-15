@@ -25,7 +25,7 @@ PROTECTED:
     DATA FColor
     DATA FposDown
     DATA FposUp
-    DATA FShadow    INIT _WIDGET_SHADOW
+    DATA Fshadow    INIT _WIDGET_SHADOW
     DATA FwindowId  /* CT Handle */
     DATA FwinSysBtnMove     INIT .f.
     DATA FwinSysBtnClose    INIT .f.
@@ -38,13 +38,13 @@ PROTECTED:
     METHOD getClearB INLINE ::FclearB
     METHOD getColor
     METHOD getPos() INLINE HTPoint():new( ::x, ::y )
-    METHOD getShadow INLINE ::FShadow
+    METHOD getShadow INLINE ::Fshadow
     METHOD getWindowId()
     METHOD paintChildren()
     METHOD setClearA( clearA ) INLINE ::FclearA := clearA
     METHOD setClearB( clearB ) INLINE ::FclearB := clearB
     METHOD SetColor( color ) INLINE ::FColor := color
-    METHOD setShadow( shadow ) INLINE ::FShadow := shadow
+    METHOD setShadow( shadow ) INLINE ::Fshadow := shadow
     METHOD setWindowId( windowId )
 
 PUBLIC:
@@ -284,7 +284,6 @@ RETURN
     mouseEvent
 */
 METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
-    LOCAL pos
     LOCAL x
     LOCAL y
 
@@ -350,10 +349,9 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
 
             IF MLeftDown()
                 IF ::FwinSysBtnMove
-                    pos := HTPoint():new( x, y )
-                    ::addEvent( HTMoveEvent():new( pos, ::pos ) )
-                ENDIF
-                IF ::FwinSysBtnResize
+                    AltD()
+                    ::move( HTPoint():new( x, y ) )
+                ELSEIF ::FwinSysBtnResize
                     ::addEvent( HTResizeEvent():new() )
                 ENDIF
             ENDIF
@@ -368,19 +366,36 @@ RETURN
     move
 */
 METHOD PROCEDURE move( ... ) CLASS HTWidget
-    LOCAL moveEvent
+    LOCAL version := 0
+    LOCAL x
+    LOCAL y
+    LOCAL newPos
+    LOCAL oldPos
 
-    SWITCH pCount()
-    CASE 2
-        moveEvent := HTMoveEvent():new( HTPoint():new( hb_pValue( 1 ), hb_pValue( 2 ) ), ::pos )
-        EXIT
-    CASE 1
-        moveEvent := HTMoveEvent():new( hb_pValue( 1 ), ::pos )
-        EXIT
-    ENDSWITCH
+    oldPos := HTPoint():new( ::x, ::y )
 
-    IF moveEvent != NIL
-        ::addEvent( moveEvent )
+    IF pCount() = 1
+        newPos := hb_pValue( 1 )
+        AltD()
+        IF hb_isObject( newPos ) .AND. newPos:className == "HTPoint"
+            version := 1
+        ENDIF
+    ENDIF
+
+    IF pCount() = 2
+        x := hb_pValue( 1 )
+        y := hb_pValue( 2 )
+        IF hb_isNumeric( x ) .AND. hb_isNumeric( y )
+            version := 2
+            newPos := HTPoint():new( x, y )
+            ::Fx := newPos:x
+            ::Fy := newPos:y
+        ENDIF
+    ENDIF
+
+    IF version > 0
+        ::repaint()
+        ::addEvent( HTMoveEvent():new( newPos, oldPos ) )
     ENDIF
 
 RETURN
@@ -406,6 +421,7 @@ RETURN
 */
 METHOD PROCEDURE paintChildren() CLASS HTWidget
     LOCAL menuBar := ht_objectFromId( ::FmenuBar )
+    LOCAL child
 
     IF menuBar != NIL
         menuBar:repaint()
@@ -415,7 +431,7 @@ METHOD PROCEDURE paintChildren() CLASS HTWidget
         ::displayLayout()
     ELSE
         FOR EACH child IN ::Fchildren
-            IF child:isDerivedFrom( "HTWidget" )
+            IF ! menuBar == child .AND. child:isDerivedFrom( "HTWidget" )
                 child:repaint()
             ENDIF
         NEXT
@@ -428,7 +444,6 @@ RETURN
 */
 METHOD PROCEDURE paintEvent( event ) CLASS HTWidget
     LOCAL n
-    LOCAL child
 
     HB_SYMBOL_UNUSED( event )
 
@@ -443,34 +458,32 @@ METHOD PROCEDURE paintEvent( event ) CLASS HTWidget
             IF ::Fy = NIL
                 ::Fy := maxCol() / 2 - ::Fwidth / 2
             ENDIF
-            ::setWindowId( wOpen( ::Fx, ::Fy, ::Fx + ::Fheight, ::Fy + ::Fwidth, .t. ) )
-            wFormat()
+            ::setWindowId( wOpen( ::Fx, ::Fy, ::Fx + ::Fheight - 1, ::Fy + ::Fwidth - 1, .t. ) )
             setClearB( _WIDGET_CHAR )
             wBox( NIL, ::color )
-            n := 0
+            wFormat()
+            n := 1
             IF ::charWidgetClose = NIL
                 ::FbtnClosePos := NIL
             ELSE
                 ::FbtnClosePos := { n, n += len( ::charWidgetClose ) - 1 }
-                dispOutAt( -1, n, ::charWidgetClose, ::color )
+                dispOutAt( 0, n, ::charWidgetClose, ::color )
                 ++n
             ENDIF
             IF ::charWidgetHide = NIL
                 ::FBtnHidePos := NIL
             ELSE
                 ::FBtnHidePos := { n, n += len( ::charWidgetHide ) - 1 }
-                dispOutAt( -1, n, ::charWidgetHide, ::color )
+                dispOutAt( 0, n, ::charWidgetHide, ::color )
                 ++n
             ENDIF
             IF ::charWidgetMaximize = NIL
                 ::FbtnMaximizePos := NIL
             ELSE
                 ::FbtnMaximizePos := { n, n += len( ::charWidgetMaximize ) - 1 }
-                dispOutAt( -1, n, ::charWidgetMaximize, ::color )
+                dispOutAt( 0, n, ::charWidgetMaximize, ::color )
                 ++n
             ENDIF
-            wFormat()
-            wFormat( 1, 1, 0, 0 )
             IF ::charWidgetResize = NIL
                 ::FbtnResizePos := NIL
             ELSE
@@ -486,6 +499,8 @@ METHOD PROCEDURE paintEvent( event ) CLASS HTWidget
     wFormat( 1, 1, 1, 1 )
 
     ::paintChildren()
+
+    setBlink( .f. )
 
 RETURN
 
