@@ -22,7 +22,7 @@ PROTECTED:
     DATA FbtnResizePos
     DATA FclearA    INIT "07/15"
     DATA FclearB    INIT _DESKTOP_CHAR
-    DATA FColor
+    DATA Fcolor
     DATA FposDown
     DATA FposUp
     DATA Fshadow    INIT _WIDGET_SHADOW
@@ -44,7 +44,7 @@ PROTECTED:
     METHOD paintTopLevelWindow()
     METHOD setClearA( clearA ) INLINE ::FclearA := clearA
     METHOD setClearB( clearB ) INLINE ::FclearB := clearB
-    METHOD SetColor( color ) INLINE ::FColor := color
+    METHOD SetColor( color ) INLINE ::Fcolor := color
     METHOD setShadow( shadow ) INLINE ::Fshadow := shadow
     METHOD setWindowId( windowId )
 
@@ -254,8 +254,8 @@ RETURN
 METHOD FUNCTION getColor CLASS HTWidget
     LOCAL parent
 
-    IF ::FColor != NIL
-        RETURN ::FColor
+    IF ::Fcolor != NIL
+        RETURN ::Fcolor
     ELSE
         parent := ::parent()
         IF parent != NIL
@@ -400,6 +400,8 @@ METHOD PROCEDURE move( ... ) CLASS HTWidget
             wSelect( ::FwindowId, .f. )
             wMove( newPos:y, newPos:x )
         ELSE
+            ::Fx := newPos:x
+            ::Fy := newPos:y
             ::repaint()
         ENDIF
         ::addEvent( HTMoveEvent():new( newPos, oldPos ) )
