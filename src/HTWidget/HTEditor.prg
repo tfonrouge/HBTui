@@ -50,7 +50,7 @@ METHOD View( cFile, nTop, nLeft, nBottom, nRight, cColor )
    LOCAL nKey
    LOCAL nStart, nEnd, nIncrement
 
-   IF Empty( cFile )
+   IF empty( cFile )
       IF ( nHandle := FCREATE( ::cFile, FC_NORMAL ) ) = -1
          ALERT( "File cannot be created:" + STR( FERROR() ) )
          RETURN 0

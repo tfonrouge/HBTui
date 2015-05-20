@@ -42,7 +42,11 @@ RETURN
     paintEvent
 */
 METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTDesktop
+
     ctWInit()
+
+    wSelect( 0 )
+
     paintEvent:accept()
     wBoard() /* available physical screen */
     wMode( .f., .f., .f., .f. ) /* windows cannot be moved outside of screen ( top, left, bottom, right ) */
@@ -55,6 +59,9 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTDesktop
     ::setWindowId( 0 )
     ::Fwidth := maxCol() + 1
     ::Fheight := maxRow() + 1
+
+    wBoard( NIL, NIL, NIL, NIL )
+
     ::paintChildren()
-    wBoard( 1, NIL, NIL, NIL )
+
 RETURN

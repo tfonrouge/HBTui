@@ -139,7 +139,7 @@ METHOD PROCEDURE getEvent() CLASS HTApplication
     nKey := Inkey(  )
 
     IF nKey != 0
-        IF !Empty( window := ::getTopLevelWindowFromWindowId( hb_windowAtMousePos() ) )
+        IF !empty( window := ::getTopLevelWindowFromWindowId( hb_windowAtMousePos() ) )
             IF nKey >= K_MINMOUSE .AND. nKey <= K_MAXMOUSE
                 window:addEvent( HTMouseEvent():new( nKey ) )
             ELSE
