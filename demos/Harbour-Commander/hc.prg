@@ -21,6 +21,10 @@ FUNCTION Main()
    LOCAL nCount, nMrow, nMcol
    LOCAL xReturn
    LOCAL lMode := .T.
+   LOCAL nFError := { "Successful", "File not found", "Path not found", "Too many files open", "Access denied", ;
+                      "Invalid handle", "Insufficient memory", "Invalid drive specified", ;
+                      "Attempted to write to a write-protected disk", "Drive not ready", "Data CRC error", ;
+                      "Write fault", "Read fault", "Sharing violation", "Lock Violation" }
 
    SETMODE( 31, 100 )
    Hb_GtInfo( HB_GTI_WINTITLE, "Harbour Commander" )
@@ -33,7 +37,7 @@ FUNCTION Main()
 
    oTBrowse := TBrowseNew( nTop, nLeft, nBottom, nRight )
 
-   DISPBOX( 0, 50, 28, 99, B_DOUBLE + CHR( 255 ), "W+/B" )
+   DISPBOX( nTop -1, nLeft -1, nBottom +2, nRight +1, B_DOUBLE + CHR( 255 ), "W+/B" )
 
    StatusBar()
 
@@ -77,9 +81,9 @@ FUNCTION Main()
          @ 29, 0 SAY cDrive + ":\" COLOR "W/N"
 
          @ 27, 51      Say EVAL( oTBrowse:getColumn( 1 ):block )
-         @ 27, 51 + 13 Say EVAL( oTBrowse:getColumn( 2 ):block )
-         @ 27, 51 + 23 Say EVAL( oTBrowse:getColumn( 3 ):block )
-         @ 27, 51 + 32 Say EVAL( oTBrowse:getColumn( 4 ):block )
+         @ 27, 51 + 21 Say EVAL( oTBrowse:getColumn( 2 ):block )
+         @ 27, 51 + 31 Say EVAL( oTBrowse:getColumn( 3 ):block )
+         @ 27, 51 + 40 Say EVAL( oTBrowse:getColumn( 4 ):block )
 
          nKey := INKEY( 0, 254 + HB_INKEY_GTEVENT )
 
@@ -172,6 +176,24 @@ FUNCTION Main()
                CASE ( nKey == K_F6 .AND. !( CHR( 17 ) $ EVAL( ( oTBrowse:getColumn( 2 ) ):block ) ) )
 
                CASE ( nKey == K_F8 .AND. !( CHR( 17 ) $ EVAL( ( oTBrowse:getColumn( 2 ) ):block ) ) )
+
+                  IF ALERT( "Delete;" + "Do you wish to delete;" + ;
+                            ";" + ;
+                            LastBlockValue( oTBrowse ), { "Delete", "Cancel" }, "N/W" ) == 1
+
+                     IF FERASE( LastBlockValue( oTBrowse ) ) == -1
+
+                        IF FERROR() != 0
+
+                           ALERT( "File erase error: " + nFError[ FERROR() ] )
+
+                        ENDIF
+
+                     ENDIF
+
+                     lMode := .F.
+
+                  ENDIF
 
                CASE ( nKey == K_F9 )
 
@@ -440,4 +462,3 @@ FUNCTION StatusBar()
    HB_DISPOUTAT( MAXROW(), 92, "Quit    ", "N/BG" )
 
 RETURN ( NIL )
-
