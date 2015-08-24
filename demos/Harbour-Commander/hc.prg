@@ -191,7 +191,7 @@ FUNCTION Main()
 
                      ENDIF
 
-                     lMode := .F.
+                     lMode := .T.
 
                   ENDIF
 
