@@ -21,7 +21,7 @@ FUNCTION Main()
    LOCAL nCount, nMrow, nMcol
    LOCAL xReturn
    LOCAL lMode := .T.
-   LOCAL nFError := { "Successful", "File not found", "Path not found", "Too many files open", "Access denied", ;
+   LOCAL aFError := { "Successful", "File not found", "Path not found", "Too many files open", "Access denied", ;
                       "Invalid handle", "Insufficient memory", "Invalid drive specified", ;
                       "Attempted to write to a write-protected disk", "Drive not ready", "Data CRC error", ;
                       "Write fault", "Read fault", "Sharing violation", "Lock Violation" }
@@ -185,7 +185,7 @@ FUNCTION Main()
 
                         IF FERROR() != 0
 
-                           ALERT( "File erase error: " + nFError[ FERROR() ] )
+                           ALERT( "File erase error: " + aFError[ FERROR() ] )
 
                         ENDIF
 
