@@ -1,6 +1,10 @@
 /*
  *
  */
+
+#include "hbtui.ch"
+#include "inkey.ch"
+
 CLASS HTTextEdit FROM HTWidget
 
    DATA nTop
@@ -15,26 +19,28 @@ CLASS HTTextEdit FROM HTWidget
    DATA nNumRows
    DATA nNumCols
 
+   //DATA mode         INIT .F.
+
    METHOD New( nTop, nLeft, nBottom, nRight ) CONSTRUCTOR
 
    METHOD up()
    METHOD down()
    METHOD right()
    METHOD left()
-   METHOD pageUp
-   METHOD pageDown
-   METHOD home
-   METHOD end
-   METHOD goTop
-   METHOD goBottom
-   METHOD wordRight
-   METHOD wordLeft
-   METHOD pageHome
-   METHOD pageEnd
+   METHOD pageUp()
+   METHOD pageDown()
+   METHOD home()
+   METHOD end()
+   METHOD pageHome()
+   METHOD pageEnd()
+   METHOD wordRight()
+   METHOD wordLeft()
 
-   METHOD moveCursor
+   METHOD moveCursor( nKey )
 
-   METHOD refresh
+   METHOD refresh()
+   METHOD fileOpen()
+
 
 ENDCLASS
 /*
@@ -54,29 +60,40 @@ RETURN ( Self )
 
 /*
    up()
-   Moves the cursor up one row
+   Moves the cursor one line up.
+   K_UP
 */
 METHOD up() CLASS HTTextEdit
 
    ::nRow--
 
-   SETPOS( ::nTop + ::nRow - ::nRowWin, ::nLeft + ::nCol - ::nColWin )
+   IF ::nRowWin < ::nTop + 1
+      ::refresh()
+   ELSE
+      SETPOS( ::nTop + ::nRow - ::nRowWin, ::nLeft + ::nCol - ::nColWin )
+   ENDIF
 
 RETURN ( Self )
 /*
    down()
-   Moves the cursor down one row
+   Moves the cursor one line down.
+   K_DOWN
 */
 METHOD down() CLASS HTTextEdit
 
    ::nRow++
 
-   SETPOS( ::nTop + ::nRow - ::nRowWin, ::nLeft + ::nCol - ::nColWin )
+   IF ::nColWin > ( ::nBottom - ::nTop + 1 )
+      ::refresh()
+   ELSE
+      SETPOS( ::nTop + ::nRow - ::nRowWin, ::nLeft + ::nCol - ::nColWin )
+   ENDIF
 
 RETURN ( Self )
 /*
    right()
-   Moves the cursor right one column
+   Moves the cursor one character to the right.
+   K_RIGHT
 */
 METHOD right() CLASS HTTextEdit
 
@@ -87,13 +104,14 @@ METHOD right() CLASS HTTextEdit
 RETURN ( Self )
 /*
    left()
-   Moves the cursor left one column
+   Moves the cursor one character to the left.
+   K_LEFT
 */
 METHOD left() CLASS HTTextEdit
 
    ::nCol--
 
-   IF ::nColWin <= 1
+   IF ::nColWin < ::nLeft + 1
       ::refresh()
    ELSE
       SETPOS( ::nTop + ::nRow - ::nRowWin, ::nLeft + ::nCol - ::nColWin )
@@ -102,7 +120,8 @@ METHOD left() CLASS HTTextEdit
 RETURN ( Self )
 /*
    pageUp()
-   Repositions the text source upward
+   Moves the cursor one page up.
+   K_PGUP
 */
 METHOD pageUp() CLASS HTTextEdit
 
@@ -110,10 +129,11 @@ METHOD pageUp() CLASS HTTextEdit
 
    ::refresh()
 
-RETURN( Self )
+RETURN ( Self )
 /*
    pageDown()
-   Repositions the text source downward
+   Moves the cursor one page down.
+   K_PGDN
 */
 METHOD pageDown() CLASS HTTextEdit
 
@@ -121,10 +141,11 @@ METHOD pageDown() CLASS HTTextEdit
 
 	::refresh()
 
-RETURN( Self )
+RETURN ( Self )
 /*
    home()
-   Moves the cursor to the leftmost visible text column
+   Moves the cursor to the beginning of the line.
+   K_HOME
 */
 METHOD home() CLASS HTTextEdit
 
@@ -134,10 +155,11 @@ METHOD home() CLASS HTTextEdit
 
    ::refresh()
 
-RETURN( Self )
+RETURN ( Self )
 /*
    end()
-   Moves the cursor to the rightmost visible text column
+   Moves the cursor to the end of the line.
+   K_END
 */
 METHOD end() CLASS HTTextEdit
 
@@ -147,57 +169,49 @@ METHOD end() CLASS HTTextEdit
 
    ::refresh()
 
-RETURN( Self )
-/*
-   goTop
-   Repositions the text source to the top of file
-*/
-METHOD goTop() CLASS HTTextEdit
-
-   ::nRow := 1
-   ::nCol := 1
-
-   SETPOS( ::nRow, ::nCol )
-
-   ::refresh()
-
-RETURN( Self )
-/*
-   goBottom()
-   Repositions the text source to the bottom of file
-*/
-METHOD goBottom() CLASS HTTextEdit
-
-RETURN( Self )
-/*
-   wordRight()
-   Move by word to right
-*/
-METHOD wordRight() CLASS HTTextEdit
-
-RETURN( Self )
-/*
-   wordLeft()
-   Move by word to left
-*/
-METHOD wordLeft() CLASS HTTextEdit
-
-RETURN( Self )
+RETURN ( Self )
 /*
    pageHome()
-   Moves the cursor to the beginning of the file
+   Moves the cursor to the beginning of the text.
+   K_CTRL_HOME
 */
 METHOD pageHome() CLASS HTTextEdit
 
-RETURN( Self )
+   ::nCol := 1
+
+   SETPOS( ::nRowWin, ::nCol )
+
+   ::refresh()
+
+RETURN ( Self )
 /*
    pageEnd()
-   Moves the cursor at the end of the file
+   Moves the cursor to the end of the text.
+   K_CTRL_END
 */
 METHOD pageEnd() CLASS HTTextEdit
 
-RETURN( Self )
+   ::nCol := 1
 
+   SETPOS( ::nRowWin + ::nNumRows - 1, -1 )
+
+RETURN ( Self )
+/*
+   wordRight()
+   Moves the cursor one word to the right.
+   K_CTRL_RIGHT
+*/
+METHOD wordRight() CLASS HTTextEdit
+
+RETURN ( Self )
+/*
+   wordLeft()
+   Moves the cursor one word to the left.
+   K_CTRL_LEFT
+*/
+METHOD wordLeft() CLASS HTTextEdit
+
+RETURN ( Self )
 /*
    moveCursor()
 */
@@ -228,11 +242,11 @@ METHOD moveCursor( nKey )
       CASE nKey == K_END
          ::end()
 
-      CASE nKey == K_CTRL_PGUP
-         ::goTop()
+      CASE nKey == K_CTRL_HOME
+         ::pageHome()
 
-      CASE nKey == K_CTRL_PGDN
-         ::goBottom()
+      CASE nKey == K_CTRL_END
+         ::pageEnd()
 
       CASE nKey == K_CTRL_RIGHT
          ::wordRight()
@@ -240,19 +254,13 @@ METHOD moveCursor( nKey )
       CASE nKey == K_CTRL_LEFT
          ::wordLeft()
 
-      CASE nKey == K_CTRL_HOME
-         ::pageHome()
+      OTHERWISE
 
-      CASE nKey == K_CTRL_END
-	      ::pageEnd()
-
-       OTHERWISE
-
-	       RETURN( .F. )
+	      RETURN( .F. )
 
     ENDCASE
 
-RETURN( .T. )
+RETURN ( .T. )
 /*
    refresh()
    Causes all data to be refreshed during the next stabilize
@@ -260,3 +268,11 @@ RETURN( .T. )
 METHOD refresh() CLASS HTTextEdit
 
 RETURN( Self )
+/*
+   fileOpen()
+
+*/
+METHOD fileOpen() CLASS HTTextEdit
+
+
+RETURN ( Self )
