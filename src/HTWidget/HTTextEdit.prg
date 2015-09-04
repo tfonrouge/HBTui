@@ -36,11 +36,14 @@ CLASS HTTextEdit FROM HTWidget
    METHOD wordRight()
    METHOD wordLeft()
 
+   METHOD refresh()
+
    METHOD moveCursor( nKey )
 
-   METHOD refresh()
-   METHOD fileOpen()
-
+   METHOD fileOpen( cFile )
+   METHOD fileSave()
+   METHOD textInsert( string )
+   METHOD textSave()
 
 ENDCLASS
 /*
@@ -213,6 +216,22 @@ METHOD wordLeft() CLASS HTTextEdit
 
 RETURN ( Self )
 /*
+   refresh()
+   Causes all data to be refreshed during the next stabilize
+*/
+METHOD refresh() CLASS HTTextEdit
+
+   ::nRow := MAX( 1, ::nRow )
+   ::nCol := MAX( 1, ::nCol )
+
+   ::nRowWin := MIN( MIN( MAX( 1, ::nRowWin ), ::nBottom - ::nTop + 1 ), ::nRow )
+   ::nColWin := MIN( MIN( MAX( 1, ::nColWin ), ::nRight - ::nLeft + 1 ), ::nCol )
+
+
+   SETPOS( ::nTop + ::nRow - ::nRowWin, ::nLeft + ::nCol - ::nColWin )
+
+RETURN( Self )
+/*
    moveCursor()
 */
 METHOD moveCursor( nKey )
@@ -262,17 +281,44 @@ METHOD moveCursor( nKey )
 
 RETURN ( .T. )
 /*
-   refresh()
-   Causes all data to be refreshed during the next stabilize
-*/
-METHOD refresh() CLASS HTTextEdit
-
-RETURN( Self )
-/*
    fileOpen()
-
+   Open a binary file
+   K_CTRL_O
 */
-METHOD fileOpen() CLASS HTTextEdit
+METHOD fileOpen( cFile ) CLASS HTTextEdit
 
+   LOCAL nHandle
+
+   nHandle := FOPEN( cFile )
+   IF FERROR() != 0
+      ALERT( "Cannot open file, system error ;" + STR( FERROR() ) )
+      RETURN ( .F. )
+   ENDIF
+
+   IF ! FCLOSE( nHandle )
+      ALERT( "Error closing file, error number: ;" + STR( FERROR() ) )
+   ENDIF
+
+RETURN ( .T. )
+/*
+   fileSave()
+*/
+METHOD fileSave() CLASS HTTextEdit
+
+RETURN ( Self )
+/*
+   textInsert()
+*/
+METHOD textInsert( string ) CLASS HTTextEdit
+
+   IF VALTYPE( string ) != "C" .AND. VALTYPE( string ) != "M" .AND. VALTYPE( string ) == "U"
+      RETURN ( .F. )
+   ENDIF
+
+RETURN ( .T. )
+/*
+   textSave()
+*/
+METHOD textSave() CLASS HTTextEdit
 
 RETURN ( Self )
