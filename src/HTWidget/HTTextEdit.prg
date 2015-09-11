@@ -12,12 +12,16 @@ CLASS HTTextEdit FROM HTWidget
    DATA nBottom
    DATA nRight
 
-   DATA nRow         INIT 1        // aktualny numer wiersza
-   DATA nCol         INIT 1        // aktualny numer kolumny
-   DATA nRowWin      INIT 1        // pozycja kursora w oknie
-   DATA nColWin      INIT 1        // pozycja kursora w oknie
-   DATA nNumRows
-   DATA nNumCols
+   DATA nRow         INIT 0
+   DATA nCol         INIT 0
+   DATA nRowWin      INIT 1
+   DATA nColWin      INIT 1
+   DATA nEndRow
+   DATA nEndCol
+
+   DATA nHandle
+
+   DATA aTextBuffer  INIT {}
 
    //DATA mode         INIT .F.
 
@@ -40,6 +44,9 @@ CLASS HTTextEdit FROM HTWidget
 
    METHOD moveCursor( nKey )
 
+   METHOD readTextDown(  )
+   METHOD readTextUp(  )
+
    METHOD fileOpen( cFile )
    METHOD fileSave()
    METHOD textInsert( string )
@@ -56,11 +63,10 @@ METHOD New( nTop, nLeft, nBottom, nRight ) CLASS HTTextEdit
    ::nBottom := nBottom
    ::nRight  := nRight
 
-   ::nNumCols := ::nRight - ::nLeft + 1
-   ::nNumRows := ::nBottom - ::nTop + 1
+   ::nEndRow := ::nBottom - ::nTop + 1
+   ::nEndCol := ::nRight - ::nLeft + 1
 
 RETURN ( Self )
-
 /*
    up()
    Moves the cursor one line up.
@@ -70,10 +76,10 @@ METHOD up() CLASS HTTextEdit
 
    ::nRow--
 
-   IF ::nRowWin < ::nTop + 1
-      ::refresh()
+   IF ::nRow < ::nTop
+      ::nRow := 0
    ELSE
-      SETPOS( ::nTop + ::nRow - ::nRowWin, ::nLeft + ::nCol - ::nColWin )
+      SETPOS( ::nRow, ::nCol )
    ENDIF
 
 RETURN ( Self )
@@ -86,23 +92,7 @@ METHOD down() CLASS HTTextEdit
 
    ::nRow++
 
-   IF ::nColWin > ( ::nBottom - ::nTop + 1 )
-      ::refresh()
-   ELSE
-      SETPOS( ::nTop + ::nRow - ::nRowWin, ::nLeft + ::nCol - ::nColWin )
-   ENDIF
-
-RETURN ( Self )
-/*
-   right()
-   Moves the cursor one character to the right.
-   K_RIGHT
-*/
-METHOD right() CLASS HTTextEdit
-
-   ::nCol++
-
-   SETPOS( ::nTop + ::nRow - ::nRowWin, ::nLeft + ::nCol - ::nColWin )
+   SETPOS( ::nRow, ::nCol )
 
 RETURN ( Self )
 /*
@@ -114,11 +104,24 @@ METHOD left() CLASS HTTextEdit
 
    ::nCol--
 
-   IF ::nColWin < ::nLeft + 1
-      ::refresh()
+   IF ::nCol < ::nLeft
+      ::nCol := 0
    ELSE
-      SETPOS( ::nTop + ::nRow - ::nRowWin, ::nLeft + ::nCol - ::nColWin )
+      SETPOS( ::nRow, ::nCol )
    ENDIF
+
+RETURN ( Self )
+
+/*
+   right()
+   Moves the cursor one character to the right.
+   K_RIGHT
+*/
+METHOD right() CLASS HTTextEdit
+
+   ::nCol++
+
+   SETPOS( ::nRow, ::nCol )
 
 RETURN ( Self )
 /*
@@ -128,9 +131,9 @@ RETURN ( Self )
 */
 METHOD pageUp() CLASS HTTextEdit
 
-   SETPOS( ::nRow - ::nNumRows + 1, ::nCol )
+   SETPOS( ::nRow - ::nEndRow + 1, ::nCol )
 
-   ::refresh()
+   //::refresh()
 
 RETURN ( Self )
 /*
@@ -140,7 +143,7 @@ RETURN ( Self )
 */
 METHOD pageDown() CLASS HTTextEdit
 
-   SETPOS( ::nRow + ::nNumRows - 1, ::nCol )
+   SETPOS( ::nRow + ::nEndRow - 1, ::nCol )
 
 	::refresh()
 
@@ -152,11 +155,9 @@ RETURN ( Self )
 */
 METHOD home() CLASS HTTextEdit
 
-   ::nCol := 1
+   ::nCol := 0
 
    SETPOS( ::nRow, ::nCol )
-
-   ::refresh()
 
 RETURN ( Self )
 /*
@@ -170,7 +171,7 @@ METHOD end() CLASS HTTextEdit
 
    SETPOS( ::nRow, ::nCol )
 
-   ::refresh()
+   //::refresh()
 
 RETURN ( Self )
 /*
@@ -196,7 +197,7 @@ METHOD pageEnd() CLASS HTTextEdit
 
    ::nCol := 1
 
-   SETPOS( ::nRowWin + ::nNumRows - 1, -1 )
+   SETPOS( ::nRowWin + ::nEndRow - 1, -1 )
 
 RETURN ( Self )
 /*
@@ -221,14 +222,6 @@ RETURN ( Self )
 */
 METHOD refresh() CLASS HTTextEdit
 
-   ::nRow := MAX( 1, ::nRow )
-   ::nCol := MAX( 1, ::nCol )
-
-   ::nRowWin := MIN( MIN( MAX( 1, ::nRowWin ), ::nBottom - ::nTop + 1 ), ::nRow )
-   ::nColWin := MIN( MIN( MAX( 1, ::nColWin ), ::nRight - ::nLeft + 1 ), ::nCol )
-
-
-   SETPOS( ::nTop + ::nRow - ::nRowWin, ::nLeft + ::nCol - ::nColWin )
 
 RETURN( Self )
 /*
@@ -281,21 +274,37 @@ METHOD moveCursor( nKey )
 
 RETURN ( .T. )
 /*
+   readTextDown( nHandle )
+*/
+METHOD readTextDown(  ) CLASS HTTextEdit
+
+   LOCAL cSubString := ""
+
+RETURN cSubString
+/*
+   readTextUp()
+*/
+METHOD readTextUp(  ) CLASS HTTextEdit
+
+   LOCAL cSubstring := ""
+
+RETURN cSubstring
+/*
    fileOpen()
    Open a binary file
    K_CTRL_O
 */
 METHOD fileOpen( cFile ) CLASS HTTextEdit
 
-   LOCAL nHandle
+   ::nHandle := FOPEN( cFile, 32 )
 
-   nHandle := FOPEN( cFile )
    IF FERROR() != 0
       ALERT( "Cannot open file, system error ;" + STR( FERROR() ) )
       RETURN ( .F. )
    ENDIF
 
-   IF ! FCLOSE( nHandle )
+
+   IF ! FCLOSE( ::nHandle )
       ALERT( "Error closing file, error number: ;" + STR( FERROR() ) )
    ENDIF
 
@@ -305,15 +314,14 @@ RETURN ( .T. )
 */
 METHOD fileSave() CLASS HTTextEdit
 
+//   IF ! EMPTY()
+//   ENDIF
+
 RETURN ( Self )
 /*
    textInsert()
 */
 METHOD textInsert( string ) CLASS HTTextEdit
-
-   IF VALTYPE( string ) != "C" .AND. VALTYPE( string ) != "M" .AND. VALTYPE( string ) == "U"
-      RETURN ( .F. )
-   ENDIF
 
 RETURN ( .T. )
 /*
