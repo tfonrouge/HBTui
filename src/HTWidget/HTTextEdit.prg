@@ -5,7 +5,7 @@
 #include "hbtui.ch"
 #include "inkey.ch"
 
-CLASS HTTextEdit FROM HTWidget
+CLASS xtEdit FROM HTWidget
 
    METHOD nTop    INLINE 0
    METHOD nLeft   INLINE 0
