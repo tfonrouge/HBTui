@@ -7,26 +7,34 @@
 
 CLASS HTTextEdit FROM HTWidget
 
-   DATA nTop
-   DATA nLeft
-   DATA nBottom
-   DATA nRight
+   METHOD nTop    INLINE 0
+   METHOD nLeft   INLINE 0
+   METHOD nBottom INLINE MAXROW()
+   METHOD nRight  INLINE MAXCOL()
 
-   DATA nRow         INIT 0
-   DATA nCol         INIT 0
-   DATA nRowWin      INIT 1
-   DATA nColWin      INIT 1
-   DATA nEndRow
-   DATA nEndCol
+   DATA nRow        INIT 0
+   DATA nCol        INIT 0
+   DATA nStartArray INIT 0
+   METHOD nRowArray INLINE ::nRow + ::nStartArray
+   METHOD nColArray INLINE ::nCol + 1
+
+   METHOD nEndRow INLINE ::nBottom - ::nTop + 1
+   METHOD nEndCol INLINE ::nRight - ::nLeft + 1
 
    DATA nHandle
+   DATA nError  INIT 0
 
    DATA aTextBuffer  INIT {}
 
-   //DATA mode         INIT .F.
+   METHOD New( cFile ) CONSTRUCTOR
 
-   METHOD New( nTop, nLeft, nBottom, nRight ) CONSTRUCTOR
+   METHOD loadFile( cFile )
+   METHOD newFile()
+   METHOD createFile( cFile )
+   METHOD saveFile()
+   METHOD closeFile()
 
+   METHOD mouse()
    METHOD up()
    METHOD down()
    METHOD right()
@@ -42,291 +50,347 @@ CLASS HTTextEdit FROM HTWidget
 
    METHOD refresh()
 
-   METHOD moveCursor( nKey )
+   METHOD error()
+   METHOD errorMsg()
 
-   METHOD readTextDown(  )
-   METHOD readTextUp(  )
-
-   METHOD fileOpen( cFile )
-   METHOD fileSave()
-   METHOD textInsert( string )
-   METHOD textSave()
+   METHOD readLine()
 
 ENDCLASS
+//----------------------------------------------------------------------------//
+
 /*
-   New()
+   New( cFile )
 */
-METHOD New( nTop, nLeft, nBottom, nRight ) CLASS HTTextEdit
+METHOD New( cFile ) CLASS xEdit
 
-   ::nTop    := nTop
-   ::nLeft   := nLeft
-   ::nBottom := nBottom
-   ::nRight  := nRight
-
-   ::nEndRow := ::nBottom - ::nTop + 1
-   ::nEndCol := ::nRight - ::nLeft + 1
-
-RETURN ( Self )
-/*
-   up()
-   Moves the cursor one line up.
-   K_UP
-*/
-METHOD up() CLASS HTTextEdit
-
-   ::nRow--
-
-   IF ::nRow < ::nTop
-      ::nRow := 0
+   IF FILE( cFile )
+      ::loadFile( cFile )
    ELSE
-      SETPOS( ::nRow, ::nCol )
+      cFile := IIF( ::cFile == NIL, "Untitled1.prg", ::cFile )
+      ::newFile( )
    ENDIF
 
 RETURN ( Self )
-/*
-   down()
-   Moves the cursor one line down.
-   K_DOWN
-*/
-METHOD down() CLASS HTTextEdit
 
-   ::nRow++
+/*
+   loadFile()
+*/
+METHOD loadFile( cFile ) CLASS xEdit
+
+   IF ( ::nHandle := FOPEN( cFile, 2 ) ) == -1
+      ::nError := FERROR()
+      RETURN ( .F. )
+   ENDIF
+
+   DO WHILE .NOT. hb_FEof( ::nHandle )
+
+      AADD( ::aTextBuffer, ::readLine() )
+
+   ENDDO
+
+   //::closeFile()
+
+   ::nRow := 0
+   ::nCol := 0
+
+   ::refresh()
+
+RETURN ( Self )
+
+/*
+   newFile()
+*/
+METHOD newFile() CLASS xEdit
+
+   AADD( ::aTextBuffer, "" )
+
+   ::refresh()
+
+RETURN ( Self )
+
+/*
+   createFile()
+*/
+METHOD createFile( cFile ) CLASS xEdit
+
+   IF ( ::nHandle := FCREATE( cFile, 0 ) ) = -1
+      ::nError := FERROR()
+      RETURN ( .F. )
+   ENDIF
+
+   //::closeFile()
+
+RETURN ( Self )
+
+/*
+   saveFile()
+*/
+METHOD saveFile() CLASS xEdit
+
+   LOCAL i
+   LOCAL cTextBuffer
+
+   ::createFile()
+
+   FOR i := 1 TO LEN( ::aTextBuffer )
+      cTextBuffer := ::aTextBuffer[ i ] + "test" + e"\n"
+      FWRITE( ::nHandle, cTextBuffer, LEN( cTextBuffer ) )
+   NEXT
+
+
+RETURN ( Self )
+
+/*
+   closeFile()
+*/
+METHOD closeFile() CLASS xEdit
+
+   IF ! FCLOSE( ::nHandle )
+      ::nError := FERROR()
+   ENDIF
+
+RETURN ( Self )
+
+/*
+   mouse()
+*/
+METHOD mouse() CLASS xEdit
+
+   ::nRow := MROW()
+   ::nCol := MCOL()
 
    SETPOS( ::nRow, ::nCol )
 
 RETURN ( Self )
+
+/*
+   up()
+*/
+METHOD up() CLASS xEdit
+
+   IF ::nRow > 0
+      ::nRow--
+   ELSEIF ::nStartArray > 0
+      ::nStartArray--
+   ENDIF
+
+   ::refresh()
+
+RETURN ( Self )
+
+/*
+   down()
+*/
+METHOD down() CLASS xEdit
+
+   IF ( ::nRow + 1 ) < ::nEndRow
+      ::nRow++
+   ELSEIF ( ::nRowArray + 1 ) < LEN( ::aTextBuffer )
+      ::nStartArray++
+   ENDIF
+
+   ::refresh()
+
+RETURN ( Self )
+
 /*
    left()
-   Moves the cursor one character to the left.
-   K_LEFT
 */
-METHOD left() CLASS HTTextEdit
+METHOD left() CLASS xEdit
 
-   ::nCol--
-
-   IF ::nCol < ::nLeft
-      ::nCol := 0
-   ELSE
-      SETPOS( ::nRow, ::nCol )
+   IF ::nCol > 0
+      ::nCol--
+   ELSEIF ::nStartArray > 0
+      ::nStartArray--
    ENDIF
+
+   ::refresh()
 
 RETURN ( Self )
 
 /*
    right()
-   Moves the cursor one character to the right.
-   K_RIGHT
 */
-METHOD right() CLASS HTTextEdit
+METHOD right() CLASS xEdit
 
-   ::nCol++
+   IF ( ::nCol + 1 ) < ::nEndCol
+      ::nCol++
+   ENDIF
 
-   SETPOS( ::nRow, ::nCol )
+   ::refresh()
 
 RETURN ( Self )
+
 /*
    pageUp()
-   Moves the cursor one page up.
-   K_PGUP
 */
-METHOD pageUp() CLASS HTTextEdit
-
-   SETPOS( ::nRow - ::nEndRow + 1, ::nCol )
-
-   //::refresh()
+METHOD pageUp() CLASS xEdit
 
 RETURN ( Self )
+
 /*
    pageDown()
-   Moves the cursor one page down.
-   K_PGDN
 */
-METHOD pageDown() CLASS HTTextEdit
-
-   SETPOS( ::nRow + ::nEndRow - 1, ::nCol )
-
-	::refresh()
+METHOD pageDown() CLASS xEdit
 
 RETURN ( Self )
+
 /*
    home()
-   Moves the cursor to the beginning of the line.
-   K_HOME
 */
-METHOD home() CLASS HTTextEdit
+METHOD home() CLASS xEdit
 
    ::nCol := 0
 
    SETPOS( ::nRow, ::nCol )
 
 RETURN ( Self )
+
 /*
    end()
-   Moves the cursor to the end of the line.
-   K_END
 */
-METHOD end() CLASS HTTextEdit
+METHOD end() CLASS xEdit
 
-   ::nCol := -1
+   ::nCol := ::nEndCol
 
    SETPOS( ::nRow, ::nCol )
 
-   //::refresh()
-
 RETURN ( Self )
+
 /*
    pageHome()
-   Moves the cursor to the beginning of the text.
-   K_CTRL_HOME
 */
-METHOD pageHome() CLASS HTTextEdit
-
-   ::nCol := 1
-
-   SETPOS( ::nRowWin, ::nCol )
-
-   ::refresh()
+METHOD pageHome() CLASS xEdit
 
 RETURN ( Self )
+
 /*
    pageEnd()
-   Moves the cursor to the end of the text.
-   K_CTRL_END
 */
-METHOD pageEnd() CLASS HTTextEdit
-
-   ::nCol := 1
-
-   SETPOS( ::nRowWin + ::nEndRow - 1, -1 )
+METHOD pageEnd() CLASS xEdit
 
 RETURN ( Self )
+
 /*
    wordRight()
-   Moves the cursor one word to the right.
-   K_CTRL_RIGHT
 */
-METHOD wordRight() CLASS HTTextEdit
+METHOD wordRight() CLASS xEdit
 
 RETURN ( Self )
+
 /*
    wordLeft()
-   Moves the cursor one word to the left.
-   K_CTRL_LEFT
 */
-METHOD wordLeft() CLASS HTTextEdit
+METHOD wordLeft() CLASS xEdit
 
 RETURN ( Self )
+
 /*
    refresh()
-   Causes all data to be refreshed during the next stabilize
 */
-METHOD refresh() CLASS HTTextEdit
+METHOD refresh() CLASS xEdit
 
+   LOCAL i
+   LOCAL n
 
-RETURN( Self )
+   DISPBEGIN()
+
+   FOR i := 1 TO ::nEndRow
+
+      SETPOS( ::nTop - 1 + i, ::nLeft )
+
+      n := i + ::nStartArray
+
+      IF n <= LEN( ::aTextBuffer )
+         DISPOUT( PADR( ::aTextBuffer[ n ], ::nEndCol ) )
+      ENDIF
+
+   NEXT
+
+   SETPOS( ::nRow, ::nCol )
+
+   DISPEND()
+
+RETURN ( Self )
+
 /*
-   moveCursor()
+   error()
+   Returns .T. if an error exists
 */
-METHOD moveCursor( nKey )
+METHOD error() CLASS xEdit
 
-   DO CASE
-      CASE nKey == K_UP
-         ::up()
+RETURN ( ::nError != 0 )
 
-      CASE nKey == K_DOWN
-         ::down()
+/*
+   errorMsg()
+   Returns formatted error message.
+*/
+METHOD errorMsg() CLASS xEdit
 
-      CASE nKey == K_RIGHT
-         ::right()
+   LOCAL cMessage
+   LOCAL aMeaning := { "Successful",;
+                       "File not found",;
+                       "Path not found",;
+                       "Too many files open",;
+                       "Access denied",;
+                       "Invalid handle",;
+                       "Insufficient memory",;
+                       "Invalid drive specified",;
+                       "Attempted to write to a write-protected disk",;
+                       "Drive not ready",;
+                       "Data CRC error",;
+                       "Write fault",;
+                       "Read fault",;
+                       "Sharing violation",;
+                       "Lock Violation" }
 
-      CASE nKey == K_LEFT
-         ::left()
+   cMessage := aMeaning[ FERROR() ]
 
-      CASE nKey == K_PGUP
-         ::pageUp()
+RETURN ( hb_Alert( cMessage, , , 3 ) )
 
-      CASE nKey == K_PGDN
-         ::pageDown()
+/*
+   readLine()
+*/
+METHOD readLine() CLASS xEdit
 
-      CASE nKey == K_HOME
-         ::home()
+   LOCAL lBytes := .F., lEnd := .F.
+   LOCAL cBufferVar
+   LOCAL cLine := ""
+   LOCAL nOffset := 0
+   LOCAL nBytes
+   LOCAL nCR, nLF, eol
 
-      CASE nKey == K_END
-         ::end()
+   DO WHILE ( ! ( lBytes .OR. lEnd ) )
 
-      CASE nKey == K_CTRL_HOME
-         ::pageHome()
+      cBufferVar := SPACE( 128 )
+      nBytes := FREAD( ::nHandle, @cBufferVar, 128 )
 
-      CASE nKey == K_CTRL_END
-         ::pageEnd()
+      lBytes := nBytes < 128
 
-      CASE nKey == K_CTRL_RIGHT
-         ::wordRight()
+      cLine := cLine + SUBSTR( cBufferVar, 1, nBytes )
 
-      CASE nKey == K_CTRL_LEFT
-         ::wordLeft()
+      nOffset := nOffset + nBytes
 
+      nCR := AT( CHR( 13 ), cLine )
+      nLF := AT( CHR( 10 ), cline )
+
+      DO CASE
+      CASE nCR == 0
+         // Jeœli nie mam CR, u¿yj pozycji LF.
+         eol := nLF
+      CASE nLF == 0
+         // Jeœli nie ma LF, u¿yj pozycji CR.
+         eol := nCR
       OTHERWISE
+         // Jeœli istnieje zarówno CR i LF u¿yj pozycji pierwszej.
+         eol := MIN( nCR, nLF )
+      ENDCASE
 
-	      RETURN( .F. )
+      IF ( lEnd := eol > 0 )
+         FSEEK( ::nHandle, eol - nOffset + 1, 1 )
+         cLine := SUBSTR( cLine, 1, eol - 1 )
+      ENDIF
 
-    ENDCASE
+   ENDDO
 
-RETURN ( .T. )
-/*
-   readTextDown( nHandle )
-*/
-METHOD readTextDown(  ) CLASS HTTextEdit
-
-   LOCAL cSubString := ""
-
-RETURN cSubString
-/*
-   readTextUp()
-*/
-METHOD readTextUp(  ) CLASS HTTextEdit
-
-   LOCAL cSubstring := ""
-
-RETURN cSubstring
-/*
-   fileOpen()
-   Open a binary file
-   K_CTRL_O
-*/
-METHOD fileOpen( cFile ) CLASS HTTextEdit
-
-   ::nHandle := FOPEN( cFile, 32 )
-
-   IF FERROR() != 0
-      ALERT( "Cannot open file, system error ;" + STR( FERROR() ) )
-      RETURN ( .F. )
-   ENDIF
-
-
-   IF ! FCLOSE( ::nHandle )
-      ALERT( "Error closing file, error number: ;" + STR( FERROR() ) )
-   ENDIF
-
-RETURN ( .T. )
-/*
-   fileSave()
-*/
-METHOD fileSave() CLASS HTTextEdit
-
-//   IF ! EMPTY()
-//   ENDIF
-
-RETURN ( Self )
-/*
-   textInsert()
-*/
-METHOD textInsert( string ) CLASS HTTextEdit
-
-RETURN ( .T. )
-/*
-   textSave()
-*/
-METHOD textSave() CLASS HTTextEdit
-
-RETURN ( Self )
+RETURN ( cLine )
