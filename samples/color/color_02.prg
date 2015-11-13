@@ -4,65 +4,88 @@
 
 #include "inkey.ch"
 
+STATIC aColor
+
 FUNCTION Main()
-   LOCAL i
-   LOCAL j
-   LOCAL y
-   LOCAL x
-   LOCAL n := 0
+
+   LOCAL i, j
    LOCAL cColor
    LOCAL nKey
-   LOCAL nCursor := SETCURSOR( 0 )
+   LOCAL xPos, yPos
 
+   aColor := {}
+
+   SETMODE( 49,128 )
    CLS
 
-   SetBlink( .F. )
+   xPos := 0
+   yPos := 0
 
-   FOR i := 1 TO 32
+   SETBLINK( .F. )
 
-      y := i - 1
+   FOR i := 0 TO 15
 
-      FOR j := 1 to 16
+      AADD( aColor, { } )
 
-         x := (j - 1) * 5
+      FOR j := 0 TO 15
 
-         cColor := nToColor( n )
+         cColor := SETCOLOR( LTRIM( STR( i ) + '/' + LTRIM( STR( j ) ) ) )
 
-         DispOutAt( y, x, cColor, cColor )
+         AADD( ATAIL( aColor ), cColor )
 
-         ++n
+         DispOutAt( yPos,     xPos, PADC( LEFT( SETCOLOR(), AT( ',', SETCOLOR() ) -1 ), 8 ) )
+         DispOutAt( yPos + 1, xPos, PADC( NToColor( ColorToN( SETCOLOR() ) ) , 8 ) )
+         DispOutAt( yPos + 2, xPos, REPLICATE( CHR(196), 8 ) )
 
-      NEXT
+         xPos += 8
+
+		NEXT
+
+      xPos := 0
+      yPos += 3
 
    NEXT
 
-   DO WHILE ( nKey != K_ESC .AND. nKey != K_RETURN )
+   SETCLEARB( CHR( 7 ) )
+   WOpen( 0, 0, 1, 7, .T. )
 
-      @ y, x SAY "     " // COLOR cColor + "I" SelectColor( y, x )
+   xPos := 1
+   yPos := 1
 
-      nKey := INKEY(0)
+   DO WHILE ( nKey != K_RETURN .AND. nKey != K_ESC )
+
+   GetColor( yPos, xPos )
+
+   nKey := INKEY( 0 )
 
       DO CASE
-         CASE nKey == K_DOWN
-            y++
-         CASE nKey == K_UP
-            y--
-         CASE nKey == K_RIGHT
-            x++
-         CASE nKey == K_LEFT
-            x--
+         CASE nKey == K_LEFT .AND. xPos > 1
+            --xPos
+
+         CASE nKey == K_RIGHT .AND. xPos < 16
+            ++xPos
+
+         CASE nKey == K_UP .AND. yPos > 1
+            --yPos
+
+         CASE nKey == K_DOWN .AND. yPos < 16
+            ++yPos
+
       ENDCASE
 
-      y := MAX( 0, MIN( y, 16 ) )
-      x := MAX( 0, MIN( x, 16 ) )
+      WMOVE( ( yPos - 1 ) * 3 , ( xPos - 1 ) * 8 )
 
    ENDDO
 
-   SETCURSOR( nCursor )
+RETURN IIF( nKey == K_ESC, NIL, GetColor( yPos, xPos ) )
 
-RETURN NIL // ( IF( nKey == K_ESC, Nil, SelectColor( y, x ) ) )
+/*
+   GetColor( yPos, xPos )
+*/
+FUNCTION GetColor( yPos, xPos )
 
-FUNCTION SelectColor(  ) // y, x
+   LOCAL cColor
 
+   cColor := aColor[xPos,yPos]
 
-RETURN NIL // color
+RETURN ( cColor )
