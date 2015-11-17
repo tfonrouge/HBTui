@@ -24,7 +24,7 @@ PROTECTED:
     DATA FclearB    INIT _DESKTOP_CHAR
     DATA Fcolor
     DATA FposDown
-    DATA FposUp
+//    DATA FposUp
     DATA Fshadow    INIT _WIDGET_SHADOW
     DATA FwindowId  /* CT Handle */
     DATA FwinSysBtnMove     INIT .f.
@@ -103,6 +103,12 @@ PUBLIC:
     PROPERTY windowTitle INIT ""
     PROPERTY x INIT 0
     PROPERTY y INIT 0
+
+    /* */
+    
+    PROPERTY posUp
+
+    /* */
 
 ENDCLASS
 
@@ -294,15 +300,15 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
         ::FposUp := NIL
         ::FposDown := HTPoint():new( eventMouse:mouseCol, eventMouse:mouseRow )
 
-        ::FwinSysBtnClose := ::FbtnClosePos != NIL .AND. ::FposDown:y = -1 .AND. ::FposDown:x >= ::FbtnClosePos[ 1 ] .AND. ::FposDown:x <= ::FbtnClosePos[ 2 ]
+        ::FwinSysBtnClose := ::FbtnClosePos != NIL .AND. ::FposDown:y = 0 .AND. ::FposDown:x >= ::FbtnClosePos[ 1 ] .AND. ::FposDown:x <= ::FbtnClosePos[ 2 ]
 
-        ::FwinSysBtnHide := ::FBtnHidePos != NIL .AND. ::FposDown:y = -1 .AND. ::FposDown:x >= ::FBtnHidePos[ 1 ] .AND. ::FposDown:x <= ::FBtnHidePos[ 2 ]
+        ::FwinSysBtnHide := ::FBtnHidePos != NIL .AND. ::FposDown:y = 0 .AND. ::FposDown:x >= ::FBtnHidePos[ 1 ] .AND. ::FposDown:x <= ::FBtnHidePos[ 2 ]
 
-        ::FwinSysBtnMaximize := ::FbtnMaximizePos != NIL .AND. ::FposDown:y = -1 .AND. ::FposDown:x >= ::FbtnMaximizePos[ 1 ] .AND. ::FposDown:x <= ::FbtnMaximizePos[ 2 ]
+        ::FwinSysBtnMaximize := ::FbtnMaximizePos != NIL .AND. ::FposDown:y = 0 .AND. ::FposDown:x >= ::FbtnMaximizePos[ 1 ] .AND. ::FposDown:x <= ::FbtnMaximizePos[ 2 ]
 
         ::FwinSysBtnResize := ::FbtnResizePos != NIL .AND. ::FposDown:y = ( ::Fheight - 1 ) .AND. ::FposDown:x >= ::FbtnResizePos[ 1 ] .AND. ::FposDown:x <= ::FbtnResizePos[ 2 ]
 
-        IF ::FposDown:y = -1 .AND. ! ::FwinSysBtnClose .AND. ! ::FwinSysBtnHide .AND. ! ::FwinSysBtnMaximize .AND. ! ::FwinSysBtnResize
+        IF ::FposDown:y = 0 .AND. ! ::FwinSysBtnClose .AND. ! ::FwinSysBtnHide .AND. ! ::FwinSysBtnMaximize .AND. ! ::FwinSysBtnResize
             ::FwinSysBtnMove := .t.
         ENDIF
 
@@ -320,17 +326,17 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
         ::FposUp := HTPoint():new( eventMouse:mouseCol, eventMouse:mouseRow )
 
         /* Close Event */
-        IF ::FposUp:y = -1 .AND. ::FwinSysBtnClose .AND. ::FposUp:x >= ::FbtnClosePos[ 1 ] .AND. ::FposUp:x <= ::FbtnClosePos[ 2 ]
+        IF ::FposUp:y = 0 .AND. ::FwinSysBtnClose .AND. ::FposUp:x >= ::FbtnClosePos[ 1 ] .AND. ::FposUp:x <= ::FbtnClosePos[ 2 ]
             ::addEvent( HTCloseEvent():new() )
         ENDIF
 
         /* Hide Event */
-        IF ::FposUp:y = -1 .AND. ::FwinSysBtnHide .AND. ::FposUp:x >= ::FBtnHidePos[ 1 ] .AND. ::FposUp:x <= ::FBtnHidePos[ 2 ]
+        IF ::FposUp:y = 0 .AND. ::FwinSysBtnHide .AND. ::FposUp:x >= ::FBtnHidePos[ 1 ] .AND. ::FposUp:x <= ::FBtnHidePos[ 2 ]
             ::addEvent( HTHideEvent():new() )
         ENDIF
 
         /* Maximize Event */
-        IF ::FposUp:y = -1 .AND. ::FwinSysBtnMaximize .AND. ::FposUp:x >= ::FbtnMaximizePos[ 1 ] .AND. ::FposUp:x <= ::FbtnMaximizePos[ 2 ]
+        IF ::FposUp:y = 0 .AND. ::FwinSysBtnMaximize .AND. ::FposUp:x >= ::FbtnMaximizePos[ 1 ] .AND. ::FposUp:x <= ::FbtnMaximizePos[ 2 ]
             ::addEvent( HTMaximizeEvent():new() )
         ENDIF
 

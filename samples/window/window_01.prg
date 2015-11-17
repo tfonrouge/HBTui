@@ -13,6 +13,8 @@ PROCEDURE Main()
     LOCAL app
     LOCAL win
 
+    setMode( 40, 100 )
+
     app := HTApplication():new()
 
     win := MainWindow():new()

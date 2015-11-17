@@ -136,7 +136,7 @@ METHOD PROCEDURE getEvent() CLASS HTApplication
         RETURN
     ENDIF
 
-    nKey := Inkey(  )
+    nKey := Inkey( 1 )
 
     IF nKey != 0
         IF !empty( window := ::getTopLevelWindowFromWindowId( hb_windowAtMousePos() ) )
