@@ -5,7 +5,7 @@
 #include "hbtui.ch"
 #include "inkey.ch"
 
-#define _DESKTOP_COLOR  "00/15"
+#define _DESKTOP_COLOR  "03/01"
 #define _DESKTOP_CHAR   e"\xB1"
 #define _WIDGET_COLOR   "11/09"
 #define _WIDGET_CHAR    e"\x20"
