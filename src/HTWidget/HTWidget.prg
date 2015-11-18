@@ -9,7 +9,7 @@
 #define _DESKTOP_CHAR   e"\xB1"
 #define _WIDGET_COLOR   "11/09"
 #define _WIDGET_CHAR    e"\x20"
-#define _WIDGET_SHADOW  "00/07"
+#define _WIDGET_SHADOW  8
 
 CLASS HTWidget FROM HTObject
 PROTECTED:
