@@ -83,9 +83,9 @@ PUBLIC:
     METHOD windowType() INLINE hb_bitAnd( ::windowFlags, 0x000000ff )
 
     PROPERTY backgroundColor WRITE setBackgroundColor
-    PROPERTY charWidgetClose INIT hb_BChar( 254 )
-    PROPERTY charWidgetHide INIT Chr( 25 )
-    PROPERTY charWidgetMaximize INIT Chr( 18 )
+    PROPERTY charWidgetClose    INIT hb_BChar( 254 )
+    PROPERTY charWidgetHide     INIT hb_BChar( 254 )
+    PROPERTY charWidgetMaximize INIT hb_BChar( 254 )
     PROPERTY charWidgetResize INIT "<>" //Chr( 254 )
     PROPERTY clearA READ getClearA WRITE setClearA
     PROPERTY clearB READ getClearB WRITE setClearB
@@ -493,7 +493,7 @@ METHOD PROCEDURE paintTopLevelWindow() CLASS HTWidget
         ::FbtnClosePos := NIL
     ELSE
         ::FbtnClosePos := { n, n += len( ::charWidgetClose ) - 1 }
-        dispOutAt( 0, n, ::charWidgetClose, ::color )
+        dispOutAt( 0, n, ::charWidgetClose, "04/09" )
         ++n
     ENDIF
 
@@ -501,7 +501,7 @@ METHOD PROCEDURE paintTopLevelWindow() CLASS HTWidget
         ::FBtnHidePos := NIL
     ELSE
         ::FBtnHidePos := { n, n += len( ::charWidgetHide ) - 1 }
-        dispOutAt( 0, n, ::charWidgetHide, ::color )
+        dispOutAt( 0, n, ::charWidgetHide, "14/09" )
         ++n
     ENDIF
 
@@ -509,7 +509,7 @@ METHOD PROCEDURE paintTopLevelWindow() CLASS HTWidget
         ::FbtnMaximizePos := NIL
     ELSE
         ::FbtnMaximizePos := { n, n += len( ::charWidgetMaximize ) - 1 }
-        dispOutAt( 0, n, ::charWidgetMaximize, ::color )
+        dispOutAt( 0, n, ::charWidgetMaximize, "02/09" )
         ++n
     ENDIF
 
