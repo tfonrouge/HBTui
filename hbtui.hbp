@@ -9,7 +9,6 @@
 -olib/${hb_plat}/${hb_comp}/hbtui
 
 -iinclude
--i${hb_inc}/../contrib/hbct
 
 -instpath=${hb_lib}/
 
@@ -17,6 +16,8 @@
 -instpath=inc:${hb_inc}/hbtui/
 
 -instforce
+
+hbct.hbc
 
 src/*.c
 src/*.prg

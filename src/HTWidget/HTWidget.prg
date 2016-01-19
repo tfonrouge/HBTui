@@ -105,7 +105,7 @@ PUBLIC:
     PROPERTY y INIT 0
 
     /* */
-    
+
     PROPERTY posUp
 
     /* */
@@ -125,7 +125,7 @@ METHOD new( ... ) CLASS HTWidget
     IF pCount() <= 2
         parent := hb_pValue( 1 )
         f := hb_pValue( 2 )
-        IF hb_isNil( parent ) .OR. hb_isObject( parent )
+        IF parent == NIL .OR. hb_isObject( parent )
             version := 1
         ENDIF
     ENDIF

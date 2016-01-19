@@ -32,7 +32,7 @@ METHOD new( ... ) CLASS HTMenu
 
     IF pCount() <= 1
         parent := hb_pValue( 1 )
-        IF hb_isNil( parent ) .OR. hb_isObject( parent )
+        IF parent == NIL .OR. hb_isObject( parent )
             version := 1
         ENDIF
     ENDIF
@@ -40,7 +40,7 @@ METHOD new( ... ) CLASS HTMenu
     IF pCount() <= 2
         title := hb_pValue( 1 )
         parent := hb_pValue( 2 )
-        IF hb_isChar( title ) .AND. hb_isNil( parent ) .OR. hb_isObject( parent )
+        IF hb_isChar( title ) .AND. parent == NIL .OR. hb_isObject( parent )
             version := 2
         ENDIF
     ENDIF
@@ -82,7 +82,7 @@ METHOD FUNCTION addAction( ... ) CLASS HTMenu
         receiver := hb_pValue( 2 )
         member := hb_pValue( 3 )
         shortcut := hb_pValue( 4 )
-        IF hb_isChar( text ) .AND. hb_isObject( receiver ) .AND. receiver:isDerivedFrom("HTObject") .AND. hb_isChar( member ) .AND. !empty( member ) .AND. ( hb_isNil( shortcut ) .OR. hb_isObject( shortcut ) .AND. shortcut:isDerivedFrom("HTKeySequence") )
+        IF hb_isChar( text ) .AND. hb_isObject( receiver ) .AND. receiver:isDerivedFrom("HTObject") .AND. hb_isChar( member ) .AND. !empty( member ) .AND. ( shortcut == NIL .OR. hb_isObject( shortcut ) .AND. shortcut:isDerivedFrom("HTKeySequence") )
             version := 3
         ENDIF
     ENDIF
