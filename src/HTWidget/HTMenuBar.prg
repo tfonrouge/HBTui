@@ -26,7 +26,7 @@ METHOD new( parent ) CLASS HTMenuBar
     LOCAL version := 0
 
     IF pCount() <= 1
-        IF hb_isNil( parent ) .OR. hb_isObject( parent )
+        IF parent == NIL .OR. hb_isObject( parent )
             version := 1
         ENDIF
     ENDIF
