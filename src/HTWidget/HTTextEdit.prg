@@ -2,11 +2,11 @@
  *
  */
 
-#include "hbtui.ch"
-#include "inkey.ch"
+#include "hbclass.ch"
 
-CLASS xEdit FROM HTWidget
+CLASS HTextEdit FROM HWidget
 
+   DATA cFileName
    METHOD nTop    INLINE 0
    METHOD nLeft   INLINE 0
    METHOD nBottom INLINE MAXROW()
@@ -15,6 +15,7 @@ CLASS xEdit FROM HTWidget
    DATA nRow        INIT 0
    DATA nCol        INIT 0
    DATA nStartArray INIT 0
+
    METHOD nRowArray INLINE ::nRow + ::nStartArray
    METHOD nColArray INLINE ::nCol + 1
 
@@ -26,11 +27,12 @@ CLASS xEdit FROM HTWidget
 
    DATA aTextBuffer  INIT {}
 
-   METHOD New( cFile ) CONSTRUCTOR
+   METHOD New( cFileName ) CONSTRUCTOR
 
-   METHOD loadFile( cFile )
-   METHOD newFile()
-   METHOD createFile( cFile )
+   METHOD isFile()
+   METHOD loadFile()
+   METHOD emptyFile()
+   METHOD createFile()
    METHOD saveFile()
    METHOD closeFile()
 
@@ -50,34 +52,59 @@ CLASS xEdit FROM HTWidget
 
    METHOD refresh()
 
-   METHOD error()
+   METHOD error()   INLINE ::nError != 0
    METHOD errorMsg()
 
    METHOD readLine()
 
 ENDCLASS
-//----------------------------------------------------------------------------//
+// -------------------------------------------------------------------------- //
+METHOD New( cFileName ) CLASS HTextEdit
 
-/*
-   New( cFile )
-*/
-METHOD New( cFile ) CLASS xEdit
+   ::cFileName := cFileName
 
-   IF FILE( cFile )
-      ::loadFile( cFile )
+   IF ::cFileName == NIL
+      ::emptyFile()
    ELSE
-      cFile := IIF( ::cFile == NIL, "Untitled1.prg", ::cFile )
-      ::newFile( )
+      ::isFile()
    ENDIF
 
 RETURN ( Self )
 
-/*
-   loadFile()
-*/
-METHOD loadFile( cFile ) CLASS xEdit
+METHOD isFile() CLASS HTextEdit
 
-   IF ( ::nHandle := FOPEN( cFile, 2 ) ) == -1
+   LOCAL nChoice
+
+   IF FILE( ::cFileName )
+      ::loadFile()
+   ELSE
+
+      nChoice := ALERT( "Cannot find the file " + '"' + ::cFileName + '";' + ";" + ;
+                        "Do you want to create a new file?", { "Yes", "No", "Cancel" } )
+
+      DO CASE
+         CASE nChoice == 1
+            ::createFile()
+            ::loadFile()
+
+         CASE nChoice == 2
+            ::emptyFile()
+
+         CASE nChoice == 3
+            QUIT
+
+         OTHERWISE
+            QUIT
+
+      ENDCASE
+
+   ENDIF
+
+RETURN ( Self )
+
+METHOD loadFile() CLASS HTextEdit
+
+   IF ( ::nHandle := FOPEN( ::cFileName, 2 ) ) == -1
       ::nError := FERROR()
       RETURN ( .F. )
    ENDIF
@@ -88,7 +115,7 @@ METHOD loadFile( cFile ) CLASS xEdit
 
    ENDDO
 
-   //::closeFile()
+   ::closeFile()
 
    ::nRow := 0
    ::nCol := 0
@@ -97,10 +124,7 @@ METHOD loadFile( cFile ) CLASS xEdit
 
 RETURN ( Self )
 
-/*
-   newFile()
-*/
-METHOD newFile() CLASS xEdit
+METHOD emptyFile() CLASS HTextEdit
 
    AADD( ::aTextBuffer, "" )
 
@@ -108,24 +132,18 @@ METHOD newFile() CLASS xEdit
 
 RETURN ( Self )
 
-/*
-   createFile()
-*/
-METHOD createFile( cFile ) CLASS xEdit
+METHOD createFile() CLASS HTextEdit
 
-   IF ( ::nHandle := FCREATE( cFile, 0 ) ) = -1
+   IF ( ::nHandle := FCREATE( ::cFileName, 0 ) ) = -1
       ::nError := FERROR()
       RETURN ( .F. )
    ENDIF
 
-   //::closeFile()
+   ::closeFile()
 
 RETURN ( Self )
 
-/*
-   saveFile()
-*/
-METHOD saveFile() CLASS xEdit
+METHOD saveFile() CLASS HTextEdit
 
    LOCAL i
    LOCAL cTextBuffer
@@ -140,10 +158,7 @@ METHOD saveFile() CLASS xEdit
 
 RETURN ( Self )
 
-/*
-   closeFile()
-*/
-METHOD closeFile() CLASS xEdit
+METHOD closeFile() CLASS HTextEdit
 
    IF ! FCLOSE( ::nHandle )
       ::nError := FERROR()
@@ -151,10 +166,7 @@ METHOD closeFile() CLASS xEdit
 
 RETURN ( Self )
 
-/*
-   mouse()
-*/
-METHOD mouse() CLASS xEdit
+METHOD mouse() CLASS HTextEdit
 
    ::nRow := MROW()
    ::nCol := MCOL()
@@ -163,10 +175,7 @@ METHOD mouse() CLASS xEdit
 
 RETURN ( Self )
 
-/*
-   up()
-*/
-METHOD up() CLASS xEdit
+METHOD up() CLASS HTextEdit
 
    IF ::nRow > 0
       ::nRow--
@@ -178,10 +187,7 @@ METHOD up() CLASS xEdit
 
 RETURN ( Self )
 
-/*
-   down()
-*/
-METHOD down() CLASS xEdit
+METHOD down() CLASS HTextEdit
 
    IF ( ::nRow + 1 ) < ::nEndRow
       ::nRow++
@@ -193,10 +199,7 @@ METHOD down() CLASS xEdit
 
 RETURN ( Self )
 
-/*
-   left()
-*/
-METHOD left() CLASS xEdit
+METHOD left() CLASS HTextEdit
 
    IF ::nCol > 0
       ::nCol--
@@ -208,10 +211,7 @@ METHOD left() CLASS xEdit
 
 RETURN ( Self )
 
-/*
-   right()
-*/
-METHOD right() CLASS xEdit
+METHOD right() CLASS HTextEdit
 
    IF ( ::nCol + 1 ) < ::nEndCol
       ::nCol++
@@ -221,24 +221,15 @@ METHOD right() CLASS xEdit
 
 RETURN ( Self )
 
-/*
-   pageUp()
-*/
-METHOD pageUp() CLASS xEdit
+METHOD pageUp() CLASS HTextEdit
 
 RETURN ( Self )
 
-/*
-   pageDown()
-*/
-METHOD pageDown() CLASS xEdit
+METHOD pageDown() CLASS HTextEdit
 
 RETURN ( Self )
 
-/*
-   home()
-*/
-METHOD home() CLASS xEdit
+METHOD home() CLASS HTextEdit
 
    ::nCol := 0
 
@@ -246,10 +237,7 @@ METHOD home() CLASS xEdit
 
 RETURN ( Self )
 
-/*
-   end()
-*/
-METHOD end() CLASS xEdit
+METHOD end() CLASS HTextEdit
 
    ::nCol := ::nEndCol
 
@@ -257,38 +245,23 @@ METHOD end() CLASS xEdit
 
 RETURN ( Self )
 
-/*
-   pageHome()
-*/
-METHOD pageHome() CLASS xEdit
+METHOD pageHome() CLASS HTextEdit
 
 RETURN ( Self )
 
-/*
-   pageEnd()
-*/
-METHOD pageEnd() CLASS xEdit
+METHOD pageEnd() CLASS HTextEdit
 
 RETURN ( Self )
 
-/*
-   wordRight()
-*/
-METHOD wordRight() CLASS xEdit
+METHOD wordRight() CLASS HTextEdit
 
 RETURN ( Self )
 
-/*
-   wordLeft()
-*/
-METHOD wordLeft() CLASS xEdit
+METHOD wordLeft() CLASS HTextEdit
 
 RETURN ( Self )
 
-/*
-   refresh()
-*/
-METHOD refresh() CLASS xEdit
+METHOD refresh() CLASS HTextEdit
 
    LOCAL i
    LOCAL n
@@ -313,19 +286,7 @@ METHOD refresh() CLASS xEdit
 
 RETURN ( Self )
 
-/*
-   error()
-   Returns .T. if an error exists
-*/
-METHOD error() CLASS xEdit
-
-RETURN ( ::nError != 0 )
-
-/*
-   errorMsg()
-   Returns formatted error message.
-*/
-METHOD errorMsg() CLASS xEdit
+METHOD errorMsg() CLASS HTextEdit
 
    LOCAL cMessage
    LOCAL aMeaning := { "Successful",;
@@ -346,12 +307,9 @@ METHOD errorMsg() CLASS xEdit
 
    cMessage := aMeaning[ FERROR() ]
 
-RETURN ( hb_Alert( cMessage, , , 3 ) )
+RETURN ( ALERT( cMessage ) )
 
-/*
-   readLine()
-*/
-METHOD readLine() CLASS xEdit
+METHOD readLine() CLASS HTextEdit
 
    LOCAL lBytes := .F., lEnd := .F.
    LOCAL cBufferVar
@@ -375,15 +333,12 @@ METHOD readLine() CLASS xEdit
       nLF := AT( CHR( 10 ), cline )
 
       DO CASE
-      CASE nCR == 0
-         // Jeœli nie mam CR, u¿yj pozycji LF.
-         eol := nLF
-      CASE nLF == 0
-         // Jeœli nie ma LF, u¿yj pozycji CR.
-         eol := nCR
-      OTHERWISE
-         // Jeœli istnieje zarówno CR i LF u¿yj pozycji pierwszej.
-         eol := MIN( nCR, nLF )
+         CASE nCR == 0
+            eol := nLF
+         CASE nLF == 0
+            eol := nCR
+         OTHERWISE
+            eol := MIN( nCR, nLF )
       ENDCASE
 
       IF ( lEnd := eol > 0 )
