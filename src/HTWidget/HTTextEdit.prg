@@ -4,7 +4,7 @@
 
 #include "hbtui.ch"
 
-CLASS HTextEdit FROM HTWidget
+CLASS HTTextEdit FROM HTWidget
 
    DATA cFileName
    METHOD nTop    INLINE 0
