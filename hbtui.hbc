@@ -5,8 +5,9 @@
 prgflags=-w3 -es2
 
 incpaths=include
-libpaths=lib/${hb_arch}/${hb_comp}
-libs=hbct hbtui
+libpaths=lib/${hb_plat}/${hb_comp}
+libs=hbtui
+hbcs=hbct.hbc
 
 {unix|linux|darwin}gt=gtxwc
 {win}gt=gtwvt

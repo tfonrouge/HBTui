@@ -10,13 +10,6 @@
 
 -iinclude
 
--instpath=${hb_lib}/
-
--instfile=inc:include/hbtui.ch
--instpath=inc:${hb_inc}/hbtui/
-
--instforce
-
 hbct.hbc
 
 src/*.c
@@ -25,3 +18,6 @@ src/types/*.prg
 src/HTEvent/*.prg
 src/HTEvent/HTInputEvent/*.prg
 src/HTWidget/*.prg
+
+$hb_pkg_dynlib.hbm
+$hb_pkg_install.hbm
