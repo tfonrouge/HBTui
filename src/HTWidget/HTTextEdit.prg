@@ -2,7 +2,7 @@
  *
  */
 
-#include "hbclass.ch"
+#include "hbtui.ch"
 
 CLASS HTTextEdit FROM HTWidget
 
