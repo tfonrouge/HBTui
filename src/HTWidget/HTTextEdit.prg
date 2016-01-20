@@ -4,7 +4,7 @@
 
 #include "hbclass.ch"
 
-CLASS HTextEdit FROM HWidget
+CLASS HTextEdit FROM HTWidget
 
    DATA cFileName
    METHOD nTop    INLINE 0
