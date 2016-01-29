@@ -7,20 +7,28 @@
 #include "hbtui.ch"
 
 CLASS HTPoint
+
 PROTECTED:
 PUBLIC:
-    CONSTRUCTOR new( x, y )
-    METHOD isNull INLINE ::Fx = 0 .AND. ::Fy = 0
-    METHOD setX( x ) INLINE ::Fx := x
+
+    CONSTRUCTOR New( y, x )
+    METHOD isNull INLINE ::Fy = 0 .AND. ::Fx = 0
+    METHOD y()       INLINE ::y
+    METHOD x()       INLINE ::x
     METHOD setY( y ) INLINE ::Fy := y
-    PROPERTY x INIT 0
+    METHOD setX( x ) INLINE ::Fx := x
+
     PROPERTY y INIT 0
+    PROPERTY x INIT 0
+
 ENDCLASS
 
 /*
-    new
+   New
 */
-METHOD new( x, y ) CLASS HTPoint
-    ::Fx := x
+METHOD New( y, x ) CLASS HTPoint
+
     ::Fy := y
-RETURN self
+    ::Fx := x
+
+RETURN ( Self )
