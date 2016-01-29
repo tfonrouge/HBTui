@@ -13,8 +13,6 @@ PUBLIC:
 
     CONSTRUCTOR New( y, x )
     METHOD IsNull    INLINE ::Fy = 0 .AND. ::Fx = 0
-    METHOD y()       INLINE ::y
-    METHOD x()       INLINE ::x
     METHOD setY( y ) INLINE ::Fy := y
     METHOD setX( x ) INLINE ::Fx := x
 
