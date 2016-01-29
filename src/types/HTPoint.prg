@@ -12,7 +12,7 @@ PROTECTED:
 PUBLIC:
 
     CONSTRUCTOR New( y, x )
-    METHOD isNull INLINE ::Fy = 0 .AND. ::Fx = 0
+    METHOD IsNull    INLINE ::Fy = 0 .AND. ::Fx = 0
     METHOD y()       INLINE ::y
     METHOD x()       INLINE ::x
     METHOD setY( y ) INLINE ::Fy := y
