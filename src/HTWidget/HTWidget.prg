@@ -37,7 +37,7 @@ PROTECTED:
     METHOD getClearA INLINE ::FclearA
     METHOD getClearB INLINE ::FclearB
     METHOD getColor
-    METHOD getPos() INLINE HTPoint():new( ::x, ::y )
+    METHOD getPos() INLINE HPoint():new( ::x, ::y )
     METHOD getShadow INLINE ::Fshadow
     METHOD getWindowId()
     METHOD paintChildren()
