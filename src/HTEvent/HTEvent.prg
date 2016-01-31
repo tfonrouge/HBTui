@@ -6,7 +6,7 @@
 
 #include "hbtui.ch"
 
-CLASS HTEvent
+CLASS HEvent
 PUBLIC:
 
     METHOD accept() INLINE ::FisAccepted := .t.

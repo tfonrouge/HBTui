@@ -7,7 +7,7 @@
 /*
     HTInputEvent
 */
-CLASS HTInputEvent FROM HTEvent
+CLASS HInputEvent FROM HEvent
 PROTECTED:
     DATA Ftype INIT HT_EVENT_TYPE_CLOSE
 PUBLIC:
@@ -19,6 +19,6 @@ ENDCLASS
 /*
     new
 */
-METHOD new() CLASS HTInputEvent
+METHOD new() CLASS HInputEvent
     ::Ftimestamp := hb_dateTime()
 RETURN self

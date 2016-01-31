@@ -4,11 +4,11 @@
 
 #include "hbtui.ch"
 
-CLASS HTLineEdit FROM HTWidget
+CLASS HLineEdit FROM HWidget
 PUBLIC:
 
     CONSTRUCTOR new( ... )
-    
+
     METHOD paintEvent( event )
 
     METHOD setText( text ) INLINE ::Ftext := text
@@ -20,7 +20,7 @@ ENDCLASS
 /*
     new
 */
-METHOD new( ... ) CLASS HTLineEdit
+METHOD new( ... ) CLASS HLineEdit
     LOCAL p
 
     IF pCount() > 0
@@ -40,7 +40,7 @@ RETURN self
 /*
     paintEvent
 */
-METHOD PROCEDURE paintEvent( event ) CLASS HTLineEdit
+METHOD PROCEDURE paintEvent( event ) CLASS HLineEdit
     HB_SYMBOL_UNUSED( event )
     dispOutAt( ::x, ::y, ::text, ::color )
 RETURN

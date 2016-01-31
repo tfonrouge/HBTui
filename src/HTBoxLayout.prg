@@ -4,7 +4,7 @@
 
 #include "hbtui.ch"
 
-CLASS HTBoxLayout FROM HTLayout
+CLASS HBoxLayout FROM HLayout
 PROTECTED:
     DATA FwidgetList INIT {}
 PUBLIC:
@@ -22,20 +22,20 @@ ENDCLASS
 /*
     new
 */
-METHOD new( dir, parent ) CLASS HTBoxLayout
+METHOD new( dir, parent ) CLASS HBoxLayout
     ::setDirection( dir )
 RETURN ::super:new( parent )
 
 /*
     addWidget
 */
-METHOD PROCEDURE addWidget( w ) CLASS HTBoxLayout
+METHOD PROCEDURE addWidget( w ) CLASS HBoxLayout
     ::addItem( w )
 RETURN
 
 /*
     setDirection
 */
-METHOD PROCEDURE setDirection( dir ) CLASS HTBoxLayout
+METHOD PROCEDURE setDirection( dir ) CLASS HBoxLayout
     ::Fdirection := dir
 RETURN

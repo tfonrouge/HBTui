@@ -7,7 +7,7 @@
 /*
     HTCloseEvent
 */
-CLASS HTCloseEvent FROM HTEvent
+CLASS HCloseEvent FROM HEvent
 PROTECTED:
     DATA Ftype INIT HT_EVENT_TYPE_CLOSE
 PUBLIC:
@@ -17,5 +17,5 @@ ENDCLASS
 /*
     new
 */
-METHOD new() CLASS HTCloseEvent
+METHOD new() CLASS HCloseEvent
 RETURN self

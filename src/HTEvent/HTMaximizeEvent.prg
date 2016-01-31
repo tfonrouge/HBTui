@@ -7,7 +7,7 @@
 /*
     HTMaximizeEvent
 */
-CLASS HTMaximizeEvent FROM HTEvent
+CLASS HMaximizeEvent FROM HEvent
 PROTECTED:
     DATA Ftype INIT HT_EVENT_TYPE_MAXIMIZE
 PUBLIC:
@@ -17,5 +17,5 @@ ENDCLASS
 /*
     new
 */
-METHOD new() CLASS HTMaximizeEvent
+METHOD new() CLASS HMaximizeEvent
 RETURN self

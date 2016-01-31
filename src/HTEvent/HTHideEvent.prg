@@ -7,7 +7,7 @@
 /*
     HTHideEvent
 */
-CLASS HTHideEvent FROM HTEvent
+CLASS HHideEvent FROM HEvent
 PROTECTED:
     DATA Ftype INIT HT_EVENT_TYPE_HIDE
 PUBLIC:
@@ -17,5 +17,5 @@ ENDCLASS
 /*
     new
 */
-METHOD new() CLASS HTHideEvent
+METHOD new() CLASS HHideEvent
 RETURN self

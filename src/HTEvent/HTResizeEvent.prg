@@ -7,7 +7,7 @@
 /*
     HTResizeEvent
 */
-CLASS HTResizeEvent FROM HTEvent
+CLASS HResizeEvent FROM HEvent
 PROTECTED:
     DATA Ftype INIT HT_EVENT_TYPE_RESIZE
 PUBLIC:
@@ -19,7 +19,7 @@ ENDCLASS
 /*
     new
 */
-METHOD new( size, oldSize ) CLASS HTResizeEvent
+METHOD new( size, oldSize ) CLASS HResizeEvent
     ::Fsize := size
     ::FoldSize := oldSize
 RETURN self

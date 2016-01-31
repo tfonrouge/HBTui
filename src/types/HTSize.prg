@@ -6,7 +6,7 @@
 
 #include "hbtui.ch"
 
-CLASS HTSize
+CLASS HSize
 PROTECTED:
 PUBLIC:
     CONSTRUCTOR new( width, height )
@@ -20,7 +20,7 @@ ENDCLASS
 /*
     new
 */
-METHOD new( width, height ) CLASS HTSize
+METHOD new( width, height ) CLASS HSize
     ::Fwidth := width
     ::Fheight := height
 RETURN self

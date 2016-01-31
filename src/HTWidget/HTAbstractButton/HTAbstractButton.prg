@@ -4,7 +4,7 @@
 
 #include "hbtui.ch"
 
-CLASS HTAbstractButton FROM HTWidget
+CLASS HAbstractButton FROM HWidget
 PROTECTED:
 
 PUBLIC:
@@ -25,6 +25,6 @@ ENDCLASS
 /*
     setText
 */
-METHOD PROCEDURE setText( text ) CLASS HTAbstractButton
+METHOD PROCEDURE setText( text ) CLASS HAbstractButton
     ::Ftext := text
 RETURN

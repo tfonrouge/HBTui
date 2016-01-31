@@ -4,7 +4,7 @@
 
 #include "hbtui.ch"
 
-SINGLETON CLASS HTDesktop FROM HTWidget
+SINGLETON CLASS HDesktop FROM HWidget
 PROTECTED:
 PUBLIC:
 
@@ -18,12 +18,12 @@ ENDCLASS
 /*
     new
 */
-METHOD new() CLASS HTDesktop
+METHOD new() CLASS HDesktop
     LOCAL menu
 
     ::super:new( NIL, HT_DESKTOP )
 
-    menu := HTMenuBar():new( self ):addMenu(e"\xfe") /* always present menu */
+    menu := HMenuBar():new( self ):addMenu(e"\xfe") /* always present menu */
 
     menu:addAction("About")
     menu:addSeparator()
@@ -34,14 +34,14 @@ RETURN self
 /*
     addEvent
 */
-METHOD PROCEDURE addEvent( event ) CLASS HTDesktop
+METHOD PROCEDURE addEvent( event ) CLASS HDesktop
     ::super:addEvent( event, HT_EVENT_PRIORITY_HIGH )
 RETURN
 
 /*
     paintEvent
 */
-METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTDesktop
+METHOD PROCEDURE paintEvent( paintEvent ) CLASS HDesktop
 
     ctWInit()
 

@@ -4,7 +4,7 @@
 
 #include "hbtui.ch"
 
-CLASS HTBase
+CLASS HBase
 PROTECTED:
 PUBLIC:
 ENDCLASS

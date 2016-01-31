@@ -4,7 +4,7 @@
 
 #include "hbtui.ch"
 
-CLASS HTMenu FROM HTWidget
+CLASS HMenu FROM HWidget
 PROTECTED:
 
 PUBLIC:
@@ -25,7 +25,7 @@ ENDCLASS
 /*
     new
 */
-METHOD new( ... ) CLASS HTMenu
+METHOD new( ... ) CLASS HMenu
     LOCAL version := 0
     LOCAL parent
     LOCAL title
@@ -62,7 +62,7 @@ RETURN self
 /*
     addAction
 */
-METHOD FUNCTION addAction( ... ) CLASS HTMenu
+METHOD FUNCTION addAction( ... ) CLASS HMenu
     LOCAL version := 0
     LOCAL text
     LOCAL action
@@ -82,24 +82,24 @@ METHOD FUNCTION addAction( ... ) CLASS HTMenu
         receiver := hb_pValue( 2 )
         member := hb_pValue( 3 )
         shortcut := hb_pValue( 4 )
-        IF hb_isChar( text ) .AND. hb_isObject( receiver ) .AND. receiver:isDerivedFrom("HTObject") .AND. hb_isChar( member ) .AND. !empty( member ) .AND. ( shortcut == NIL .OR. hb_isObject( shortcut ) .AND. shortcut:isDerivedFrom("HTKeySequence") )
+        IF hb_isChar( text ) .AND. hb_isObject( receiver ) .AND. receiver:isDerivedFrom("HObject") .AND. hb_isChar( member ) .AND. !empty( member ) .AND. ( shortcut == NIL .OR. hb_isObject( shortcut ) .AND. shortcut:isDerivedFrom("HKeySequence") )
             version := 3
         ENDIF
     ENDIF
 
     IF pCount() = 1
         action := hb_pValue( 1 )
-        IF hb_isObject( action ) .AND. action:isDerivedFrom("HTAction")
+        IF hb_isObject( action ) .AND. action:isDerivedFrom("HAction")
             version := 5
         ENDIF
     ENDIF
 
     SWITCH version
     CASE 1
-        action := HTAction():New( text, self )
+        action := HAction():New( text, self )
         EXIT
     CASE 3
-        action := HTAction():New( text, self )
+        action := HAction():New( text, self )
         IF shortcut != NIL
             action:setShortcut( shortcut )
         ENDIF
@@ -117,7 +117,7 @@ RETURN action
 /*
     addMenu
 */
-METHOD FUNCTION addMenu() CLASS HTMenu
+METHOD FUNCTION addMenu() CLASS HMenu
     LOCAL version := 0
     LOCAL menu
     LOCAL retValue
@@ -125,7 +125,7 @@ METHOD FUNCTION addMenu() CLASS HTMenu
 
     IF pCount() = 1
         menu := hb_pValue( 1 )
-        IF hb_isObject( menu ) .AND. menu:isDerivedFrom("HTMenu")
+        IF hb_isObject( menu ) .AND. menu:isDerivedFrom("HMenu")
             version := 1
             menu:setParent( self )
             retValue := menu:menuAction()
@@ -136,7 +136,7 @@ METHOD FUNCTION addMenu() CLASS HTMenu
         title := hb_pValue( 1 )
         IF hb_isChar( title )
             version := 2
-            menu := HTMenu():New( title, self )
+            menu := HMenu():New( title, self )
             retValue := menu
         ENDIF
     ENDIF
@@ -155,10 +155,10 @@ RETURN retValue
 /*
     addSeparator
 */
-METHOD FUNCTION addSeparator() CLASS HTMenu
+METHOD FUNCTION addSeparator() CLASS HMenu
     LOCAL action
 
-    action := HTAction():New( self )
+    action := HAction():New( self )
     action:setSeparator( .t. )
 
     ::addAction( action )
@@ -168,14 +168,14 @@ RETURN action
 /*
     menuAction
 */
-METHOD FUNCTION menuAction() CLASS HTMenu
+METHOD FUNCTION menuAction() CLASS HMenu
     LOCAL action := NIL
 RETURN action
 
 /*
     paintEvent
 */
-METHOD PROCEDURE paintEvent( event ) CLASS HTMenu
+METHOD PROCEDURE paintEvent( event ) CLASS HMenu
     HB_SYMBOL_UNUSED( event )
     dispOutAt( ::x, ::y, ::title, "00/07" )
 RETURN

@@ -4,7 +4,7 @@
 
 #include "hbtui.ch"
 
-CLASS HTCheckBox FROM HTAbstractButton
+CLASS HCheckBox FROM HAbstractButton
 
    METHOD New()
 
