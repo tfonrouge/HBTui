@@ -37,7 +37,7 @@ PROTECTED:
     METHOD getClearA INLINE ::FclearA
     METHOD getClearB INLINE ::FclearB
     METHOD getColor
-    METHOD getPos() INLINE HTPoint():new( ::y, ::x )
+    METHOD getPos() INLINE HTPoint():new( ::x, ::y )
     METHOD getShadow INLINE ::Fshadow
     METHOD getWindowId()
     METHOD paintChildren()
@@ -356,7 +356,7 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
 
             IF MLeftDown()
                 IF ::FwinSysBtnMove
-                    ::move( HTPoint():new( y, x ) )
+                    ::move( HTPoint():new( x, y ) )
                 ELSEIF ::FwinSysBtnResize
                     ::addEvent( HTResizeEvent():new() )
                 ENDIF
@@ -378,7 +378,7 @@ METHOD PROCEDURE move( ... ) CLASS HTWidget
     LOCAL newPos
     LOCAL oldPos
 
-    oldPos := HTPoint():new( ::y, ::x )
+    oldPos := HTPoint():new( ::x, ::y )
 
     SWITCH pCount()
     CASE 1
@@ -392,7 +392,7 @@ METHOD PROCEDURE move( ... ) CLASS HTWidget
         y := hb_pValue( 2 )
         IF hb_isNumeric( x ) .AND. hb_isNumeric( y )
             version := 2
-            newPos := HTPoint():new( y, x )
+            newPos := HTPoint():new( x, y )
         ENDIF
         EXIT
     OTHERWISE
