@@ -6,9 +6,10 @@
 #include "inkey.ch"
 
 SINGLETON CLASS HApplication FROM HObject
+
 PROTECTED:
 
-    DATA Fexecute INIT .f.
+    DATA Fexecute INIT .F.
     DATA FeventStack        INIT { {}, {}, {} }
     DATA FeventStackLen     INIT { 0, 0, 0 }
 
@@ -33,6 +34,7 @@ ENDCLASS
     new
 */
 METHOD new() CLASS HApplication
+
     LOCAL desktop
 
     IF ::Fdesktop = NIL
@@ -53,6 +55,7 @@ RETURN ::getTopLevelWindowFromWindowId( wSelect() )
     addTopLevelWindow
 */
 METHOD PROCEDURE addTopLevelWindow( windowId, widget ) CLASS HApplication
+
     LOCAL objectId
 
     IF hb_hHasKey( ::FtopLevelWindows, windowId )
@@ -68,6 +71,7 @@ RETURN
   exec
 */
 METHOD FUNCTION exec() CLASS HApplication
+
     LOCAL result
     LOCAL event
     LOCAL widget
@@ -76,15 +80,15 @@ METHOD FUNCTION exec() CLASS HApplication
     IF !::Fexecute
 
         //set( _SET_EVENTMASK, INKEY_ALL + HB_INKEY_RAW + HB_INKEY_EXT + HB_INKEY_GTEVENT )
-        set( _SET_EVENTMASK, INKEY_ALL )
-        setBlink( .f. )
+        Set( _SET_EVENTMASK, INKEY_ALL )
+        SetBlink( .F. )
 
         result := 0
 
         /* paint desktop */
         ::Fdesktop:show()
 
-        ::Fexecute := .t.
+        ::Fexecute := .T.
 
         WHILE ::Fexecute
 
@@ -97,7 +101,7 @@ METHOD FUNCTION exec() CLASS HApplication
                     aDel( ::FeventStack[ priority ], 1 )
                     --::FeventStackLen[ priority ]
 
-                    widget := iif( event:widget = NIL, ::activeWindow(), event:widget )
+                    widget := IIF( event:widget = NIL, ::activeWindow(), event:widget )
 
                     widget:event( event )
 
@@ -118,9 +122,10 @@ RETURN result
   getEvent
 */
 METHOD PROCEDURE getEvent() CLASS HApplication
+
     LOCAL nKey
-    LOCAL mrow := mRow( .t. )
-    LOCAL mcol := mCol( .t. )
+    LOCAL mrow := mRow( .T. )
+    LOCAL mcol := mCol( .T. )
     LOCAL window
 
     STATIC mCoords
@@ -139,7 +144,7 @@ METHOD PROCEDURE getEvent() CLASS HApplication
     nKey := Inkey( 1 )
 
     IF nKey != 0
-        IF !empty( window := ::getTopLevelWindowFromWindowId( hb_windowAtMousePos() ) )
+        IF !Empty( window := ::getTopLevelWindowFromWindowId( hb_windowAtMousePos() ) )
             IF nKey >= K_MINMOUSE .AND. nKey <= K_MAXMOUSE
                 window:addEvent( HMouseEvent():new( nKey ) )
             ELSE
@@ -154,6 +159,7 @@ RETURN
     getTopLevelWindowFromWindowId
 */
 METHOD FUNCTION getTopLevelWindowFromWindowId( windowId ) CLASS HApplication
+
     LOCAL nPos
 
     nPos := hb_hPos( ::FtopLevelWindows, windowId )
@@ -179,7 +185,7 @@ METHOD PROCEDURE queueEvent( event, priority ) CLASS HApplication
 
     IF ::FeventStackLen[ priority ] < HBTUI_UI_STACK_EVENT_SIZE
         ++::FeventStackLen[ priority ]
-        IF len( ::FeventStack[ priority ] ) < ::FeventStackLen[ priority ]
+        IF Len( ::FeventStack[ priority ] ) < ::FeventStackLen[ priority ]
             ASize( ::FeventStack[ priority ], ::FeventStackLen[ priority ] )
         ENDIF
         ::FeventStack[ priority, ::FeventStackLen[ priority ] ] := event

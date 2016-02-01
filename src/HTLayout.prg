@@ -5,6 +5,7 @@
 #include "hbtui.ch"
 
 CLASS HLayout FROM HObject, HLayoutItem
+
 PUBLIC:
 
     CONSTRUCTOR new( parent )

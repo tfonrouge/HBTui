@@ -6,13 +6,13 @@
 
 CLASS HComboBox FROM HWidget
 
-   METHOD New()
+    CONSTRUCTOR new()
 
 ENDCLASS
 
 /*
-   New()
+   new
 */
-METHOD New() CLASS HComboBox
+METHOD new() CLASS HComboBox
 
 RETURN ( Self )

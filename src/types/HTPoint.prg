@@ -9,9 +9,11 @@
 CLASS HPoint
 
 PROTECTED:
+
 PUBLIC:
 
-    CONSTRUCTOR New( y, x )
+    CONSTRUCTOR new( y, x )
+
     METHOD IsNull    INLINE ::Fy = 0 .AND. ::Fx = 0
     METHOD setY( y ) INLINE ::Fy := y
     METHOD setX( x ) INLINE ::Fx := x
@@ -24,9 +26,9 @@ ENDCLASS
 /*
    New
 */
-METHOD New( y, x ) CLASS HPoint
+METHOD new( y, x ) CLASS HPoint
 
     ::Fy := y
     ::Fx := x
 
-RETURN ( Self )
+RETURN self

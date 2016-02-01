@@ -5,15 +5,16 @@
 #include "hbtui.ch"
 
 PROCEDURE Main()
+
     LOCAL app
     LOCAL win
     LOCAL menu
 
-    setMode( 30, 90 )
+    SetMode( 30, 90 )
 
-    app := HTApplication():new()
+    app := HApplication():new()
 
-    win := HTMainWindow():new()
+    win := HMainWindow():new()
 
     menu := win:menuBar():addMenu("File")
 

@@ -1,6 +1,6 @@
 /*
-   12-01-2015
-*/
+ *
+ */
 
 #include "hbtui.ch"
 #include "common.ch"

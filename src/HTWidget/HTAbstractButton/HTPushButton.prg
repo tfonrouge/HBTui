@@ -5,6 +5,7 @@
 #include "hbtui.ch"
 
 CLASS HPushButton FROM HAbstractButton
+
 PROTECTED:
 PUBLIC:
 
@@ -19,6 +20,7 @@ ENDCLASS
     new
 */
 METHOD new( ... ) CLASS HPushButton
+
     LOCAL p
 
     IF pCount() > 0

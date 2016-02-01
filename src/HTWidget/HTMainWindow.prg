@@ -5,10 +5,14 @@
 #include "hbtui.ch"
 
 CLASS HMainWindow FROM HWidget
+
 PROTECTED:
+
 PUBLIC:
+
     METHOD menuBar()
     METHOD show()
+
 ENDCLASS
 
 /*

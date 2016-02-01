@@ -12,6 +12,7 @@
 #define _WIDGET_SHADOW  8
 
 CLASS HWidget FROM HObject
+
 PROTECTED:
 
     DATA Factions
@@ -27,11 +28,11 @@ PROTECTED:
 //    DATA FposUp
     DATA Fshadow    INIT _WIDGET_SHADOW
     DATA FwindowId  /* CT Handle */
-    DATA FwinSysBtnMove     INIT .f.
-    DATA FwinSysBtnClose    INIT .f.
-    DATA FwinSysBtnHide     INIT .f.
-    DATA FwinSysBtnMaximize INIT .f.
-    DATA FwinSysBtnResize   INIT .f.
+    DATA FwinSysBtnMove     INIT .F.
+    DATA FwinSysBtnClose    INIT .F.
+    DATA FwinSysBtnHide     INIT .F.
+    DATA FwinSysBtnMaximize INIT .F.
+    DATA FwinSysBtnResize   INIT .F.
 
     METHOD displayLayout()
     METHOD getClearA INLINE ::FclearA
@@ -92,7 +93,7 @@ PUBLIC:
     PROPERTY color READ getColor WRITE SetColor
     PROPERTY foregroundColor WRITE setForegroundColor
     PROPERTY height INIT 0
-    PROPERTY isVisible INIT .f.
+    PROPERTY isVisible INIT .F.
     PROPERTY layout WRITE setLayout
     PROPERTY pos READ getPos()
     PROPERTY shadow READ getShadow WRITE setShadow
@@ -116,6 +117,7 @@ ENDCLASS
     new
 */
 METHOD new( ... ) CLASS HWidget
+
     LOCAL version := 0
     LOCAL parent
     LOCAL f
@@ -152,8 +154,8 @@ RETURN ::Factions
     addAction
 */
 METHOD PROCEDURE addAction( action ) CLASS HWidget
-    IF aScan( ::Factions, action ) = 0
-        aAdd( ::Factions, action )
+    IF AScan( ::Factions, action ) = 0
+        AAdd( ::Factions, action )
     ENDIF
 RETURN
 
@@ -268,7 +270,7 @@ METHOD FUNCTION getColor CLASS HWidget
             RETURN parent:Color
         ENDIF
     ENDIF
-RETURN iif( ::FAsDesktopWidget = .t., _DESKTOP_COLOR, _WIDGET_COLOR )
+RETURN IIF( ::FAsDesktopWidget = .T., _DESKTOP_COLOR, _WIDGET_COLOR )
 
 /*
     getWindowId
@@ -291,6 +293,7 @@ RETURN
     mouseEvent
 */
 METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HWidget
+
     LOCAL x
     LOCAL y
 
@@ -309,7 +312,7 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HWidget
         ::FwinSysBtnResize := ::FbtnResizePos != NIL .AND. ::FposDown:y = ( ::Fheight - 1 ) .AND. ::FposDown:x >= ::FbtnResizePos[ 1 ] .AND. ::FposDown:x <= ::FbtnResizePos[ 2 ]
 
         IF ::FposDown:y = 0 .AND. ! ::FwinSysBtnClose .AND. ! ::FwinSysBtnHide .AND. ! ::FwinSysBtnMaximize .AND. ! ::FwinSysBtnResize
-            ::FwinSysBtnMove := .t.
+            ::FwinSysBtnMove := .T.
         ENDIF
 
         OutStd( ::FposDown:x, ::FposDown:y, e"\n" )
@@ -340,10 +343,10 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HWidget
             ::addEvent( HMaximizeEvent():new() )
         ENDIF
 
-        ::FwinSysBtnMove     := .f.
-        ::FwinSysBtnClose    := .f.
-        ::FwinSysBtnHide     := .f.
-        ::FwinSysBtnMaximize := .f.
+        ::FwinSysBtnMove     := .F.
+        ::FwinSysBtnClose    := .F.
+        ::FwinSysBtnHide     := .F.
+        ::FwinSysBtnMaximize := .F.
 
         EXIT
 
@@ -351,16 +354,12 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HWidget
 
         IF ::FposDown != NIL
 
-            x := mCol( .t. ) - ( ::FposDown:x + 1 )
-            y := mRow( .t. )
+            x := mCol( .T. ) - ( ::FposDown:x + 1 )
+            y := mRow( .T. )
 
             IF MLeftDown()
                 IF ::FwinSysBtnMove
-<<<<<<< HEAD
                     ::move( HPoint():new( y, x ) )
-=======
-                    ::move( HTPoint():new( x, y ) )
->>>>>>> origin/master
                 ELSEIF ::FwinSysBtnResize
                     ::addEvent( HResizeEvent():new() )
                 ENDIF
@@ -376,17 +375,14 @@ RETURN
     move
 */
 METHOD PROCEDURE move( ... ) CLASS HWidget
+
     LOCAL version := 0
     LOCAL x
     LOCAL y
     LOCAL newPos
     LOCAL oldPos
 
-<<<<<<< HEAD
     oldPos := HPoint():new( ::y, ::x )
-=======
-    oldPos := HTPoint():new( ::x, ::y )
->>>>>>> origin/master
 
     SWITCH pCount()
     CASE 1
@@ -400,11 +396,7 @@ METHOD PROCEDURE move( ... ) CLASS HWidget
         y := hb_pValue( 2 )
         IF hb_isNumeric( x ) .AND. hb_isNumeric( y )
             version := 2
-<<<<<<< HEAD
             newPos := HPoint():new( y, x )
-=======
-            newPos := HTPoint():new( x, y )
->>>>>>> origin/master
         ENDIF
         EXIT
     OTHERWISE
@@ -415,7 +407,7 @@ METHOD PROCEDURE move( ... ) CLASS HWidget
     CASE 1
     CASE 2
         IF ::FwindowId != NIL
-            wSelect( ::FwindowId, .f. )
+            wSelect( ::FwindowId, .F. )
             wMove( newPos:y, newPos:x )
         ELSE
             ::Fx := newPos:x
@@ -441,6 +433,7 @@ RETURN
     paintChildren
 */
 METHOD PROCEDURE paintChildren() CLASS HWidget
+
     LOCAL menuBar := ht_objectFromId( ::FmenuBar )
     LOCAL child
 
@@ -480,22 +473,23 @@ RETURN
     paintTopLevelWindow
 */
 METHOD PROCEDURE paintTopLevelWindow() CLASS HWidget
+
     LOCAL n
 
     ::Fheight := 10
     ::Fwidth := 40
 
     IF ::Fx = NIL
-        ::Fx := maxRow() / 2 - ::Fheight / 2
+        ::Fx := MaxRow() / 2 - ::Fheight / 2
     ENDIF
 
     IF ::Fy = NIL
-        ::Fy := maxCol() / 2 - ::Fwidth / 2
+        ::Fy := MaxCol() / 2 - ::Fwidth / 2
     ENDIF
 
-    ::setWindowId( wOpen( ::Fx, ::Fy, ::Fx + ::Fheight - 1, ::Fy + ::Fwidth - 1, .t. ) )
+    ::setWindowId( wOpen( ::Fx, ::Fy, ::Fx + ::Fheight - 1, ::Fy + ::Fwidth - 1, .T. ) )
 
-    setClearB( _WIDGET_CHAR )
+    SetClearB( _WIDGET_CHAR )
     wBox( NIL, ::color ) /* border window */
     wFormat()
 
@@ -504,33 +498,33 @@ METHOD PROCEDURE paintTopLevelWindow() CLASS HWidget
     IF ::charWidgetClose = NIL
         ::FbtnClosePos := NIL
     ELSE
-        ::FbtnClosePos := { n, n += len( ::charWidgetClose ) - 1 }
-        dispOutAt( 0, n, ::charWidgetClose, "04/09" )
+        ::FbtnClosePos := { n, n += Len( ::charWidgetClose ) - 1 }
+        DispOutAt( 0, n, ::charWidgetClose, "04/09" )
         ++n
     ENDIF
 
     IF ::charWidgetHide = NIL
         ::FBtnHidePos := NIL
     ELSE
-        ::FBtnHidePos := { n, n += len( ::charWidgetHide ) - 1 }
-        dispOutAt( 0, n, ::charWidgetHide, "14/09" )
+        ::FBtnHidePos := { n, n += Len( ::charWidgetHide ) - 1 }
+        DispOutAt( 0, n, ::charWidgetHide, "14/09" )
         ++n
     ENDIF
 
     IF ::charWidgetMaximize = NIL
         ::FbtnMaximizePos := NIL
     ELSE
-        ::FbtnMaximizePos := { n, n += len( ::charWidgetMaximize ) - 1 }
-        dispOutAt( 0, n, ::charWidgetMaximize, "02/09" )
+        ::FbtnMaximizePos := { n, n += Len( ::charWidgetMaximize ) - 1 }
+        DispOutAt( 0, n, ::charWidgetMaximize, "02/09" )
         ++n
     ENDIF
 
     IF ::charWidgetResize = NIL
         ::FbtnResizePos := NIL
     ELSE
-        n := len( ::charWidgetResize )
+        n := Len( ::charWidgetResize )
         ::FbtnResizePos := { ::Fwidth - n, ::Fwidth }
-        dispOutAt( ::Fheight - 1, ::FbtnResizePos[ 1 ], ::charWidgetResize, ::color )
+        DispOutAt( ::Fheight - 1, ::FbtnResizePos[ 1 ], ::charWidgetResize, ::color )
     ENDIF
 
     wFormat()
@@ -548,7 +542,9 @@ RETURN
     resize
 */
 METHOD PROCEDURE resize( ... ) CLASS HWidget
+
     LOCAL eventResize
+
     SWITCH pCount()
     CASE 2
         eventResize := HResizeEvent():new( HSize():new( hb_pValue( 1 ), hb_pValue( 2 ) ), ::size )
@@ -576,7 +572,7 @@ METHOD PROCEDURE setAsDesktopWidget CLASS HWidget
 
     /* just one widget can be the desktop widget */
     IF ::FAsDesktopWidget = NIL .AND. HApplication():desktop = NIL
-        ::FAsDesktopWidget := .t.
+        ::FAsDesktopWidget := .T.
     ENDIF
 
 RETURN
@@ -592,6 +588,7 @@ RETURN ::FbackgroundColor
     setFocus
 */
 METHOD PROCEDURE setFocus() CLASS HWidget
+
     LOCAL activeWindow := HApplication():activeWindow()
 
     IF ! activeWindow == self
@@ -641,7 +638,7 @@ RETURN
 */
 METHOD PROCEDURE show() CLASS HWidget
 
-    ::FisVisible := .t.
+    ::FisVisible := .T.
 
     ::addEvent( HPaintEvent():new() )
     ::addEvent( HFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ) )

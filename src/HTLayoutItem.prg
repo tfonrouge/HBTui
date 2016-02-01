@@ -5,6 +5,7 @@
 #include "hbtui.ch"
 
 CLASS HLayoutItem FROM HBase
+
 PUBLIC:
 
     CONSTRUCTOR new( alignment )
@@ -19,10 +20,12 @@ ENDCLASS
     new
 */
 METHOD new( alignment ) CLASS HLayoutItem
+
     IF alignment = NIL
         alignment := 0
     ENDIF
     ::setAlignment( alignment )
+
 RETURN self
 
 /*

@@ -5,6 +5,7 @@
 #include "hbtui.ch"
 
 CLASS HLineEdit FROM HWidget
+
 PUBLIC:
 
     CONSTRUCTOR new( ... )
@@ -21,6 +22,7 @@ ENDCLASS
     new
 */
 METHOD new( ... ) CLASS HLineEdit
+
     LOCAL p
 
     IF pCount() > 0

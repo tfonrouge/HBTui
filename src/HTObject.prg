@@ -10,12 +10,17 @@ THREAD STATIC __s_childList := {=>}
     HObject
 */
 CLASS HObject FROM HBase
+
 PRIVATE:
+
     DATA Fparent
     METHOD addChild( child )
+
 PROTECTED:
+
     DATA FmenuBar
     METHOD setMenuBar( menuBar )
+
 PUBLIC:
 
     CONSTRUCTOR new( parent )
@@ -32,10 +37,12 @@ ENDCLASS
     new
 */
 METHOD new( parent ) CLASS HObject
+
     ::Fchildren := {}
     IF pCount() = 1
         ::setParent( parent )
     ENDIF
+
 RETURN self
 
 /*

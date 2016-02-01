@@ -8,12 +8,17 @@
   HTMoveEvent
 */
 CLASS HMoveEvent FROM HEvent
+
 PROTECTED:
+
     DATA Ftype INIT HT_EVENT_TYPE_MOVE
+
 PUBLIC:
+
     CONSTRUCTOR new( pos, oldPos )
     PROPERTY oldPos
     PROPERTY pos
+
 ENDCLASS
 
 /*

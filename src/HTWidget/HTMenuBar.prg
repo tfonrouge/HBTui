@@ -6,6 +6,7 @@
 #include "inkey.ch"
 
 CLASS HMenuBar FROM HWidget
+
 PROTECTED:
 PUBLIC:
 
@@ -23,6 +24,7 @@ ENDCLASS
     new
 */
 METHOD new( parent ) CLASS HMenuBar
+
     LOCAL version := 0
 
     IF pCount() <= 1
@@ -45,6 +47,7 @@ RETURN self
     addAction
 */
 METHOD FUNCTION addAction( ... ) CLASS HMenuBar
+
     LOCAL version := 0
     LOCAL action
     LOCAL text
@@ -60,9 +63,9 @@ METHOD FUNCTION addAction( ... ) CLASS HMenuBar
     ENDIF
 
     IF pCount() = 3
-        text := hb_pValue( 1 )
+        text     := hb_pValue( 1 )
         receiver := hb_pValue( 2 )
-        member := hb_pValue( 3 )
+        member   := hb_pValue( 3 )
         IF hb_isChar( text ) .AND. hb_isObject( receiver ) .AND. hb_isChar( member )
             version := 2
         ENDIF
@@ -98,6 +101,7 @@ RETURN retValue
     addMenu
 */
 METHOD FUNCTION addMenu( ... ) CLASS HMenuBar
+
     LOCAL version := 0
     LOCAL menu
     LOCAL title
@@ -143,19 +147,20 @@ RETURN self
     paintEvent
 */
 METHOD PROCEDURE paintEvent( event ) CLASS HMenuBar
+
     LOCAL itm
     LOCAL y := 0
 
     HB_SYMBOL_UNUSED( event )
 
-    wSelect( ::windowId, .f. )
+    wSelect( ::windowId, .F. )
     wFormat()
     wFormat( 1, 0, 1, 0 )
-    dispOutAt( 0, 0, space( ::parent():width ), "00/07" )
+    DispOutAt( 0, 0, Space( ::parent():width ), "00/07" )
     FOR EACH itm IN ::children
         IF itm:isDerivedFrom("HMenu")
             itm:move( 0, ++y )
-            y += len( itm:title )
+            y += Len( itm:title )
         ENDIF
     NEXT
     wFormat()

@@ -6,13 +6,13 @@
 
 CLASS HRadioButton FROM HAbstractButton
 
-   METHOD New()
+   METHOD new()
 
 ENDCLASS
 
 /*
-   New()
+   new
 */
-METHOD New() CLASS HRadioButton
+METHOD new() CLASS HRadioButton
 
-RETURN ( Self )
+RETURN self

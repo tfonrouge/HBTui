@@ -8,10 +8,15 @@
     HTCloseEvent
 */
 CLASS HCloseEvent FROM HEvent
+
 PROTECTED:
+
     DATA Ftype INIT HT_EVENT_TYPE_CLOSE
+
 PUBLIC:
+
     CONSTRUCTOR new()
+    
 ENDCLASS
 
 /*

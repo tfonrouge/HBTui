@@ -8,12 +8,17 @@
     HTResizeEvent
 */
 CLASS HResizeEvent FROM HEvent
+
 PROTECTED:
+
     DATA Ftype INIT HT_EVENT_TYPE_RESIZE
+
 PUBLIC:
+
     CONSTRUCTOR new( size, oldSize )
     PROPERTY oldSize
     PROPERTY size
+
 ENDCLASS
 
 /*

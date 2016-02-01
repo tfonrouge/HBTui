@@ -7,11 +7,17 @@
 /*
     HTHideEvent
 */
+
 CLASS HHideEvent FROM HEvent
+
 PROTECTED:
+
     DATA Ftype INIT HT_EVENT_TYPE_HIDE
+
 PUBLIC:
+
     CONSTRUCTOR new()
+
 ENDCLASS
 
 /*

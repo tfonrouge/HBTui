@@ -1,21 +1,23 @@
 /*
  *
- *
  */
 
 #include "hbtui.ch"
 
 CLASS HAction FROM HObject
+
 PROTECTED:
-    DATA FisSeparator INIT .f.
+
+    DATA FisSeparator INIT .F.
+
 PUBLIC:
 
     CONSTRUCTOR new( ... )
 
-    METHOD isSeparator() INLINE ::FisSeparator
-    METHOD setSeparator( b ) INLINE ::FisSeparator := b
+    METHOD isSeparator()           INLINE ::FisSeparator
+    METHOD setSeparator( b )       INLINE ::FisSeparator := b
     METHOD setShortcut( shortcut )
-    METHOD setText( text ) INLINE ::Ftext := text
+    METHOD setText( text )         INLINE ::Ftext := text
 
     PROPERTY shortcut
     PROPERTY text
@@ -26,6 +28,7 @@ ENDCLASS
     new
 */
 METHOD new( ... ) CLASS HAction
+
     LOCAL version := 0
     LOCAL parent
     LOCAL text
@@ -63,5 +66,7 @@ RETURN self
     setShortcut
 */
 METHOD PROCEDURE setShortcut( shortcut ) CLASS HAction
+
     ::Fshortcut := shortcut
+
 RETURN

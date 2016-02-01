@@ -5,8 +5,11 @@
 #include "hbtui.ch"
 
 CLASS HBoxLayout FROM HLayout
+
 PROTECTED:
+
     DATA FwidgetList INIT {}
+
 PUBLIC:
 
     CONSTRUCTOR new( dir, parent )

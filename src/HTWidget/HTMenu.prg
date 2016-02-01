@@ -5,6 +5,7 @@
 #include "hbtui.ch"
 
 CLASS HMenu FROM HWidget
+
 PROTECTED:
 
 PUBLIC:
@@ -26,6 +27,7 @@ ENDCLASS
     new
 */
 METHOD new( ... ) CLASS HMenu
+
     LOCAL version := 0
     LOCAL parent
     LOCAL title
@@ -63,6 +65,7 @@ RETURN self
     addAction
 */
 METHOD FUNCTION addAction( ... ) CLASS HMenu
+
     LOCAL version := 0
     LOCAL text
     LOCAL action
@@ -78,11 +81,11 @@ METHOD FUNCTION addAction( ... ) CLASS HMenu
     ENDIF
 
     IF pCount() <= 4
-        text := hb_pValue( 1 )
+        text     := hb_pValue( 1 )
         receiver := hb_pValue( 2 )
-        member := hb_pValue( 3 )
+        member   := hb_pValue( 3 )
         shortcut := hb_pValue( 4 )
-        IF hb_isChar( text ) .AND. hb_isObject( receiver ) .AND. receiver:isDerivedFrom("HObject") .AND. hb_isChar( member ) .AND. !empty( member ) .AND. ( shortcut == NIL .OR. hb_isObject( shortcut ) .AND. shortcut:isDerivedFrom("HKeySequence") )
+        IF hb_isChar( text ) .AND. hb_isObject( receiver ) .AND. receiver:isDerivedFrom("HObject") .AND. hb_isChar( member ) .AND. !Empty( member ) .AND. ( shortcut == NIL .OR. hb_isObject( shortcut ) .AND. shortcut:isDerivedFrom("HKeySequence") )
             version := 3
         ENDIF
     ENDIF
@@ -96,10 +99,10 @@ METHOD FUNCTION addAction( ... ) CLASS HMenu
 
     SWITCH version
     CASE 1
-        action := HAction():New( text, self )
+        action := HAction():new( text, self )
         EXIT
     CASE 3
-        action := HAction():New( text, self )
+        action := HAction():new( text, self )
         IF shortcut != NIL
             action:setShortcut( shortcut )
         ENDIF
@@ -118,6 +121,7 @@ RETURN action
     addMenu
 */
 METHOD FUNCTION addMenu() CLASS HMenu
+
     LOCAL version := 0
     LOCAL menu
     LOCAL retValue
@@ -136,7 +140,7 @@ METHOD FUNCTION addMenu() CLASS HMenu
         title := hb_pValue( 1 )
         IF hb_isChar( title )
             version := 2
-            menu := HMenu():New( title, self )
+            menu := HMenu():new( title, self )
             retValue := menu
         ENDIF
     ENDIF
@@ -156,9 +160,10 @@ RETURN retValue
     addSeparator
 */
 METHOD FUNCTION addSeparator() CLASS HMenu
+
     LOCAL action
 
-    action := HAction():New( self )
+    action := HAction():new( self )
     action:setSeparator( .t. )
 
     ::addAction( action )
