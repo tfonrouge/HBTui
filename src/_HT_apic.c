@@ -19,8 +19,11 @@ HB_FUNC( HT_OBJECTFROMID )
 
     if ( pObjectId ) {
         PHB_ITEM pItem = hb_arrayFromId( NULL, pObjectId );
-        if( pItem && hb_arrayIsObject( pItem ) ) {
+        if( hb_arrayIsObject( pItem ) ) {
             hb_itemReturnRelease( pItem );
+        }
+        else {
+            hb_itemRelease( pItem );
         }
     }
 }
