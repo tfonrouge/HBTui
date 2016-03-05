@@ -14,10 +14,11 @@ hbct.hbc
 
 src/*.c
 src/*.prg
-src/types/*.prg
 src/HTEvent/*.prg
 src/HTEvent/HTInputEvent/*.prg
 src/HTWidget/*.prg
+src/HTWidget/HTAbstractButton/*.prg
+src/types/*.prg
 
 $hb_pkg_dynlib.hbm
 $hb_pkg_install.hbm

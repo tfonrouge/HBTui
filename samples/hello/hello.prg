@@ -4,7 +4,7 @@
 
 #include "hbtui.ch"
 
-CLASS MyMainWindow FROM HTMainWindow
+CLASS MyMainWindow FROM HMainWindow
 PROTECTED:
 PUBLIC:
     CONSTRUCTOR new( ... )
@@ -39,7 +39,7 @@ PROCEDURE Main()
 
     SetMode( 40, 120 )
 
-    app := HTApplication():new()
+    app := HApplication():new()
 
     w1 := MyMainWindow():new()
     w1:setWindowTitle( "Window 1" )
@@ -58,16 +58,16 @@ PROCEDURE Main()
     w3:move( 16, 9 )
     w3:resize( 60, 20 )
 
-    t := HTLineEdit():new( "Text ONE", w1 )
+    t := HLineEdit():new( "Text ONE", w1 )
     t:move( 0, 0 )
 
-    t := HTLineEdit():new( "Text TWO", w2 )
+    t := HLineEdit():new( "Text TWO", w2 )
     t:move( 0, 0 )
 
-    t := HTLineEdit():new( "Text THREE", w3 )
+    t := HLineEdit():new( "Text THREE", w3 )
     t:move( 0, 0 )
 
-    btn := HTPushButton():new( "Ok", w1 )
+    btn := HPushButton():new( "Ok", w1 )
     btn:Move( 3, 0 )
 
     w1:show()

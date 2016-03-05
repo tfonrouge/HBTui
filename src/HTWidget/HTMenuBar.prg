@@ -5,7 +5,8 @@
 #include "hbtui.ch"
 #include "inkey.ch"
 
-CLASS HTMenuBar FROM HTWidget
+CLASS HMenuBar FROM HWidget
+
 PROTECTED:
 PUBLIC:
 
@@ -22,7 +23,8 @@ ENDCLASS
 /*
     new
 */
-METHOD new( parent ) CLASS HTMenuBar
+METHOD new( parent ) CLASS HMenuBar
+
     LOCAL version := 0
 
     IF pCount() <= 1
@@ -44,7 +46,8 @@ RETURN self
 /*
     addAction
 */
-METHOD FUNCTION addAction( ... ) CLASS HTMenuBar
+METHOD FUNCTION addAction( ... ) CLASS HMenuBar
+
     LOCAL version := 0
     LOCAL action
     LOCAL text
@@ -60,9 +63,9 @@ METHOD FUNCTION addAction( ... ) CLASS HTMenuBar
     ENDIF
 
     IF pCount() = 3
-        text := hb_pValue( 1 )
+        text     := hb_pValue( 1 )
         receiver := hb_pValue( 2 )
-        member := hb_pValue( 3 )
+        member   := hb_pValue( 3 )
         IF hb_isChar( text ) .AND. hb_isObject( receiver ) .AND. hb_isChar( member )
             version := 2
         ENDIF
@@ -77,11 +80,11 @@ METHOD FUNCTION addAction( ... ) CLASS HTMenuBar
 
     SWITCH version
     CASE 1
-        action := HTAction():new( text, self )
+        action := HAction():new( text, self )
         retValue := action
         EXIT
     CASE 2
-        action := HTAction():new( text, receiver )
+        action := HAction():new( text, receiver )
         retValue := action
         EXIT
     CASE 3
@@ -97,7 +100,8 @@ RETURN retValue
 /*
     addMenu
 */
-METHOD FUNCTION addMenu( ... ) CLASS HTMenuBar
+METHOD FUNCTION addMenu( ... ) CLASS HMenuBar
+
     LOCAL version := 0
     LOCAL menu
     LOCAL title
@@ -105,7 +109,7 @@ METHOD FUNCTION addMenu( ... ) CLASS HTMenuBar
 
     IF pCount() = 1
         menu := hb_pValue( 1 )
-        IF hb_isObject( menu ) .AND. menu:isDerivedFrom("HTMenu")
+        IF hb_isObject( menu ) .AND. menu:isDerivedFrom("HMenu")
             version := 1
         ENDIF
     ENDIF
@@ -123,7 +127,7 @@ METHOD FUNCTION addMenu( ... ) CLASS HTMenuBar
         retValue := menu:menuAction()
         EXIT
     CASE 2
-        menu := HTMenu():new( title, self )
+        menu := HMenu():new( title, self )
         retValue := menu
         EXIT
     OTHERWISE
@@ -135,27 +139,28 @@ RETURN retValue
 /*
     addSeparator
 */
-METHOD FUNCTION addSeparator() CLASS HTMenuBar
+METHOD FUNCTION addSeparator() CLASS HMenuBar
 
 RETURN self
 
 /*
     paintEvent
 */
-METHOD PROCEDURE paintEvent( event ) CLASS HTMenuBar
+METHOD PROCEDURE paintEvent( event ) CLASS HMenuBar
+
     LOCAL itm
     LOCAL y := 0
 
     HB_SYMBOL_UNUSED( event )
 
-    wSelect( ::windowId, .f. )
+    wSelect( ::windowId, .F. )
     wFormat()
     wFormat( 1, 0, 1, 0 )
-    dispOutAt( 0, 0, space( ::parent():width ), "00/07" )
+    DispOutAt( 0, 0, Space( ::parent():width ), "00/07" )
     FOR EACH itm IN ::children
-        IF itm:isDerivedFrom("HTMenu")
+        IF itm:isDerivedFrom("HMenu")
             itm:move( 0, ++y )
-            y += len( itm:title )
+            y += Len( itm:title )
         ENDIF
     NEXT
     wFormat()

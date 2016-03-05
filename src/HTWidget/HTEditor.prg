@@ -1,13 +1,13 @@
 /*
-   12-01-2015
-*/
+ *
+ */
 
 #include "hbtui.ch"
 #include "common.ch"
 #include "fileio.ch"
 #include "inkey.ch"
 
-CLASS HTEditor FROM HTWidget
+CLASS HEditor FROM HWidget
 
    VAR cFile                         AS CHARACTER INIT "Untitled.txt"
    VAR nTop                          AS NUMERIC   INIT 0
@@ -24,7 +24,7 @@ ENDCLASS
 /*
    new
 */
-METHOD new( cFile, nTop, nLeft, nBottom, nRight, cColor ) CLASS HTEditor
+METHOD new( cFile, nTop, nLeft, nBottom, nRight, cColor ) CLASS HEditor
 
     ::super:new()
 

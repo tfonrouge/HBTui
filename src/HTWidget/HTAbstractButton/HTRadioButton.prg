@@ -4,15 +4,15 @@
 
 #include "hbtui.ch"
 
-CLASS HTRadioButton FROM HTAbstractButton
+CLASS HRadioButton FROM HAbstractButton
 
-   METHOD New()
+   METHOD new()
 
 ENDCLASS
 
 /*
-   New()
+   new
 */
-METHOD New() CLASS HTRadioButton
+METHOD new() CLASS HRadioButton
 
-RETURN ( Self )
+RETURN self

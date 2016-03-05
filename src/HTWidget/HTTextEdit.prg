@@ -4,13 +4,13 @@
 
 #include "hbtui.ch"
 
-CLASS HTTextEdit FROM HTWidget
+CLASS HTextEdit FROM HWidget
 
    DATA cFileName
    METHOD nTop    INLINE 0
    METHOD nLeft   INLINE 0
-   METHOD nBottom INLINE MAXROW()
-   METHOD nRight  INLINE MAXCOL()
+   METHOD nBottom INLINE MaxRow()
+   METHOD nRight  INLINE MaxCol()
 
    DATA nRow        INIT 0
    DATA nCol        INIT 0
@@ -59,7 +59,7 @@ CLASS HTTextEdit FROM HTWidget
 
 ENDCLASS
 // -------------------------------------------------------------------------- //
-METHOD New( cFileName ) CLASS HTTextEdit
+METHOD New( cFileName ) CLASS HTextEdit
 
    ::cFileName := cFileName
 
@@ -71,7 +71,7 @@ METHOD New( cFileName ) CLASS HTTextEdit
 
 RETURN ( Self )
 
-METHOD isFile() CLASS HTTextEdit
+METHOD isFile() CLASS HTextEdit
 
    LOCAL nChoice
 
@@ -79,7 +79,7 @@ METHOD isFile() CLASS HTTextEdit
       ::loadFile()
    ELSE
 
-      nChoice := ALERT( "Cannot find the file " + '"' + ::cFileName + '";' + ";" + ;
+      nChoice := Alert( "Cannot find the file " + '"' + ::cFileName + '";' + ";" + ;
                         "Do you want to create a new file?", { "Yes", "No", "Cancel" } )
 
       DO CASE
@@ -102,16 +102,16 @@ METHOD isFile() CLASS HTTextEdit
 
 RETURN ( Self )
 
-METHOD loadFile() CLASS HTTextEdit
+METHOD loadFile() CLASS HTextEdit
 
-   IF ( ::nHandle := FOPEN( ::cFileName, 2 ) ) == -1
-      ::nError := FERROR()
+   IF ( ::nHandle := FOpen( ::cFileName, 2 ) ) == -1
+      ::nError := FError()
       RETURN ( .F. )
    ENDIF
 
    DO WHILE .NOT. hb_FEof( ::nHandle )
 
-      AADD( ::aTextBuffer, ::readLine() )
+      AAdd( ::aTextBuffer, ::readLine() )
 
    ENDDO
 
@@ -124,18 +124,18 @@ METHOD loadFile() CLASS HTTextEdit
 
 RETURN ( Self )
 
-METHOD emptyFile() CLASS HTTextEdit
+METHOD emptyFile() CLASS HTextEdit
 
-   AADD( ::aTextBuffer, "" )
+   AAdd( ::aTextBuffer, "" )
 
    ::refresh()
 
 RETURN ( Self )
 
-METHOD createFile() CLASS HTTextEdit
+METHOD createFile() CLASS HTextEdit
 
-   IF ( ::nHandle := FCREATE( ::cFileName, 0 ) ) = -1
-      ::nError := FERROR()
+   IF ( ::nHandle := FCreate( ::cFileName, 0 ) ) = -1
+      ::nError := FError()
       RETURN ( .F. )
    ENDIF
 
@@ -143,39 +143,39 @@ METHOD createFile() CLASS HTTextEdit
 
 RETURN ( Self )
 
-METHOD saveFile() CLASS HTTextEdit
+METHOD saveFile() CLASS HTextEdit
 
    LOCAL i
    LOCAL cTextBuffer
 
    ::createFile()
 
-   FOR i := 1 TO LEN( ::aTextBuffer )
+   FOR i := 1 TO Len( ::aTextBuffer )
       cTextBuffer := ::aTextBuffer[ i ] + "test" + e"\n"
-      FWRITE( ::nHandle, cTextBuffer, LEN( cTextBuffer ) )
+      FWrite( ::nHandle, cTextBuffer, Len( cTextBuffer ) )
    NEXT
 
 
 RETURN ( Self )
 
-METHOD closeFile() CLASS HTTextEdit
+METHOD closeFile() CLASS HTextEdit
 
-   IF ! FCLOSE( ::nHandle )
-      ::nError := FERROR()
+   IF ! FClose( ::nHandle )
+      ::nError := FError()
    ENDIF
 
 RETURN ( Self )
 
-METHOD mouse() CLASS HTTextEdit
+METHOD mouse() CLASS HTextEdit
 
-   ::nRow := MROW()
-   ::nCol := MCOL()
+   ::nRow := MRow()
+   ::nCol := MCol()
 
-   SETPOS( ::nRow, ::nCol )
+   SetPos( ::nRow, ::nCol )
 
 RETURN ( Self )
 
-METHOD up() CLASS HTTextEdit
+METHOD up() CLASS HTextEdit
 
    IF ::nRow > 0
       ::nRow--
@@ -187,11 +187,11 @@ METHOD up() CLASS HTTextEdit
 
 RETURN ( Self )
 
-METHOD down() CLASS HTTextEdit
+METHOD down() CLASS HTextEdit
 
    IF ( ::nRow + 1 ) < ::nEndRow
       ::nRow++
-   ELSEIF ( ::nRowArray + 1 ) < LEN( ::aTextBuffer )
+   ELSEIF ( ::nRowArray + 1 ) < Len( ::aTextBuffer )
       ::nStartArray++
    ENDIF
 
@@ -199,7 +199,7 @@ METHOD down() CLASS HTTextEdit
 
 RETURN ( Self )
 
-METHOD left() CLASS HTTextEdit
+METHOD left() CLASS HTextEdit
 
    IF ::nCol > 0
       ::nCol--
@@ -211,7 +211,7 @@ METHOD left() CLASS HTTextEdit
 
 RETURN ( Self )
 
-METHOD right() CLASS HTTextEdit
+METHOD right() CLASS HTextEdit
 
    IF ( ::nCol + 1 ) < ::nEndCol
       ::nCol++
@@ -221,72 +221,72 @@ METHOD right() CLASS HTTextEdit
 
 RETURN ( Self )
 
-METHOD pageUp() CLASS HTTextEdit
+METHOD pageUp() CLASS HTextEdit
 
 RETURN ( Self )
 
-METHOD pageDown() CLASS HTTextEdit
+METHOD pageDown() CLASS HTextEdit
 
 RETURN ( Self )
 
-METHOD home() CLASS HTTextEdit
+METHOD home() CLASS HTextEdit
 
    ::nCol := 0
 
-   SETPOS( ::nRow, ::nCol )
+   SetPos( ::nRow, ::nCol )
 
 RETURN ( Self )
 
-METHOD end() CLASS HTTextEdit
+METHOD end() CLASS HTextEdit
 
    ::nCol := ::nEndCol
 
-   SETPOS( ::nRow, ::nCol )
+   SetPos( ::nRow, ::nCol )
 
 RETURN ( Self )
 
-METHOD pageHome() CLASS HTTextEdit
+METHOD pageHome() CLASS HTextEdit
 
 RETURN ( Self )
 
-METHOD pageEnd() CLASS HTTextEdit
+METHOD pageEnd() CLASS HTextEdit
 
 RETURN ( Self )
 
-METHOD wordRight() CLASS HTTextEdit
+METHOD wordRight() CLASS HTextEdit
 
 RETURN ( Self )
 
-METHOD wordLeft() CLASS HTTextEdit
+METHOD wordLeft() CLASS HTextEdit
 
 RETURN ( Self )
 
-METHOD refresh() CLASS HTTextEdit
+METHOD refresh() CLASS HTextEdit
 
    LOCAL i
    LOCAL n
 
-   DISPBEGIN()
+   DispBegin()
 
    FOR i := 1 TO ::nEndRow
 
-      SETPOS( ::nTop - 1 + i, ::nLeft )
+      SetPos( ::nTop - 1 + i, ::nLeft )
 
       n := i + ::nStartArray
 
-      IF n <= LEN( ::aTextBuffer )
-         DISPOUT( PADR( ::aTextBuffer[ n ], ::nEndCol ) )
+      IF n <= Len( ::aTextBuffer )
+         DispOut( PadR( ::aTextBuffer[ n ], ::nEndCol ) )
       ENDIF
 
    NEXT
 
-   SETPOS( ::nRow, ::nCol )
+   SetPos( ::nRow, ::nCol )
 
-   DISPEND()
+   DispEnd()
 
 RETURN ( Self )
 
-METHOD errorMsg() CLASS HTTextEdit
+METHOD errorMsg() CLASS HTextEdit
 
    LOCAL cMessage
    LOCAL aMeaning := { "Successful",;
@@ -305,11 +305,11 @@ METHOD errorMsg() CLASS HTTextEdit
                        "Sharing violation",;
                        "Lock Violation" }
 
-   cMessage := aMeaning[ FERROR() ]
+   cMessage := aMeaning[ FError() ]
 
-RETURN ( ALERT( cMessage ) )
+RETURN ( Alert( cMessage ) )
 
-METHOD readLine() CLASS HTTextEdit
+METHOD readLine() CLASS HTextEdit
 
    LOCAL lBytes := .F., lEnd := .F.
    LOCAL cBufferVar
@@ -320,17 +320,17 @@ METHOD readLine() CLASS HTTextEdit
 
    DO WHILE ( ! ( lBytes .OR. lEnd ) )
 
-      cBufferVar := SPACE( 128 )
-      nBytes := FREAD( ::nHandle, @cBufferVar, 128 )
+      cBufferVar := Space( 128 )
+      nBytes := FRead( ::nHandle, @cBufferVar, 128 )
 
       lBytes := nBytes < 128
 
-      cLine := cLine + SUBSTR( cBufferVar, 1, nBytes )
+      cLine := cLine + SubStr( cBufferVar, 1, nBytes )
 
       nOffset := nOffset + nBytes
 
-      nCR := AT( CHR( 13 ), cLine )
-      nLF := AT( CHR( 10 ), cline )
+      nCR := At( Chr( 13 ), cLine )
+      nLF := At( Chr( 10 ), cline )
 
       DO CASE
          CASE nCR == 0
@@ -338,12 +338,12 @@ METHOD readLine() CLASS HTTextEdit
          CASE nLF == 0
             eol := nCR
          OTHERWISE
-            eol := MIN( nCR, nLF )
+            eol := Min( nCR, nLF )
       ENDCASE
 
       IF ( lEnd := eol > 0 )
-         FSEEK( ::nHandle, eol - nOffset + 1, 1 )
-         cLine := SUBSTR( cLine, 1, eol - 1 )
+         FSeek( ::nHandle, eol - nOffset + 1, 1 )
+         cLine := SubStr( cLine, 1, eol - 1 )
       ENDIF
 
    ENDDO

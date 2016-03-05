@@ -11,13 +11,13 @@ FUNCTION Main()
    LOCAL nKey
 
    CLEAR SCREEN
-   WOpen( 0, 0, MAXROW(), MAXCOL() )
+   WOpen( 0, 0, MaxRow(), MaxCol() )
 
-   oTextEdit := HTTextEdit():New( 0, 0, MAXROW(), MAXCOL() )
+   oTextEdit := HTextEdit():New( 0, 0, MaxRow(), MaxCol() )
 
    DO WHILE ( .T. )
 
-	nKey := INKEY(0)
+	nKey := InKey(0)
 
 	   oTextEdit:moveCursor( nKey )
 

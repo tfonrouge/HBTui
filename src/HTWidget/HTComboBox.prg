@@ -4,15 +4,15 @@
 
 #include "hbtui.ch"
 
-CLASS HTComboBox FROM HTWidget
+CLASS HComboBox FROM HWidget
 
-   METHOD New()
+    CONSTRUCTOR new()
 
 ENDCLASS
 
 /*
-   New()
+   new
 */
-METHOD New() CLASS HTComboBox
+METHOD new() CLASS HComboBox
 
 RETURN ( Self )

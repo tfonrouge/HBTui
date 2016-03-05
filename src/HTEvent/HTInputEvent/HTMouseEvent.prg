@@ -7,7 +7,7 @@
 /*
     HTMouseEvent
 */
-CLASS HTMouseEvent FROM HTInputEvent
+CLASS HMouseEvent FROM HInputEvent
 PROTECTED:
     DATA Ftype INIT HT_EVENT_TYPE_MOUSE
 PUBLIC:
@@ -22,7 +22,7 @@ ENDCLASS
 /*
     new
 */
-METHOD new( nKey ) CLASS HTMouseEvent
+METHOD new( nKey ) CLASS HMouseEvent
     ::FnKey := nKey
     ::FmouseAbsCol := mCol( .t. )
     ::FmouseAbsRow := mRow( .t. )

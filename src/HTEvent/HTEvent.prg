@@ -6,15 +6,16 @@
 
 #include "hbtui.ch"
 
-CLASS HTEvent
+CLASS HEvent
+
 PUBLIC:
 
-    METHOD accept() INLINE ::FisAccepted := .t.
-    METHOD ignore() INLINE ::FisAccepted := .f.
+    METHOD accept() INLINE ::FisAccepted := .T.
+    METHOD ignore() INLINE ::FisAccepted := .F.
     METHOD setAccepted( accepted ) INLINE ::FisAccepted := accepted
     METHOD setWidget( widget ) INLINE ::Fwidget := widget
 
-    PROPERTY isAccepted INIT .t.
+    PROPERTY isAccepted INIT .T.
     PROPERTY type INIT HT_EVENT_TYPE_NULL
     PROPERTY widget
 

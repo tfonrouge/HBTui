@@ -4,7 +4,8 @@
 
 #include "hbtui.ch"
 
-SINGLETON CLASS HTDesktop FROM HTWidget
+SINGLETON CLASS HDesktop FROM HWidget
+
 PROTECTED:
 PUBLIC:
 
@@ -18,12 +19,13 @@ ENDCLASS
 /*
     new
 */
-METHOD new() CLASS HTDesktop
+METHOD new() CLASS HDesktop
+
     LOCAL menu
 
     ::super:new( NIL, HT_DESKTOP )
 
-    menu := HTMenuBar():new( self ):addMenu(e"\xfe") /* always present menu */
+    menu := HMenuBar():new( self ):addMenu(e"\xfe") /* always present menu */
 
     menu:addAction("About")
     menu:addSeparator()
@@ -34,14 +36,14 @@ RETURN self
 /*
     addEvent
 */
-METHOD PROCEDURE addEvent( event ) CLASS HTDesktop
+METHOD PROCEDURE addEvent( event ) CLASS HDesktop
     ::super:addEvent( event, HT_EVENT_PRIORITY_HIGH )
 RETURN
 
 /*
     paintEvent
 */
-METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTDesktop
+METHOD PROCEDURE paintEvent( paintEvent ) CLASS HDesktop
 
     ctWInit()
 
@@ -51,14 +53,14 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTDesktop
     wBoard() /* available physical screen */
     wMode( .f., .f., .f., .f. ) /* windows cannot be moved outside of screen ( top, left, bottom, right ) */
     wSetShadow( ::Fshadow )
-    setClearA( ::FclearA )
-    setClearB( ::FclearB )
-    dispBox( 0, 0, maxRow(), maxCol(), replicate( ::FclearB, 9 ), ::color )
-    setPos( 0, 0 )
-    ::FisVisible := .t.
+    SetClearA( ::FclearA )
+    SetClearB( ::FclearB )
+    DispBox( 0, 0, MaxRow(), MaxCol(), Replicate( ::FclearB, 9 ), ::color )
+    SetPos( 0, 0 )
+    ::FisVisible := .T.
     ::setWindowId( 0 )
-    ::Fwidth := maxCol() + 1
-    ::Fheight := maxRow() + 1
+    ::Fwidth := MaxCol() + 1
+    ::Fheight := MaxRow() + 1
 
     wBoard( NIL, NIL, NIL, NIL )
 

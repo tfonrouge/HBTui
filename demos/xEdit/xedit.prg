@@ -10,12 +10,12 @@ FUNCTION Main( cFile )
 
 //altd()
 
-   lMouse := MSETCURSOR( .T. )
-   SET( _SET_EVENTMASK, INKEY_ALL )
+   lMouse := MSetCursor( .T. )
+   Set( _SET_EVENTMASK, INKEY_ALL )
 
-   SETMODE(25,80)
+   SetMode( 25, 80 )
 
-   oTextEdit := HTTextEdit():New( cFile )
+   oTextEdit := HTextEdit():New( cFile )
 
 //   Hb_GtInfo( HB_GTI_WINTITLE , oTextEdit:cFile )
 
@@ -25,14 +25,13 @@ FUNCTION Main( cFile )
 
       DO WHILE ( .T. )
 
-         nKey := INKEY( 0 )
+         nKey := InKey( 0 )
 
          DO CASE
             CASE nKey == K_ESC
                RETURN ( .F. )
 
             CASE nKey == K_CTRL_LEFT
-               alert("K_CTRL_LEFT")
 
             CASE nKey == K_LBUTTONDOWN
                oTextEdit:mouse()
@@ -87,15 +86,15 @@ FUNCTION Main( cFile )
 
           ENDCASE
 ***
-//OUTSTD( "nRow            :", PADR( oTextEdit:nRow, 10 ), "nCol :", PADR( oTextEdit:nCol, 10 ), CHR(10)+CHR(13) )
-//OUTSTD( "nStartArray :", PADR( oTextEdit:nStartArray, 10 ), CHR(10)+CHR(13) )
-OUTSTD( "nRowArray   :", PADR( oTextEdit:nRowArray, 10 ), CHR(10)+CHR(13) )
-OUTSTD( "nColArray   :", PADR( oTextEdit:nColArray, 10 ), CHR(10)+CHR(13) )
+//OutStd( "nRow            :", PadR( oTextEdit:nRow, 10 ), "nCol :", PadR( oTextEdit:nCol, 10 ), Chr(10)+Chr(13) )
+//OutStd( "nStartArray :", PadR( oTextEdit:nStartArray, 10 ), Chr(10)+Chr(13) )
+OutStd( "nRowArray   :", PadR( oTextEdit:nRowArray, 10 ), Chr(10)+Chr(13) )
+OutStd( "nColArray   :", PadR( oTextEdit:nColArray, 10 ), Chr(10)+Chr(13) )
 ***
       ENDDO
 
    ENDIF
 
-   MSETCURSOR( lMouse )
+   MSetCursor( lMouse )
 
 RETURN NIL

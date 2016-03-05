@@ -4,7 +4,8 @@
 
 #include "hbtui.ch"
 
-CLASS HTAbstractButton FROM HTWidget
+CLASS HAbstractButton FROM HWidget
+
 PROTECTED:
 
 PUBLIC:
@@ -13,10 +14,10 @@ PUBLIC:
 
     METHOD setText( text )
 
-    PROPERTY autoExclusive  INIT .f.
-    PROPERTY checkable      INIT .f.
-    PROPERTY checked        INIT .f.
-    PROPERTY down           INIT .f.
+    PROPERTY autoExclusive  INIT .F.
+    PROPERTY checkable      INIT .F.
+    PROPERTY checked        INIT .F.
+    PROPERTY down           INIT .F.
     PROPERTY shortcut
     PROPERTY text WRITE setText INIT ""
 
@@ -25,6 +26,6 @@ ENDCLASS
 /*
     setText
 */
-METHOD PROCEDURE setText( text ) CLASS HTAbstractButton
+METHOD PROCEDURE setText( text ) CLASS HAbstractButton
     ::Ftext := text
 RETURN

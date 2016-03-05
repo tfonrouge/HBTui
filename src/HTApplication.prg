@@ -5,10 +5,11 @@
 #include "hbtui.ch"
 #include "inkey.ch"
 
-SINGLETON CLASS HTApplication FROM HTObject
+SINGLETON CLASS HApplication FROM HObject
+
 PROTECTED:
 
-    DATA Fexecute INIT .f.
+    DATA Fexecute INIT .F.
     DATA FeventStack        INIT { {}, {}, {} }
     DATA FeventStackLen     INIT { 0, 0, 0 }
 
@@ -32,11 +33,12 @@ ENDCLASS
 /*
     new
 */
-METHOD new() CLASS HTApplication
+METHOD new() CLASS HApplication
+
     LOCAL desktop
 
     IF ::Fdesktop = NIL
-        desktop := HTDesktop():new()
+        desktop := HDesktop():new()
         desktop:setAsDesktopWidget()
         ::Fdesktop := desktop
     ENDIF
@@ -46,13 +48,14 @@ RETURN self
 /*
     activeWindow
 */
-METHOD FUNCTION activeWindow() CLASS HTApplication
+METHOD FUNCTION activeWindow() CLASS HApplication
 RETURN ::getTopLevelWindowFromWindowId( wSelect() )
 
 /*
     addTopLevelWindow
 */
-METHOD PROCEDURE addTopLevelWindow( windowId, widget ) CLASS HTApplication
+METHOD PROCEDURE addTopLevelWindow( windowId, widget ) CLASS HApplication
+
     LOCAL objectId
 
     IF hb_hHasKey( ::FtopLevelWindows, windowId )
@@ -67,7 +70,8 @@ RETURN
 /*
   exec
 */
-METHOD FUNCTION exec() CLASS HTApplication
+METHOD FUNCTION exec() CLASS HApplication
+
     LOCAL result
     LOCAL event
     LOCAL widget
@@ -76,15 +80,15 @@ METHOD FUNCTION exec() CLASS HTApplication
     IF !::Fexecute
 
         //set( _SET_EVENTMASK, INKEY_ALL + HB_INKEY_RAW + HB_INKEY_EXT + HB_INKEY_GTEVENT )
-        set( _SET_EVENTMASK, INKEY_ALL )
-        setBlink( .f. )
+        Set( _SET_EVENTMASK, INKEY_ALL )
+        SetBlink( .F. )
 
         result := 0
 
         /* paint desktop */
         ::Fdesktop:show()
 
-        ::Fexecute := .t.
+        ::Fexecute := .T.
 
         WHILE ::Fexecute
 
@@ -97,7 +101,7 @@ METHOD FUNCTION exec() CLASS HTApplication
                     aDel( ::FeventStack[ priority ], 1 )
                     --::FeventStackLen[ priority ]
 
-                    widget := iif( event:widget = NIL, ::activeWindow(), event:widget )
+                    widget := IIF( event:widget = NIL, ::activeWindow(), event:widget )
 
                     widget:event( event )
 
@@ -117,10 +121,11 @@ RETURN result
 /*
   getEvent
 */
-METHOD PROCEDURE getEvent() CLASS HTApplication
+METHOD PROCEDURE getEvent() CLASS HApplication
+
     LOCAL nKey
-    LOCAL mrow := mRow( .t. )
-    LOCAL mcol := mCol( .t. )
+    LOCAL mrow := mRow( .T. )
+    LOCAL mcol := mCol( .T. )
     LOCAL window
 
     STATIC mCoords
@@ -130,7 +135,7 @@ METHOD PROCEDURE getEvent() CLASS HTApplication
     ENDIF
 
     IF mCoords[ 1 ] != mrow .OR. mCoords[ 2 ] != mcol
-        HTApplication():activeWindow():addEvent( HTMouseEvent():new( K_MOUSEMOVE ) )
+        HApplication():activeWindow():addEvent( HMouseEvent():new( K_MOUSEMOVE ) )
         mCoords[ 1 ] := mrow
         mCoords[ 2 ] := mcol
         RETURN
@@ -139,11 +144,11 @@ METHOD PROCEDURE getEvent() CLASS HTApplication
     nKey := Inkey( 1 )
 
     IF nKey != 0
-        IF !empty( window := ::getTopLevelWindowFromWindowId( hb_windowAtMousePos() ) )
+        IF !Empty( window := ::getTopLevelWindowFromWindowId( hb_windowAtMousePos() ) )
             IF nKey >= K_MINMOUSE .AND. nKey <= K_MAXMOUSE
-                window:addEvent( HTMouseEvent():new( nKey ) )
+                window:addEvent( HMouseEvent():new( nKey ) )
             ELSE
-                window:addEvent( HTKeyEvent():new( nKey ) )
+                window:addEvent( HKeyEvent():new( nKey ) )
             ENDIF
         ENDIF
     ENDIF
@@ -153,7 +158,8 @@ RETURN
 /*
     getTopLevelWindowFromWindowId
 */
-METHOD FUNCTION getTopLevelWindowFromWindowId( windowId ) CLASS HTApplication
+METHOD FUNCTION getTopLevelWindowFromWindowId( windowId ) CLASS HApplication
+
     LOCAL nPos
 
     nPos := hb_hPos( ::FtopLevelWindows, windowId )
@@ -167,7 +173,7 @@ RETURN NIL
 /*
     queueEvent
 */
-METHOD PROCEDURE queueEvent( event, priority ) CLASS HTApplication
+METHOD PROCEDURE queueEvent( event, priority ) CLASS HApplication
 
     IF priority = NIL
         IF event:widget != NIL .AND. event:widget:isVisible
@@ -179,7 +185,7 @@ METHOD PROCEDURE queueEvent( event, priority ) CLASS HTApplication
 
     IF ::FeventStackLen[ priority ] < HBTUI_UI_STACK_EVENT_SIZE
         ++::FeventStackLen[ priority ]
-        IF len( ::FeventStack[ priority ] ) < ::FeventStackLen[ priority ]
+        IF Len( ::FeventStack[ priority ] ) < ::FeventStackLen[ priority ]
             ASize( ::FeventStack[ priority ], ::FeventStackLen[ priority ] )
         ENDIF
         ::FeventStack[ priority, ::FeventStackLen[ priority ] ] := event
