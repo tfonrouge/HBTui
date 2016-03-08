@@ -7,7 +7,7 @@
 /*
     HTMaximizeEvent
 */
-CLASS HMaximizeEvent FROM HEvent
+CLASS HTMaximizeEvent FROM HTEvent
 
 PROTECTED:
 
@@ -22,5 +22,5 @@ ENDCLASS
 /*
     new
 */
-METHOD new() CLASS HMaximizeEvent
+METHOD new() CLASS HTMaximizeEvent
 RETURN self

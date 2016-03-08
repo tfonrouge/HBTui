@@ -6,7 +6,7 @@
 
 #include "hbtui.ch"
 
-CLASS HEvent
+CLASS HTEvent
 
 PUBLIC:
 

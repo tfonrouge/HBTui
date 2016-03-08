@@ -15,7 +15,7 @@ FUNCTION Main( cFile )
 
    SetMode( 25, 80 )
 
-   oTextEdit := HTextEdit():New( cFile )
+   oTextEdit := HTTextEdit():New( cFile )
 
 //   Hb_GtInfo( HB_GTI_WINTITLE , oTextEdit:cFile )
 

@@ -13,7 +13,7 @@ FUNCTION Main()
    CLEAR SCREEN
    WOpen( 0, 0, MaxRow(), MaxCol() )
 
-   oTextEdit := HTextEdit():New( 0, 0, MaxRow(), MaxCol() )
+   oTextEdit := HTTextEdit():New( 0, 0, MaxRow(), MaxCol() )
 
    DO WHILE ( .T. )
 

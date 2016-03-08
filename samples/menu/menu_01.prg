@@ -10,11 +10,11 @@ PROCEDURE Main()
     LOCAL win
     LOCAL menu
 
-    SetMode( 30, 90 )
+    setMode( 30, 90 )
 
-    app := HApplication():new()
+    app := HTApplication():new()
 
-    win := HMainWindow():new()
+    win := HTMainWindow():new()
 
     menu := win:menuBar():addMenu("File")
 

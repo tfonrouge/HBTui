@@ -4,7 +4,7 @@
 
 #include "hbtui.ch"
 
-CLASS HLayout FROM HObject, HLayoutItem
+CLASS HTLayout FROM HTObject, HTLayoutItem
 
 PUBLIC:
 
@@ -17,8 +17,8 @@ ENDCLASS
 /*
     new
 */
-METHOD new( parent ) CLASS HLayout
-    IF parent != NIL .AND. parent:isDerivedFrom( "HWidget" )
+METHOD new( parent ) CLASS HTLayout
+    IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
         parent:setLayout( self )
     ENDIF
 RETURN self

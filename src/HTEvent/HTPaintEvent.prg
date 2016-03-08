@@ -7,7 +7,7 @@
 /*
     HTPaintEvent
 */
-CLASS HPaintEvent FROM HEvent
+CLASS HTPaintEvent FROM HTEvent
 
 PROTECTED:
 
@@ -22,5 +22,5 @@ ENDCLASS
 /*
     new
 */
-METHOD new() CLASS HPaintEvent
+METHOD new() CLASS HTPaintEvent
 RETURN self

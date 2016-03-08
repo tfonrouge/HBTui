@@ -6,7 +6,7 @@
 
 #include "hbtui.ch"
 
-CLASS HSize
+CLASS HTSize
 
 PROTECTED:
 PUBLIC:
@@ -25,7 +25,7 @@ ENDCLASS
 /*
     new
 */
-METHOD new( width, height ) CLASS HSize
+METHOD new( width, height ) CLASS HTSize
 
     ::Fwidth := width
     ::Fheight := height

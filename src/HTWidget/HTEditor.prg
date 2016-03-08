@@ -7,7 +7,7 @@
 #include "fileio.ch"
 #include "inkey.ch"
 
-CLASS HEditor FROM HWidget
+CLASS HTEditor FROM HTWidget
 
    VAR cFile                         AS CHARACTER INIT "Untitled.txt"
    VAR nTop                          AS NUMERIC   INIT 0
@@ -24,7 +24,7 @@ ENDCLASS
 /*
    new
 */
-METHOD new( cFile, nTop, nLeft, nBottom, nRight, cColor ) CLASS HEditor
+METHOD new( cFile, nTop, nLeft, nBottom, nRight, cColor ) CLASS HTEditor
 
     ::super:new()
 

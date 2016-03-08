@@ -4,7 +4,7 @@
 
 #include "hbtui.ch"
 
-CLASS HMainWindow FROM HWidget
+CLASS HTMainWindow FROM HTWidget
 
 PROTECTED:
 
@@ -18,15 +18,15 @@ ENDCLASS
 /*
     menuBar
 */
-METHOD FUNCTION menuBar() CLASS HMainWindow
+METHOD FUNCTION menuBar() CLASS HTMainWindow
     IF ::FmenuBar = NIL
-        HMenuBar():new( self )
+        HTMenuBar():new( self )
     ENDIF
 RETURN ht_objectFromId( ::FmenuBar )
 
 /*
     show
 */
-METHOD PROCEDURE show() CLASS HMainWindow
+METHOD PROCEDURE show() CLASS HTMainWindow
     ::super:show()
 RETURN

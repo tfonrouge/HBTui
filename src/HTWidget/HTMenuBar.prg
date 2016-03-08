@@ -5,7 +5,7 @@
 #include "hbtui.ch"
 #include "inkey.ch"
 
-CLASS HMenuBar FROM HWidget
+CLASS HTMenuBar FROM HTWidget
 
 PROTECTED:
 PUBLIC:
@@ -23,7 +23,7 @@ ENDCLASS
 /*
     new
 */
-METHOD new( parent ) CLASS HMenuBar
+METHOD new( parent ) CLASS HTMenuBar
 
     LOCAL version := 0
 
@@ -46,7 +46,7 @@ RETURN self
 /*
     addAction
 */
-METHOD FUNCTION addAction( ... ) CLASS HMenuBar
+METHOD FUNCTION addAction( ... ) CLASS HTMenuBar
 
     LOCAL version := 0
     LOCAL action
@@ -80,11 +80,11 @@ METHOD FUNCTION addAction( ... ) CLASS HMenuBar
 
     SWITCH version
     CASE 1
-        action := HAction():new( text, self )
+        action := HTAction():new( text, self )
         retValue := action
         EXIT
     CASE 2
-        action := HAction():new( text, receiver )
+        action := HTAction():new( text, receiver )
         retValue := action
         EXIT
     CASE 3
@@ -100,7 +100,7 @@ RETURN retValue
 /*
     addMenu
 */
-METHOD FUNCTION addMenu( ... ) CLASS HMenuBar
+METHOD FUNCTION addMenu( ... ) CLASS HTMenuBar
 
     LOCAL version := 0
     LOCAL menu
@@ -109,7 +109,7 @@ METHOD FUNCTION addMenu( ... ) CLASS HMenuBar
 
     IF pCount() = 1
         menu := hb_pValue( 1 )
-        IF hb_isObject( menu ) .AND. menu:isDerivedFrom("HMenu")
+        IF hb_isObject( menu ) .AND. menu:isDerivedFrom("HTMenu")
             version := 1
         ENDIF
     ENDIF
@@ -127,7 +127,7 @@ METHOD FUNCTION addMenu( ... ) CLASS HMenuBar
         retValue := menu:menuAction()
         EXIT
     CASE 2
-        menu := HMenu():new( title, self )
+        menu := HTMenu():new( title, self )
         retValue := menu
         EXIT
     OTHERWISE
@@ -139,14 +139,14 @@ RETURN retValue
 /*
     addSeparator
 */
-METHOD FUNCTION addSeparator() CLASS HMenuBar
+METHOD FUNCTION addSeparator() CLASS HTMenuBar
 
 RETURN self
 
 /*
     paintEvent
 */
-METHOD PROCEDURE paintEvent( event ) CLASS HMenuBar
+METHOD PROCEDURE paintEvent( event ) CLASS HTMenuBar
 
     LOCAL itm
     LOCAL y := 0
@@ -158,7 +158,7 @@ METHOD PROCEDURE paintEvent( event ) CLASS HMenuBar
     wFormat( 1, 0, 1, 0 )
     DispOutAt( 0, 0, Space( ::parent():width ), "00/07" )
     FOR EACH itm IN ::children
-        IF itm:isDerivedFrom("HMenu")
+        IF itm:isDerivedFrom("HTMenu")
             itm:move( 0, ++y )
             y += Len( itm:title )
         ENDIF

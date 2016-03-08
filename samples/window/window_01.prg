@@ -4,7 +4,7 @@
 
 #include "hbtui.ch"
 
-CLASS MainWindow FROM HMainWindow
+CLASS MainWindow FROM HTMainWindow
 PROTECTED:
 PUBLIC:
 ENDCLASS
@@ -15,7 +15,7 @@ PROCEDURE Main()
 
     SetMode( 40, 100 )
 
-    app := HApplication():new()
+    app := HTApplication():new()
 
     win := MainWindow():new()
 

@@ -7,7 +7,7 @@
 /*
     HTKeyEvent
 */
-CLASS HKeyEvent FROM HInputEvent
+CLASS HTKeyEvent FROM HTInputEvent
 
 PROTECTED:
 PUBLIC:
@@ -21,5 +21,5 @@ ENDCLASS
 /*
     new
 */
-METHOD new() CLASS HKeyEvent
+METHOD new() CLASS HTKeyEvent
 RETURN ::super:new()

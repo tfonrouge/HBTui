@@ -7,7 +7,7 @@
 /*
     HTFocusEvent
 */
-CLASS HFocusEvent FROM HEvent
+CLASS HTFocusEvent FROM HTEvent
 
 PROTECTED:
 PUBLIC:
@@ -22,7 +22,7 @@ ENDCLASS
 /*
     new
 */
-METHOD new( type, reason ) CLASS HFocusEvent
+METHOD new( type, reason ) CLASS HTFocusEvent
     ::Ftype := type
     ::Freason := reason
 RETURN self

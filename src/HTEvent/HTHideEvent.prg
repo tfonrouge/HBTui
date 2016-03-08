@@ -8,7 +8,7 @@
     HTHideEvent
 */
 
-CLASS HHideEvent FROM HEvent
+CLASS HTHideEvent FROM HTEvent
 
 PROTECTED:
 
@@ -23,5 +23,5 @@ ENDCLASS
 /*
     new
 */
-METHOD new() CLASS HHideEvent
+METHOD new() CLASS HTHideEvent
 RETURN self

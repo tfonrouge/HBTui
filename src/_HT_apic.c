@@ -44,7 +44,7 @@ HB_FUNC( HT_OBJECTID )
 /*
     ht_windowAtMousePos
 */
-HB_FUNC( HB_WINDOWATMOUSEPOS )
+HB_FUNC( HT_WINDOWATMOUSEPOS )
 {
     int x,y;
 

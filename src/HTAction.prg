@@ -4,7 +4,7 @@
 
 #include "hbtui.ch"
 
-CLASS HAction FROM HObject
+CLASS HTAction FROM HTObject
 
 PROTECTED:
 
@@ -27,7 +27,7 @@ ENDCLASS
 /*
     new
 */
-METHOD new( ... ) CLASS HAction
+METHOD new( ... ) CLASS HTAction
 
     LOCAL version := 0
     LOCAL parent
@@ -35,7 +35,7 @@ METHOD new( ... ) CLASS HAction
 
     IF pCount() = 1
         parent := hb_pValue( 1 )
-        IF hb_isObject( parent ) .AND. parent:isDerivedFrom("HObject")
+        IF hb_isObject( parent ) .AND. parent:isDerivedFrom("HTObject")
             version := 1
         ENDIF
     ENDIF
@@ -43,7 +43,7 @@ METHOD new( ... ) CLASS HAction
     IF pCount() = 2
         text := hb_pValue( 1 )
         parent := hb_pValue( 2 )
-        IF hb_isChar( text ) .AND. hb_isObject( parent ) .AND. parent:isDerivedFrom("HObject")
+        IF hb_isChar( text ) .AND. hb_isObject( parent ) .AND. parent:isDerivedFrom("HTObject")
             version := 2
         ENDIF
     ENDIF
@@ -65,7 +65,7 @@ RETURN self
 /*
     setShortcut
 */
-METHOD PROCEDURE setShortcut( shortcut ) CLASS HAction
+METHOD PROCEDURE setShortcut( shortcut ) CLASS HTAction
 
     ::Fshortcut := shortcut
 

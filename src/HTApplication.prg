@@ -5,7 +5,7 @@
 #include "hbtui.ch"
 #include "inkey.ch"
 
-SINGLETON CLASS HApplication FROM HObject
+SINGLETON CLASS HTApplication FROM HTObject
 
 PROTECTED:
 
@@ -33,12 +33,12 @@ ENDCLASS
 /*
     new
 */
-METHOD new() CLASS HApplication
+METHOD new() CLASS HTApplication
 
     LOCAL desktop
 
     IF ::Fdesktop = NIL
-        desktop := HDesktop():new()
+        desktop := HTDesktop():new()
         desktop:setAsDesktopWidget()
         ::Fdesktop := desktop
     ENDIF
@@ -48,13 +48,13 @@ RETURN self
 /*
     activeWindow
 */
-METHOD FUNCTION activeWindow() CLASS HApplication
+METHOD FUNCTION activeWindow() CLASS HTApplication
 RETURN ::getTopLevelWindowFromWindowId( wSelect() )
 
 /*
     addTopLevelWindow
 */
-METHOD PROCEDURE addTopLevelWindow( windowId, widget ) CLASS HApplication
+METHOD PROCEDURE addTopLevelWindow( windowId, widget ) CLASS HTApplication
 
     LOCAL objectId
 
@@ -70,7 +70,7 @@ RETURN
 /*
   exec
 */
-METHOD FUNCTION exec() CLASS HApplication
+METHOD FUNCTION exec() CLASS HTApplication
 
     LOCAL result
     LOCAL event
@@ -121,7 +121,7 @@ RETURN result
 /*
   getEvent
 */
-METHOD PROCEDURE getEvent() CLASS HApplication
+METHOD PROCEDURE getEvent() CLASS HTApplication
 
     LOCAL nKey
     LOCAL mrow := mRow( .T. )
@@ -135,7 +135,7 @@ METHOD PROCEDURE getEvent() CLASS HApplication
     ENDIF
 
     IF mCoords[ 1 ] != mrow .OR. mCoords[ 2 ] != mcol
-        HApplication():activeWindow():addEvent( HMouseEvent():new( K_MOUSEMOVE ) )
+        HTApplication():activeWindow():addEvent( HTMouseEvent():new( K_MOUSEMOVE ) )
         mCoords[ 1 ] := mrow
         mCoords[ 2 ] := mcol
         RETURN
@@ -144,11 +144,11 @@ METHOD PROCEDURE getEvent() CLASS HApplication
     nKey := Inkey( 1 )
 
     IF nKey != 0
-        IF !Empty( window := ::getTopLevelWindowFromWindowId( hb_windowAtMousePos() ) )
+        IF !Empty( window := ::getTopLevelWindowFromWindowId( ht_windowAtMousePos() ) )
             IF nKey >= K_MINMOUSE .AND. nKey <= K_MAXMOUSE
-                window:addEvent( HMouseEvent():new( nKey ) )
+                window:addEvent( HTMouseEvent():new( nKey ) )
             ELSE
-                window:addEvent( HKeyEvent():new( nKey ) )
+                window:addEvent( HTKeyEvent():new( nKey ) )
             ENDIF
         ENDIF
     ENDIF
@@ -158,7 +158,7 @@ RETURN
 /*
     getTopLevelWindowFromWindowId
 */
-METHOD FUNCTION getTopLevelWindowFromWindowId( windowId ) CLASS HApplication
+METHOD FUNCTION getTopLevelWindowFromWindowId( windowId ) CLASS HTApplication
 
     LOCAL nPos
 
@@ -173,7 +173,7 @@ RETURN NIL
 /*
     queueEvent
 */
-METHOD PROCEDURE queueEvent( event, priority ) CLASS HApplication
+METHOD PROCEDURE queueEvent( event, priority ) CLASS HTApplication
 
     IF priority = NIL
         IF event:widget != NIL .AND. event:widget:isVisible

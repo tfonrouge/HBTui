@@ -4,7 +4,7 @@
 
 #include "hbtui.ch"
 
-CLASS HBoxLayout FROM HLayout
+CLASS HTBoxLayout FROM HTLayout
 
 PROTECTED:
 
@@ -25,20 +25,20 @@ ENDCLASS
 /*
     new
 */
-METHOD new( dir, parent ) CLASS HBoxLayout
+METHOD new( dir, parent ) CLASS HTBoxLayout
     ::setDirection( dir )
 RETURN ::super:new( parent )
 
 /*
     addWidget
 */
-METHOD PROCEDURE addWidget( w ) CLASS HBoxLayout
+METHOD PROCEDURE addWidget( w ) CLASS HTBoxLayout
     ::addItem( w )
 RETURN
 
 /*
     setDirection
 */
-METHOD PROCEDURE setDirection( dir ) CLASS HBoxLayout
+METHOD PROCEDURE setDirection( dir ) CLASS HTBoxLayout
     ::Fdirection := dir
 RETURN

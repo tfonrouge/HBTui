@@ -7,9 +7,9 @@
 THREAD STATIC __s_childList := {=>}
 
 /*
-    HObject
+    HTObject
 */
-CLASS HObject FROM HBase
+CLASS HTObject FROM HTBase
 
 PRIVATE:
 
@@ -36,7 +36,7 @@ ENDCLASS
 /*
     new
 */
-METHOD new( parent ) CLASS HObject
+METHOD new( parent ) CLASS HTObject
 
     ::Fchildren := {}
     IF pCount() = 1
@@ -48,7 +48,7 @@ RETURN self
 /*
     addChild
 */
-METHOD PROCEDURE addChild( child ) CLASS HObject
+METHOD PROCEDURE addChild( child ) CLASS HTObject
     IF aScan( ::Fchildren, {|e| e == child } ) = 0
         aAdd( ::Fchildren, child )
     ENDIF
@@ -57,20 +57,20 @@ RETURN
 /*
     setMenuBar
 */
-METHOD PROCEDURE setMenuBar( menuBar ) CLASS HObject
+METHOD PROCEDURE setMenuBar( menuBar ) CLASS HTObject
     ::FmenuBar := ht_objectId( menuBar )
 RETURN
 
 /*
     event
 */
-METHOD FUNCTION event( event ) CLASS HObject
+METHOD FUNCTION event( event ) CLASS HTObject
 RETURN event:isAccepted()
 
 /*
     parent
 */
-METHOD FUNCTION parent() CLASS HObject
+METHOD FUNCTION parent() CLASS HTObject
     IF ::Fparent != NIL
         RETURN ht_objectFromId( ::Fparent )
     ENDIF
@@ -79,12 +79,12 @@ RETURN NIL
 /*
   setParent
 */
-METHOD PROCEDURE setParent( parent ) CLASS HObject
+METHOD PROCEDURE setParent( parent ) CLASS HTObject
     IF parent != NIL
-        IF parent:isDerivedFrom("HObject")
+        IF parent:isDerivedFrom("HTObject")
             ::Fparent := ht_objectId( parent )
             parent:addChild( self )
-            IF ::isDerivedFrom("HMenuBar")
+            IF ::isDerivedFrom("HTMenuBar")
                 parent:setMenuBar( self )
             ENDIF
         ELSE
@@ -94,5 +94,5 @@ METHOD PROCEDURE setParent( parent ) CLASS HObject
 RETURN
 
 /*
-    End HObject Class
+    End HTObject Class
 */

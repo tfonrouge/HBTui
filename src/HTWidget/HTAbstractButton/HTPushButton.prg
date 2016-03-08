@@ -4,7 +4,7 @@
 
 #include "hbtui.ch"
 
-CLASS HPushButton FROM HAbstractButton
+CLASS HTPushButton FROM HTAbstractButton
 
 PROTECTED:
 PUBLIC:
@@ -19,7 +19,7 @@ ENDCLASS
 /*
     new
 */
-METHOD new( ... ) CLASS HPushButton
+METHOD new( ... ) CLASS HTPushButton
 
     LOCAL p
 

@@ -4,7 +4,7 @@
 
 #include "hbtui.ch"
 
-CLASS HTextEdit FROM HWidget
+CLASS HTTextEdit FROM HTWidget
 
    DATA cFileName
    METHOD nTop    INLINE 0
@@ -59,7 +59,7 @@ CLASS HTextEdit FROM HWidget
 
 ENDCLASS
 // -------------------------------------------------------------------------- //
-METHOD New( cFileName ) CLASS HTextEdit
+METHOD New( cFileName ) CLASS HTTextEdit
 
    ::cFileName := cFileName
 
@@ -71,7 +71,7 @@ METHOD New( cFileName ) CLASS HTextEdit
 
 RETURN ( Self )
 
-METHOD isFile() CLASS HTextEdit
+METHOD isFile() CLASS HTTextEdit
 
    LOCAL nChoice
 
@@ -102,7 +102,7 @@ METHOD isFile() CLASS HTextEdit
 
 RETURN ( Self )
 
-METHOD loadFile() CLASS HTextEdit
+METHOD loadFile() CLASS HTTextEdit
 
    IF ( ::nHandle := FOpen( ::cFileName, 2 ) ) == -1
       ::nError := FError()
@@ -124,7 +124,7 @@ METHOD loadFile() CLASS HTextEdit
 
 RETURN ( Self )
 
-METHOD emptyFile() CLASS HTextEdit
+METHOD emptyFile() CLASS HTTextEdit
 
    AAdd( ::aTextBuffer, "" )
 
@@ -132,7 +132,7 @@ METHOD emptyFile() CLASS HTextEdit
 
 RETURN ( Self )
 
-METHOD createFile() CLASS HTextEdit
+METHOD createFile() CLASS HTTextEdit
 
    IF ( ::nHandle := FCreate( ::cFileName, 0 ) ) = -1
       ::nError := FError()
@@ -143,7 +143,7 @@ METHOD createFile() CLASS HTextEdit
 
 RETURN ( Self )
 
-METHOD saveFile() CLASS HTextEdit
+METHOD saveFile() CLASS HTTextEdit
 
    LOCAL i
    LOCAL cTextBuffer
@@ -158,7 +158,7 @@ METHOD saveFile() CLASS HTextEdit
 
 RETURN ( Self )
 
-METHOD closeFile() CLASS HTextEdit
+METHOD closeFile() CLASS HTTextEdit
 
    IF ! FClose( ::nHandle )
       ::nError := FError()
@@ -166,7 +166,7 @@ METHOD closeFile() CLASS HTextEdit
 
 RETURN ( Self )
 
-METHOD mouse() CLASS HTextEdit
+METHOD mouse() CLASS HTTextEdit
 
    ::nRow := MRow()
    ::nCol := MCol()
@@ -175,7 +175,7 @@ METHOD mouse() CLASS HTextEdit
 
 RETURN ( Self )
 
-METHOD up() CLASS HTextEdit
+METHOD up() CLASS HTTextEdit
 
    IF ::nRow > 0
       ::nRow--
@@ -187,7 +187,7 @@ METHOD up() CLASS HTextEdit
 
 RETURN ( Self )
 
-METHOD down() CLASS HTextEdit
+METHOD down() CLASS HTTextEdit
 
    IF ( ::nRow + 1 ) < ::nEndRow
       ::nRow++
@@ -199,7 +199,7 @@ METHOD down() CLASS HTextEdit
 
 RETURN ( Self )
 
-METHOD left() CLASS HTextEdit
+METHOD left() CLASS HTTextEdit
 
    IF ::nCol > 0
       ::nCol--
@@ -211,7 +211,7 @@ METHOD left() CLASS HTextEdit
 
 RETURN ( Self )
 
-METHOD right() CLASS HTextEdit
+METHOD right() CLASS HTTextEdit
 
    IF ( ::nCol + 1 ) < ::nEndCol
       ::nCol++
@@ -221,15 +221,15 @@ METHOD right() CLASS HTextEdit
 
 RETURN ( Self )
 
-METHOD pageUp() CLASS HTextEdit
+METHOD pageUp() CLASS HTTextEdit
 
 RETURN ( Self )
 
-METHOD pageDown() CLASS HTextEdit
+METHOD pageDown() CLASS HTTextEdit
 
 RETURN ( Self )
 
-METHOD home() CLASS HTextEdit
+METHOD home() CLASS HTTextEdit
 
    ::nCol := 0
 
@@ -237,7 +237,7 @@ METHOD home() CLASS HTextEdit
 
 RETURN ( Self )
 
-METHOD end() CLASS HTextEdit
+METHOD end() CLASS HTTextEdit
 
    ::nCol := ::nEndCol
 
@@ -245,23 +245,23 @@ METHOD end() CLASS HTextEdit
 
 RETURN ( Self )
 
-METHOD pageHome() CLASS HTextEdit
+METHOD pageHome() CLASS HTTextEdit
 
 RETURN ( Self )
 
-METHOD pageEnd() CLASS HTextEdit
+METHOD pageEnd() CLASS HTTextEdit
 
 RETURN ( Self )
 
-METHOD wordRight() CLASS HTextEdit
+METHOD wordRight() CLASS HTTextEdit
 
 RETURN ( Self )
 
-METHOD wordLeft() CLASS HTextEdit
+METHOD wordLeft() CLASS HTTextEdit
 
 RETURN ( Self )
 
-METHOD refresh() CLASS HTextEdit
+METHOD refresh() CLASS HTTextEdit
 
    LOCAL i
    LOCAL n
@@ -286,7 +286,7 @@ METHOD refresh() CLASS HTextEdit
 
 RETURN ( Self )
 
-METHOD errorMsg() CLASS HTextEdit
+METHOD errorMsg() CLASS HTTextEdit
 
    LOCAL cMessage
    LOCAL aMeaning := { "Successful",;
@@ -309,7 +309,7 @@ METHOD errorMsg() CLASS HTextEdit
 
 RETURN ( Alert( cMessage ) )
 
-METHOD readLine() CLASS HTextEdit
+METHOD readLine() CLASS HTTextEdit
 
    LOCAL lBytes := .F., lEnd := .F.
    LOCAL cBufferVar

@@ -7,7 +7,7 @@
 /*
   HTMoveEvent
 */
-CLASS HMoveEvent FROM HEvent
+CLASS HTMoveEvent FROM HTEvent
 
 PROTECTED:
 
@@ -24,7 +24,7 @@ ENDCLASS
 /*
     new
 */
-METHOD new( pos, oldPos ) CLASS HMoveEvent
+METHOD new( pos, oldPos ) CLASS HTMoveEvent
     ::Fpos := pos
     ::FoldPos := oldPos
 RETURN self

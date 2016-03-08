@@ -7,7 +7,7 @@
 /*
     HTCloseEvent
 */
-CLASS HCloseEvent FROM HEvent
+CLASS HTCloseEvent FROM HTEvent
 
 PROTECTED:
 
@@ -22,5 +22,5 @@ ENDCLASS
 /*
     new
 */
-METHOD new() CLASS HCloseEvent
+METHOD new() CLASS HTCloseEvent
 RETURN self

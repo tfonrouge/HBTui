@@ -4,7 +4,7 @@
 
 #include "hbtui.ch"
 
-CLASS HHBoxLayout FROM HBoxLayout
+CLASS HTBoxLayout FROM HTBoxLayout
 
 PUBLIC:
 

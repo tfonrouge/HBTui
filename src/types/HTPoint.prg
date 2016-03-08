@@ -6,7 +6,7 @@
 
 #include "hbtui.ch"
 
-CLASS HPoint
+CLASS HTPoint
 
 PROTECTED:
 
@@ -26,7 +26,7 @@ ENDCLASS
 /*
    New
 */
-METHOD new( y, x ) CLASS HPoint
+METHOD new( y, x ) CLASS HTPoint
 
     ::Fy := y
     ::Fx := x
