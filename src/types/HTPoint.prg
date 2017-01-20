@@ -12,23 +12,23 @@ PROTECTED:
 
 PUBLIC:
 
-    CONSTRUCTOR new( y, x )
+    CONSTRUCTOR new( x, y )
 
-    METHOD IsNull    INLINE ::Fy = 0 .AND. ::Fx = 0
-    METHOD setY( y ) INLINE ::Fy := y
+    METHOD IsNull    INLINE ::Fx = 0 .AND. ::Fy = 0
     METHOD setX( x ) INLINE ::Fx := x
+    METHOD setY( y ) INLINE ::Fy := y
 
-    PROPERTY y INIT 0
     PROPERTY x INIT 0
+    PROPERTY y INIT 0
 
 ENDCLASS
 
 /*
    New
 */
-METHOD new( y, x ) CLASS HTPoint
+METHOD new( x, y ) CLASS HTPoint
 
-    ::Fy := y
     ::Fx := x
+    ::Fy := y
 
 RETURN self

@@ -315,7 +315,7 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
             ::FwinSysBtnMove := .T.
         ENDIF
 
-        OutStd( ::FposDown:x, ::FposDown:y, e"\n" )
+        OutStd( ::FposDown:y, ::FposDown:x, e"\n" )
 
         IF HTApplication():activeWindow() = NIL .OR. HTApplication():activeWindow():windowId != ::windowId
             ::addEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ) )
@@ -359,7 +359,7 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
 
             IF MLeftDown()
                 IF ::FwinSysBtnMove
-                    ::move( HTPoint():new( y, x ) )
+                    ::move( HTPoint():new( x, y ) )
                 ELSEIF ::FwinSysBtnResize
                     ::addEvent( HTResizeEvent():new() )
                 ENDIF
@@ -396,7 +396,7 @@ METHOD PROCEDURE move( ... ) CLASS HTWidget
         y := hb_pValue( 2 )
         IF hb_isNumeric( x ) .AND. hb_isNumeric( y )
             version := 2
-            newPos := HTPoint():new( y, x )
+            newPos := HTPoint():new( x, y )
         ENDIF
         EXIT
     OTHERWISE
