@@ -56,13 +56,10 @@ RETURN ::getTopLevelWindowFromWindowId( wSelect() )
 */
 METHOD PROCEDURE addTopLevelWindow( windowId, widget ) CLASS HTApplication
 
-    LOCAL objectId
-
     IF hb_hHasKey( ::FtopLevelWindows, windowId )
         ::ERROR_DUPLICATE_TOP_LEVEL_WINDOW()
     ELSE
-        objectId := ht_objectId( widget )
-        ::FtopLevelWindows[ windowId ] := objectId
+        ::FtopLevelWindows[ windowId ] := widget
     ENDIF
 
 RETURN
@@ -165,7 +162,7 @@ METHOD FUNCTION getTopLevelWindowFromWindowId( windowId ) CLASS HTApplication
     nPos := hb_hPos( ::FtopLevelWindows, windowId )
 
     IF nPos > 0
-        RETURN ht_objectFromId( hb_hValueAt( ::FtopLevelWindows, nPos ) )
+        RETURN hb_hValueAt( ::FtopLevelWindows, nPos )
     ENDIF
 
 RETURN NIL
