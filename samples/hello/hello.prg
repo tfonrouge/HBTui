@@ -16,6 +16,7 @@ METHOD new( ... ) CLASS MyMainWindow
 
     ::super:new( ... )
 
+    /*
     menuBar := ::menuBar
 
     menu := menuBar:addMenu( "File" )
@@ -28,6 +29,7 @@ METHOD new( ... ) CLASS MyMainWindow
     menu:addAction( "Insert" )
     menu:addAction( "Delete" )
     menu:addAction( "Edit" )
+    */
 
 RETURN self
 
@@ -37,7 +39,7 @@ PROCEDURE Main()
     LOCAL t
     LOCAL btn
 
-    SetMode( 40, 120 )
+    SetMode( 40, 100 )
 
     app := HTApplication():new()
 
@@ -58,6 +60,7 @@ PROCEDURE Main()
     w3:move( 16, 9 )
     w3:resize( 60, 20 )
 
+    /*
     t := HTLineEdit():new( "Text ONE", w1 )
     t:move( 0, 0 )
 
@@ -69,11 +72,22 @@ PROCEDURE Main()
 
     btn := HTPushButton():new( "Ok", w1 )
     btn:Move( 3, 0 )
+    */
 
     w1:show()
     w2:show()
     w3:show()
 
     app:exec()
+
+RETURN
+
+STATIC PROCEDURE MakeWindow()
+    LOCAL w
+
+    STATIC numWindow := 0
+
+    w := MyMainWindow():new()
+    w:setWindowTitle( "Window " + HB_ntos(++numWindow) )
 
 RETURN
