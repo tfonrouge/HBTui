@@ -41,8 +41,8 @@ PROTECTED:
     METHOD getPos() INLINE HTPoint():new( ::x, ::y )
     METHOD getShadow INLINE ::Fshadow
     METHOD getWindowId()
-    METHOD paintChildren()
     METHOD paintTopLevelWindow()
+    METHOD paintWidget()
     METHOD setClearA( clearA ) INLINE ::FclearA := clearA
     METHOD setClearB( clearB ) INLINE ::FclearB := clearB
     METHOD SetColor( color ) INLINE ::Fcolor := color
@@ -430,30 +430,6 @@ METHOD PROCEDURE moveEvent( moveEvent ) CLASS HTWidget
 RETURN
 
 /*
-    paintChildren
-*/
-METHOD PROCEDURE paintChildren() CLASS HTWidget
-
-    LOCAL menuBar := ht_objectFromId( ::FmenuBar )
-    LOCAL child
-
-    IF menuBar != NIL
-        menuBar:repaint()
-    ENDIF
-
-    IF ::Flayout != NIL
-        ::displayLayout()
-    ELSE
-        FOR EACH child IN ::Fchildren
-            IF ! menuBar == child .AND. child:isDerivedFrom( "HTWidget" )
-                child:repaint()
-            ENDIF
-        NEXT
-    ENDIF
-
-RETURN
-
-/*
     paintEvent
 */
 METHOD PROCEDURE paintEvent( event ) CLASS HTWidget
@@ -465,7 +441,7 @@ METHOD PROCEDURE paintEvent( event ) CLASS HTWidget
         ::paintTopLevelWindow()
     ENDIF
 
-    ::paintChildren()
+    ::paintWidget()
 
 RETURN
 
@@ -528,6 +504,30 @@ METHOD PROCEDURE paintTopLevelWindow() CLASS HTWidget
     ENDIF
 
     wFormat()
+
+RETURN
+
+/*
+    paintWidget
+*/
+METHOD PROCEDURE paintWidget() CLASS HTWidget
+
+    LOCAL menuBar := ht_objectFromId( ::FmenuBar )
+    LOCAL child
+
+    IF menuBar != NIL
+        menuBar:repaint()
+    ENDIF
+
+    IF ::Flayout != NIL
+        ::displayLayout()
+    ELSE
+        FOR EACH child IN ::Fchildren
+            IF ! menuBar == child .AND. child:isDerivedFrom( "HTWidget" )
+                child:repaint()
+            ENDIF
+        NEXT
+    ENDIF
 
 RETURN
 

@@ -64,6 +64,6 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTDesktop
 
     wBoard( NIL, NIL, NIL, NIL )
 
-    ::paintChildren()
+    ::paintWidget()
 
 RETURN
