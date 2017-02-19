@@ -55,7 +55,7 @@ PUBLIC:
 
     METHOD actions()
     METHOD addAction( action )
-    METHOD addEvent( event, priority )
+    METHOD addEvent( target, event, priority )
 
     METHOD closeEvent( closeEvent )
     METHOD event( event )
@@ -162,7 +162,7 @@ RETURN
 /*
     addEvent
 */
-METHOD PROCEDURE addEvent( event, priority ) CLASS HTWidget
+METHOD PROCEDURE addEvent( target, event, priority ) CLASS HTWidget
     event:setWidget( self )
     HTApplication():queueEvent( event, priority )
 RETURN
@@ -375,50 +375,25 @@ RETURN
     move
 */
 METHOD PROCEDURE move( ... ) CLASS HTWidget
+    LOCAL pos
 
-    LOCAL version := 0
-    LOCAL x
-    LOCAL y
-    LOCAL newPos
-    LOCAL oldPos
-
-    oldPos := HTPoint():new( ::y, ::x )
-
-    SWITCH pCount()
+    SWITCH PCount()
     CASE 1
-        newPos := hb_pValue( 1 )
-        IF hb_isObject( newPos ) .AND. newPos:classH = HTPoint():classH
-            version := 1
+        pos := HB_PValue( 1 )
+        IF HB_IsObject( pos ) .AND. pos:classH = HTPoint():classH
+            ::addEvent( HTMoveEvent():new( pos, ::pos ) )
+            RETURN
         ENDIF
         EXIT
     CASE 2
-        x := hb_pValue( 1 )
-        y := hb_pValue( 2 )
-        IF hb_isNumeric( x ) .AND. hb_isNumeric( y )
-            version := 2
-            newPos := HTPoint():new( x, y )
+        IF hb_isNumeric( HB_PValue( 1 ) ) .AND. hb_isNumeric( HB_PValue( 2 ) )
+            ::addEvent( HTMoveEvent():new( HTPoint():new( HB_PValue(1), HB_PValue(2) ), ::pos ) )
+            RETURN
         ENDIF
         EXIT
-    OTHERWISE
-        ::PARAM_ERROR()
     ENDSWITCH
 
-    SWITCH version
-    CASE 1
-    CASE 2
-        IF ::FwindowId != NIL
-            wSelect( ::FwindowId, .F. )
-            wMove( newPos:y, newPos:x )
-        ELSE
-            ::Fx := newPos:x
-            ::Fy := newPos:y
-            ::repaint()
-        ENDIF
-        ::addEvent( HTMoveEvent():new( newPos, oldPos ) )
-        EXIT
-    OTHERWISE
-        ::PARAM_ERROR()
-    ENDSWITCH
+    ::PARAM_ERROR()
 
 RETURN
 
@@ -426,7 +401,19 @@ RETURN
     moveEvent
 */
 METHOD PROCEDURE moveEvent( moveEvent ) CLASS HTWidget
-    HB_SYMBOL_UNUSED( moveEvent )
+    LOCAL pos
+
+    pos := moveEvent:pos
+
+    IF ::FwindowId != NIL
+        wSelect( ::FwindowId, .F. )
+        wMove( pos:y, pos:x )
+    ELSE
+        ::Fx := pos:x
+        ::Fy := pos:y
+        ::repaint()
+    ENDIF
+
 RETURN
 
 /*

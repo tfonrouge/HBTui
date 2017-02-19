@@ -27,7 +27,7 @@ PUBLIC:
     PROPERTY allWidgets
     PROPERTY desktop
     PROPERTY topLevelWindows INIT { => }
-
+    
 ENDCLASS
 
 /*
@@ -132,7 +132,7 @@ METHOD PROCEDURE getEvent() CLASS HTApplication
     ENDIF
 
     IF mCoords[ 1 ] != mrow .OR. mCoords[ 2 ] != mcol
-        HTApplication():activeWindow():addEvent( HTMouseEvent():new( K_MOUSEMOVE ) )
+        HTApplication():addEvent( self, HTMouseEvent():new( K_MOUSEMOVE ) )
         mCoords[ 1 ] := mrow
         mCoords[ 2 ] := mcol
         RETURN
@@ -143,9 +143,9 @@ METHOD PROCEDURE getEvent() CLASS HTApplication
     IF nKey != 0
         IF !Empty( window := ::getTopLevelWindowFromWindowId( ht_windowAtMousePos() ) )
             IF nKey >= K_MINMOUSE .AND. nKey <= K_MAXMOUSE
-                window:addEvent( HTMouseEvent():new( nKey ) )
+                ::addEvent( window, HTMouseEvent():new( nKey ) )
             ELSE
-                window:addEvent( HTKeyEvent():new( nKey ) )
+                ::addEvent( window, HTKeyEvent():new( nKey ) )
             ENDIF
         ENDIF
     ENDIF
