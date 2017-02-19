@@ -11,7 +11,6 @@ PUBLIC:
 
     CONSTRUCTOR new()
 
-    METHOD addEvent( event )
     METHOD paintEvent( paintEvent )
 
 ENDCLASS
@@ -32,13 +31,6 @@ METHOD new() CLASS HTDesktop
     menu:addAction("Quit")
 
 RETURN self
-
-/*
-    addEvent
-*/
-METHOD PROCEDURE addEvent( event ) CLASS HTDesktop
-    ::super:addEvent( event, HT_EVENT_PRIORITY_HIGH )
-RETURN
 
 /*
     paintEvent
