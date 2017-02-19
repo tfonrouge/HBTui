@@ -4,3 +4,4 @@
 
 lib
 *.app
+.DS_Store
