@@ -3,7 +3,7 @@
 #
 
 -b
--n1 -es2 -w3 -gc3
+-w3 -gc3
 -hblib
 -inc
 -olib/${hb_plat}/${hb_comp}/hbtui
@@ -14,6 +14,7 @@ hbct.hbc
 
 src/*.c
 src/*.prg
+src/functions/*.prg
 src/HTEvent/*.prg
 src/HTEvent/HTInputEvent/*.prg
 src/HTWidget/*.prg
