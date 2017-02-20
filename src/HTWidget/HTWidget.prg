@@ -163,6 +163,7 @@ RETURN
     addEvent
 */
 METHOD PROCEDURE addEvent( target, event, priority ) CLASS HTWidget
+    HB_SYMBOL_UNUSED( target )
     event:setWidget( self )
     HTApplication():queueEvent( event, priority )
 RETURN
