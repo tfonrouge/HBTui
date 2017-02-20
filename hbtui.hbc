@@ -1,6 +1,7 @@
 #
 #
 #
+description=Harbour library Text User Interface
 
 prgflags=-w3 -es2
 
