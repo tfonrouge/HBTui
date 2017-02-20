@@ -1,3 +1,4 @@
+
 #if defined( __PLATFORM__WINDOWS ) .OR. defined( __HBSCRIPT__HBSHELL )
 
 STATIC nStart
