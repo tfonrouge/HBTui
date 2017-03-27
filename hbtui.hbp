@@ -14,7 +14,6 @@ hbct.hbc
 
 src/*.c
 src/*.prg
-src/functions/*.prg
 src/HTEvent/*.prg
 src/HTEvent/HTInputEvent/*.prg
 src/HTWidget/*.prg
