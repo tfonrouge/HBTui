@@ -32,11 +32,12 @@ PUBLIC:
     METHOD setValue( n )
     METHOD setMinimum( n )
     METHOD setMaximum( n )
+    METHOD setPageStep( n )
 
     PROPERTY value WRITE setValue INIT 0
     PROPERTY minimum WRITE setMinimum INIT 0
     PROPERTY maximum WRITE setMaximum INIT 100
-    PROPERTY pageStep INIT 10
+    PROPERTY pageStep WRITE setPageStep INIT 10
     PROPERTY orientation INIT _SB_ORIENT_VERTICAL
     PROPERTY onValueChanged READWRITE            /* {|nValue| ... } */
 
@@ -219,4 +220,12 @@ METHOD PROCEDURE setMaximum( n ) CLASS HTScrollBar
         ::FnValue := n
         ::Fvalue  := n
     ENDIF
+RETURN
+
+/** Sets the page step size used for page-up/down scrolling.
+ * @param n New page step value (must be >= 1)
+ */
+METHOD PROCEDURE setPageStep( n ) CLASS HTScrollBar
+    ::FnPageStep := n
+    ::FpageStep  := n
 RETURN

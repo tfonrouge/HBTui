@@ -30,6 +30,7 @@ PROTECTED:
     DATA FnCurCol    INIT 1            /* cursor column (1-based, in current line) */
     DATA FnTopRow    INIT 1            /* first visible line (scroll offset) */
     DATA FnLeftCol   INIT 1            /* first visible column (horizontal scroll) */
+    DATA FreadOnly   INIT .F.
 
 PUBLIC:
 
@@ -43,7 +44,8 @@ PUBLIC:
     METHOD setText( cText )
 
     PROPERTY text READ getText WRITE setText
-    PROPERTY readOnly INIT .F.
+    METHOD readOnly()   INLINE ::FreadOnly
+    METHOD _readOnly( b ) INLINE ::FreadOnly := b
     PROPERTY onChanged READWRITE         /* {|cText| ... } */
 
 ENDCLASS

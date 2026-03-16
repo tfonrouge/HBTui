@@ -29,6 +29,8 @@ PROCEDURE Main()
     TestSpinner()
     TestProgressBar()
     TestScrollBar()
+    TestTextEdit()
+    TestContextMenu()
 
     nTotal := nPass + nFail
     QOut( "" )
@@ -331,5 +333,77 @@ STATIC PROCEDURE TestScrollBar()
 
     o:setValue( 30 )
     Assert( "HTScrollBar:setValue 30 in range", o:value == 30 )
+
+    o:setPageStep( 5 )
+    Assert( "HTScrollBar:setPageStep 5",        o:pageStep == 5 )
+
+RETURN
+
+/*----------------------------------------------------------------*/
+
+STATIC PROCEDURE TestTextEdit()
+
+    LOCAL o
+    LOCAL cMulti
+
+    o := HTTextEdit():new()
+    Assert( "HTTextEdit:text default empty",  o:text == "" )
+    Assert( "HTTextEdit:readOnly default .F.", ! o:readOnly )
+
+    o:setText( "Hello" )
+    Assert( "HTTextEdit:setText single line",  o:text == "Hello" )
+
+    o:setText( "" )
+    Assert( "HTTextEdit:setText empty",        o:text == "" )
+
+    /* multi-line round-trip */
+    cMulti := "Line 1" + hb_eol() + "Line 2" + hb_eol() + "Line 3"
+    o:setText( cMulti )
+    Assert( "HTTextEdit:setText multi-line",   o:text == cMulti )
+
+    /* overwrite resets to new content */
+    o:setText( "New" )
+    Assert( "HTTextEdit:setText overwrites",   o:text == "New" )
+
+    o:readOnly := .T.
+    Assert( "HTTextEdit:readOnly set .T.",     o:readOnly )
+
+    o:readOnly := .F.
+    Assert( "HTTextEdit:readOnly reset .F.",   ! o:readOnly )
+
+RETURN
+
+/*----------------------------------------------------------------*/
+
+STATIC PROCEDURE TestContextMenu()
+
+    LOCAL o
+    LOCAL a1, aSep, a2
+    LOCAL lFired := .F.
+
+    o := HTContextMenu():new()
+    Assert( "HTContextMenu:actions empty",       Len( o:actions() ) == 0 )
+
+    a1 := o:addAction( "Edit" )
+    Assert( "HTContextMenu:addAction returns action",  a1 != NIL )
+    Assert( "HTContextMenu:action text",               a1:text == "Edit" )
+    Assert( "HTContextMenu:action not separator",      ! a1:isSeparator() )
+    Assert( "HTContextMenu:count 1",                   Len( o:actions() ) == 1 )
+
+    aSep := o:addSeparator()
+    Assert( "HTContextMenu:addSeparator is separator", aSep:isSeparator() )
+    Assert( "HTContextMenu:count 2",                   Len( o:actions() ) == 2 )
+
+    a2 := o:addAction( "Delete" )
+    Assert( "HTContextMenu:count 3",                   Len( o:actions() ) == 3 )
+
+    /* trigger fires onTriggered callback */
+    a1:onTriggered := {|| lFired := .T. }
+    a1:trigger()
+    Assert( "HTContextMenu:action trigger fires callback", lFired )
+
+    /* trigger without callback is a no-op */
+    a2:trigger()   /* no callback set — must not crash */
+    Assert( "HTContextMenu:trigger no-op safe", .T. )
 
 RETURN
