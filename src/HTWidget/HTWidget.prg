@@ -29,6 +29,8 @@ PROTECTED:
     DATA Fshadow    INIT _WIDGET_SHADOW
     DATA FwindowId  /* CT Handle */
     DATA FfocusWidget                       /* currently focused child (object ref or NIL) */
+    DATA FhelpLineWidget                    /* HTStatusBar ref for help line display */
+    DATA FonKeyBindings                     /* hash: nKey => bAction for per-window key handlers */
     DATA FwinSysBtnMove     INIT .F.
     DATA FwinSysBtnClose    INIT .F.
     DATA FwinSysBtnHide     INIT .F.
@@ -112,9 +114,13 @@ PUBLIC:
     PROPERTY width INIT 0
     PROPERTY windowFlags INIT 0
     PROPERTY windowId READ getWindowId WRITE setWindowId /* only main windows have it */
+    PROPERTY helpLine                                  /* context help text for this control */
     PROPERTY windowTitle INIT ""
     PROPERTY x INIT 0
     PROPERTY y INIT 0
+
+    METHOD onKey( nKey, bAction )
+    METHOD setHelpLineWidget( oStatusBar )
 
 ENDCLASS
 
@@ -311,6 +317,11 @@ METHOD PROCEDURE focusInEvent( eventFocus ) CLASS HTWidget
     parent := ::parent()
     IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
         parent:repaintChild( self )
+        /* update help line if parent has a helpLineWidget */
+        IF parent:FhelpLineWidget != NIL .AND. ::FhelpLine != NIL
+            parent:FhelpLineWidget:setSection( 1, ::FhelpLine )
+            parent:repaintChild( parent:FhelpLineWidget )
+        ENDIF
     ENDIF
 
 RETURN
@@ -478,6 +489,13 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTWidget
     /* let the menu bar handle F10 and Alt+letter before anything else */
     menuBar := ht_objectFromId( ::FmenuBar )
     IF menuBar != NIL .AND. menuBar:handleKey( keyEvent:key )
+        keyEvent:accept()
+        RETURN
+    ENDIF
+
+    /* check per-window key bindings (ON KEY system) */
+    IF ::FonKeyBindings != NIL .AND. hb_hHasKey( ::FonKeyBindings, keyEvent:key )
+        Eval( ::FonKeyBindings[ keyEvent:key ] )
         keyEvent:accept()
         RETURN
     ENDIF
@@ -972,6 +990,26 @@ RETURN
 */
 METHOD PROCEDURE setWindowTitle( title ) CLASS HTWidget
     ::FwindowTitle := title
+RETURN
+
+/*
+    onKey - register a key binding (nKey => bAction) on this window
+*/
+METHOD PROCEDURE onKey( nKey, bAction ) CLASS HTWidget
+
+    IF ::FonKeyBindings = NIL
+        ::FonKeyBindings := { => }
+    ENDIF
+
+    ::FonKeyBindings[ nKey ] := bAction
+
+RETURN
+
+/*
+    setHelpLineWidget - set the status bar widget used for help line display
+*/
+METHOD PROCEDURE setHelpLineWidget( oStatusBar ) CLASS HTWidget
+    ::FhelpLineWidget := oStatusBar
 RETURN
 
 /*
