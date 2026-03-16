@@ -1,13 +1,12 @@
-/*
- * HTTabWidget - Tabbed panel container widget
+/** @class HTTabWidget
+ * Tabbed panel container that shows one tab's widgets at a time.
+ * Supports Ctrl+Tab/Ctrl+Shift+Tab switching and mouse click on tab bar.
+ * @extends HTWidget
  */
 
 #include "hbtui.ch"
 #include "inkey.ch"
 
-#define _TAB_COLOR_ACTIVE   "15/01"
-#define _TAB_COLOR_INACTIVE "00/07"
-#define _TAB_COLOR_BAR      "00/07"
 
 CLASS HTTabWidget FROM HTWidget
 
@@ -30,13 +29,13 @@ PUBLIC:
     METHOD tabCount()           INLINE Len( ::FaTabs )
     METHOD addWidgetToTab( nTabIndex, oWidget )
 
-    PROPERTY onTabChanged                       /* {|nIndex| ... } */
+    PROPERTY onTabChanged READWRITE              /* {|nIndex| ... } */
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new tabbed widget container.
+ * @param ... Optional parent widget
+ */
 METHOD new( ... ) CLASS HTTabWidget
 
     LOCAL p
@@ -59,20 +58,19 @@ METHOD new( ... ) CLASS HTTabWidget
 
 RETURN self
 
-/*
-    addTab
-    Adds a new tab with the given title. Returns the 1-based tab index.
-*/
+/** Adds a new tab with the given title.
+ * @param cTitle Tab label text
+ * @return 1-based index of the new tab
+ */
 METHOD FUNCTION addTab( cTitle ) CLASS HTTabWidget
 
     AAdd( ::FaTabs, { cTitle, {} } )
 
 RETURN Len( ::FaTabs )
 
-/*
-    setActiveTab
-    Switches to the tab at nIndex and repaints.
-*/
+/** Switches to the tab at nIndex, fires onTabChanged, and repaints.
+ * @param nIndex 1-based tab index
+ */
 METHOD PROCEDURE setActiveTab( nIndex ) CLASS HTTabWidget
 
     LOCAL parent
@@ -98,11 +96,10 @@ METHOD PROCEDURE setActiveTab( nIndex ) CLASS HTTabWidget
 
 RETURN
 
-/*
-    addWidgetToTab
-    Associates oWidget with the tab at nTabIndex.
-    The widget should already be a child of this widget or its parent.
-*/
+/** Associates a widget with a tab panel.
+ * @param nTabIndex 1-based tab index
+ * @param oWidget Widget to display when this tab is active
+ */
 METHOD PROCEDURE addWidgetToTab( nTabIndex, oWidget ) CLASS HTTabWidget
 
     IF nTabIndex < 1 .OR. nTabIndex > Len( ::FaTabs )
@@ -113,10 +110,10 @@ METHOD PROCEDURE addWidgetToTab( nTabIndex, oWidget ) CLASS HTTabWidget
 
 RETURN
 
-/*
-    paintEvent
-    Draws the tab bar at row 0 and paints the active tab's widgets.
-*/
+/** Draws the tab bar at row 0 and paints the active tab's child widgets
+ * using wFormat viewports.
+ * @param paintEvent HTPaintEvent instance
+ */
 METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTTabWidget
 
     LOCAL i, nCol, cLabel, cColor
@@ -128,7 +125,7 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTTabWidget
     HB_SYMBOL_UNUSED( paintEvent )
 
     /* draw tab bar background at row 0 */
-    DispOutAt( 0, 0, Space( nMaxCol + 1 ), _TAB_COLOR_BAR )
+    DispOutAt( 0, 0, Space( nMaxCol + 1 ), HTTheme():getColor( HT_CLR_TAB_BAR ) )
 
     /* draw each tab label */
     nCol := 0
@@ -137,13 +134,13 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTTabWidget
         IF i > 1
             /* separator */
             IF nCol <= nMaxCol
-                DispOutAt( 0, nCol, hb_UTF8ToStr( Chr( 9474 ) ), _TAB_COLOR_BAR )
+                DispOutAt( 0, nCol, hb_UTF8ToStr( Chr( 9474 ) ), HTTheme():getColor( HT_CLR_TAB_BAR ) )
                 nCol++
             ENDIF
         ENDIF
 
         cLabel := " " + ::FaTabs[ i ][ 1 ] + " "
-        cColor := IIF( i == ::FnActiveTab, _TAB_COLOR_ACTIVE, _TAB_COLOR_INACTIVE )
+        cColor := IIF( i == ::FnActiveTab, HTTheme():getColor( HT_CLR_TAB_ACTIVE ), HTTheme():getColor( HT_CLR_TAB_INACTIVE ) )
 
         IF nCol + Len( cLabel ) - 1 <= nMaxCol
             DispOutAt( 0, nCol, cLabel, cColor )
@@ -199,10 +196,9 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTTabWidget
 
 RETURN
 
-/*
-    keyEvent
-    Handles Ctrl+Tab/Ctrl+Shift+Tab for tab switching; delegates others.
-*/
+/** Handles Ctrl+Tab/Ctrl+Shift+Tab for tab switching; delegates others to parent.
+ * @param keyEvent HTKeyEvent instance
+ */
 METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTTabWidget
 
     LOCAL nKey := keyEvent:key
@@ -233,16 +229,15 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTTabWidget
 
 RETURN
 
-/*
-    mouseEvent
-    Click on tab bar switches tab; click on content delegates to children.
-*/
+/** Handles mouse events: click on tab bar switches tabs,
+ * click on content area delegates to child widgets with focus transfer.
+ * @param eventMouse HTMouseEvent instance
+ */
 METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTTabWidget
 
     LOCAL nClickRow, nClickCol
     LOCAL i, nCol, cLabel
     LOCAL nTabStart, nTabEnd
-    LOCAL parent
     LOCAL nContentRow, nContentCol
     LOCAL oHitChild, aTabWidgets, oChild
 
@@ -323,10 +318,6 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTTabWidget
 
     ENDSWITCH
 
-    HB_SYMBOL_UNUSED( parent )
-
 RETURN
 
-/*
-    EndClass
-*/
+/* EndClass */

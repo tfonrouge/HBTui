@@ -1,19 +1,12 @@
-/*
- *   HTMenuBar - Horizontal menu bar with keyboard activation
- *
- *   F10 or Alt activates the menu bar.
- *   Left/Right navigates menus. Enter opens dropdown.
- *   Alt+letter accelerators (first letter of menu title).
+/** @class HTMenuBar
+ * Horizontal menu bar with keyboard activation (F10, Alt+letter accelerators).
+ * Supports dropdown menus with arrow-key navigation and Enter to trigger actions.
+ * @extends HTWidget
  */
 
 #include "hbtui.ch"
 #include "inkey.ch"
 
-#define _MENUBAR_COLOR       "00/07"
-#define _MENUBAR_COLOR_SEL   "15/01"
-#define _MENU_COLOR          "00/07"
-#define _MENU_COLOR_SEL      "00/BG"
-#define _MENU_COLOR_SEP      "00/07"
 
 CLASS HTMenuBar FROM HTWidget
 
@@ -42,9 +35,9 @@ PUBLIC:
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a menu bar attached to the given parent widget.
+ * @param parent Parent widget (typically HTMainWindow or HTDesktop)
+ */
 METHOD new( parent ) CLASS HTMenuBar
 
     LOCAL version := 0
@@ -65,9 +58,10 @@ METHOD new( parent ) CLASS HTMenuBar
 
 RETURN self
 
-/*
-    addAction
-*/
+/** Adds an action to the menu bar. Accepts text, (text, receiver, member), or HTAction.
+ * @param ... String text, or (text, receiver, member), or HTAction object
+ * @return HTAction instance
+ */
 METHOD FUNCTION addAction( ... ) CLASS HTMenuBar
 
     LOCAL version := 0
@@ -119,9 +113,10 @@ METHOD FUNCTION addAction( ... ) CLASS HTMenuBar
 
 RETURN retValue
 
-/*
-    addMenu
-*/
+/** Adds a submenu to the menu bar. Accepts HTMenu object or title string.
+ * @param ... HTMenu instance or string title
+ * @return HTMenu instance
+ */
 METHOD FUNCTION addMenu( ... ) CLASS HTMenuBar
 
     LOCAL version := 0
@@ -158,16 +153,16 @@ METHOD FUNCTION addMenu( ... ) CLASS HTMenuBar
 
 RETURN retValue
 
-/*
-    addSeparator
-*/
+/** Adds a visual separator to the menu bar (no-op placeholder).
+ * @return Self
+ */
 METHOD FUNCTION addSeparator() CLASS HTMenuBar
 
 RETURN self
 
-/*
-    getMenus - returns array of menu children
-*/
+/** Returns array of HTMenu children.
+ * @return Array of HTMenu
+ */
 METHOD FUNCTION getMenus() CLASS HTMenuBar
 
     LOCAL aMenus := {}
@@ -181,9 +176,9 @@ METHOD FUNCTION getMenus() CLASS HTMenuBar
 
 RETURN aMenus
 
-/*
-    paintEvent
-*/
+/** Paints the menu bar row with menu titles, highlighting the active menu.
+ * @param event HTPaintEvent instance
+ */
 METHOD PROCEDURE paintEvent( event ) CLASS HTMenuBar
 
     LOCAL itm
@@ -196,11 +191,11 @@ METHOD PROCEDURE paintEvent( event ) CLASS HTMenuBar
     wSelect( ::parent():windowId, .F. )
     wFormat()
     wFormat( 1, 0, 1, 0 )
-    DispOutAt( 0, 0, Space( ::parent():width ), _MENUBAR_COLOR )
+    DispOutAt( 0, 0, Space( ::parent():width ), HTTheme():getColor( HT_CLR_MENU_BAR ) )
     FOR EACH itm IN ::children
         IF itm:isDerivedFrom("HTMenu")
             nIdx++
-            cColor := IIF( nIdx = ::FactiveMenu, _MENUBAR_COLOR_SEL, _MENUBAR_COLOR )
+            cColor := IIF( nIdx = ::FactiveMenu, HTTheme():getColor( HT_CLR_MENU_BAR_SEL ), HTTheme():getColor( HT_CLR_MENU_BAR ) )
             itm:move( 0, ++y )
             DispOutAt( 0, y, " " + itm:title + " ", cColor )
             y += Len( itm:title ) + 2
@@ -211,15 +206,15 @@ METHOD PROCEDURE paintEvent( event ) CLASS HTMenuBar
 
 RETURN
 
-/*
-    handleKey - process keyboard input for the menu bar
-    Returns .T. if the key was consumed
-*/
+/** Processes keyboard input for the menu bar (F10 toggle, Alt+letter,
+ * arrow navigation, Enter to trigger, ESC to close).
+ * @param nKey Inkey code
+ * @return .T. if the key was consumed
+ */
 METHOD FUNCTION handleKey( nKey ) CLASS HTMenuBar
 
     LOCAL aMenus := ::getMenus()
     LOCAL nMenuCount := Len( aMenus )
-    LOCAL cKey
     LOCAL i
     LOCAL parent
     LOCAL aActions, nActionCount
@@ -245,7 +240,6 @@ METHOD FUNCTION handleKey( nKey ) CLASS HTMenuBar
 
     /* Alt+letter accelerators (check first letter of each menu title) */
     IF ::FactiveMenu = 0
-        cKey := Upper( hb_keyChar( nKey ) )
         /* check for Alt+letter: Alt key codes are typically K_ALT_A to K_ALT_Z */
         FOR i := 1 TO nMenuCount
             IF nKey = hb_keyCode( "Alt+" + Upper( Left( aMenus[ i ]:title, 1 ) ) )
@@ -361,9 +355,9 @@ METHOD FUNCTION handleKey( nKey ) CLASS HTMenuBar
 
 RETURN .T.
 
-/*
-    openMenu
-*/
+/** Opens the dropdown for the menu at the given index.
+ * @param nIndex 1-based menu index
+ */
 METHOD PROCEDURE openMenu( nIndex ) CLASS HTMenuBar
 
     LOCAL aMenus := ::getMenus()
@@ -408,16 +402,14 @@ METHOD PROCEDURE openMenu( nIndex ) CLASS HTMenuBar
 
     ::FdropWinId := wOpen( nDropTop, nDropLeft, nDropBottom, nDropRight, .T. )
     wSetShadow( 8 )
-    wBox( NIL, _MENU_COLOR )
+    wBox( NIL, HTTheme():getColor( HT_CLR_MENU_ITEM ) )
     wFormat()
 
     ::paintDropdown( oMenu )
 
 RETURN
 
-/*
-    closeMenu
-*/
+/** Closes the currently open dropdown menu and restores the parent window. */
 METHOD PROCEDURE closeMenu() CLASS HTMenuBar
 
     LOCAL parent
@@ -436,9 +428,9 @@ METHOD PROCEDURE closeMenu() CLASS HTMenuBar
 
 RETURN
 
-/*
-    paintDropdown
-*/
+/** Renders the dropdown menu items with highlight on the active item.
+ * @param oMenu HTMenu whose actions to display
+ */
 METHOD PROCEDURE paintDropdown( oMenu ) CLASS HTMenuBar
 
     LOCAL itm
@@ -460,9 +452,9 @@ METHOD PROCEDURE paintDropdown( oMenu ) CLASS HTMenuBar
     FOR EACH itm IN oMenu:actions()
         nIdx++
         IF itm:isSeparator
-            DispOutAt( nRow, 0, Replicate( e"\xC4", nMaxCol + 1 ), _MENU_COLOR_SEP )
+            DispOutAt( nRow, 0, Replicate( e"\xC4", nMaxCol + 1 ), HTTheme():getColor( HT_CLR_MENU_SEP ) )
         ELSE
-            cColor := IIF( nIdx = ::FactiveItem, _MENU_COLOR_SEL, _MENU_COLOR )
+            cColor := IIF( nIdx = ::FactiveItem, HTTheme():getColor( HT_CLR_MENU_ITEM_SEL ), HTTheme():getColor( HT_CLR_MENU_ITEM ) )
             DispOutAt( nRow, 0, PadR( " " + itm:text, nMaxCol + 1 ), cColor )
         ENDIF
         nRow++

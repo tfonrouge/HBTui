@@ -1,12 +1,10 @@
-/*
- *
+/** @class HTPaintEvent
+ * Event emitted when a widget needs to repaint itself.
+ * @extends HTEvent
  */
 
 #include "hbtui.ch"
 
-/*
-    HTPaintEvent
-*/
 CLASS HTPaintEvent FROM HTEvent
 
 PROTECTED:
@@ -19,8 +17,6 @@ PUBLIC:
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new paint event. */
 METHOD new() CLASS HTPaintEvent
 RETURN self

@@ -1,5 +1,5 @@
-/*
- *
+/** @class HTEvent
+ * Base event class for the HBTui event system (HB_CLS_NOTOBJECT).
  */
 
 #define HB_CLS_NOTOBJECT

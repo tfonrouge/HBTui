@@ -1,22 +1,79 @@
-/*
- * HTGet - Combined Label + LineEdit widget with PICTURE clause support
- * Arel ERP compatible GET widget
+/** @class HTGet
+ * Combined label + input widget backed by Harbour's TGet class.
+ * Provides full Clipper-compatible PICTURE editing, type-aware input handling,
+ * validation with focus rejection, and undo support.
+ * @extends HTWidget
+ *
+ * ## TGet Integration
+ *
+ * HTGet wraps Harbour's core Get class internally. All editing is delegated
+ * to TGet methods (insert, overStrike, delete, left, right, home, end,
+ * backSpace, wordLeft, wordRight). The formatted edit buffer (oGet:buffer)
+ * is read for display; oGet:assign() + oGet:killFocus() handle value
+ * write-back and cleanup on focus loss.
+ *
+ * **Full PICTURE support (via TGet):**
+ * - All template chars: 9, #, A, N, X, L, Y, !, $, *
+ * - All @ functions: @!, @A, @B, @C, @D, @E, @K, @R, @S, @T, @X, @Z, @(, @)
+ * - Type-aware editing: numeric decimal alignment, date CToD validation,
+ *   logical T/F toggle, timestamp fields
+ * - Insert/Overwrite toggle (K_INS)
+ * - Undo to original value (K_CTRL_U)
+ *
+ * **Validation with focus rejection:**
+ * - VALID block returning .F. keeps focus on the field (user cannot leave)
+ * - WHEN block returning .F. prevents field activation
+ *
+ * **HTWidget additions (not in TGet):**
+ * - Integrated label with auto-calculated widths
+ * - Password mode (hide property — displays asterisks)
+ * - Theme-aware colors via HTTheme()
+ * - Viewport painting via wFormat() coordinate isolation
+ * - onChange callback on each keystroke modification
+ * - Help line text for status bar
+ *
+ * @property label     Label text displayed before the input area
+ * @property picture   PICTURE format string (full Clipper/Harbour syntax)
+ * @property xVar      Code block {|x| IIF(x==NIL, val, val:=x)} for read/write variable access
+ * @property valid     Post-validation block {|xValue| lOk}; .F. rejects focus change
+ * @property when      Pre-condition block {|| lEnabled}; .F. prevents field activation
+ * @property helpLine  Context help text shown in status bar when focused
+ * @property onChange   Callback {|xValue| ...} fired on each value change
+ * @property readOnly  .T. disables editing
+ * @property hide      .T. replaces display with asterisks (password mode)
+ *
+ * @example
+ *   /* String GET with uppercase mask */
+ *   LOCAL cName := Space(30)
+ *   oGet := HTGet():new( oParent )
+ *   oGet:setup( {|x| IIF(x==NIL, cName, cName:=x) }, "Name:", "@!", ;
+ *               {|v| !Empty(v) }, NIL, "Enter name", NIL, .F., .F., 40 )
+ *
+ *   /* Numeric GET with decimal */
+ *   LOCAL nPrice := 0
+ *   oGet2 := HTGet():new( oParent )
+ *   oGet2:setup( {|x| IIF(x==NIL, nPrice, nPrice:=x) }, "Price:", "999,999.99" )
+ *
+ *   /* Date GET */
+ *   LOCAL dDate := Date()
+ *   oGet3 := HTGet():new( oParent )
+ *   oGet3:setup( {|x| IIF(x==NIL, dDate, dDate:=x) }, "Date:", "@D" )
+ *
+ * @see HTLineEdit, HTTheme, Get (Harbour core TGet class)
  */
 
 #include "hbtui.ch"
 #include "inkey.ch"
+#include "setcurs.ch"
 
-#define _GET_COLOR_LABEL    "00/07"
-#define _GET_COLOR_NORMAL   "N/W"
-#define _GET_COLOR_FOCUSED  "N/BG"
-#define _GET_COLOR_READONLY "N+/W"
 
 CLASS HTGet FROM HTWidget
 
 PROTECTED:
 
-    DATA FcursorPos  INIT 1
-    DATA FdispOffset INIT 1
+    DATA FoGet                                          /* Harbour TGet instance */
+    DATA FlGetActive     INIT .F.                       /* whether TGet currently has focus */
+    DATA FdispOffset     INIT 1
 
 PUBLIC:
 
@@ -25,29 +82,34 @@ PUBLIC:
     METHOD paintEvent( event )
     METHOD keyEvent( keyEvent )
     METHOD mouseEvent( eventMouse )
+    METHOD focusInEvent( eventFocus )
     METHOD focusOutEvent( eventFocus )
 
     METHOD setup( xVar, cLabel, cPicture, bValid, bWhen, cHelpLine, bOnChange, lReadOnly, lHide, nWidth )
     METHOD getValue()
     METHOD setValue( x )
+    METHOD setLabel( cLabel )
+    METHOD setPicture( cPicture )
+    METHOD setXVar( xVar )
+    METHOD setReadOnly( lReadOnly )
+    METHOD setLabelWidth( nWidth )
+    METHOD getDisplayValue()
 
     PROPERTY label WRITE setLabel INIT ""
     PROPERTY picture WRITE setPicture INIT ""
     PROPERTY xVar WRITE setXVar                     /* {|x| IIF( x == NIL, cValue, cValue := x ) } */
-    PROPERTY valid                                   /* {|xValue| lOk } */
-    PROPERTY when                                    /* {|| lEnabled } */
-    PROPERTY helpLine INIT ""
-    PROPERTY onChange                                 /* {|xValue| ... } */
+    PROPERTY valid READWRITE                         /* {|xValue| lOk } — .F. rejects focus loss */
+    PROPERTY when READWRITE                          /* {|| lEnabled } — .F. prevents focus entry */
+    PROPERTY helpLine READWRITE INIT ""
+    PROPERTY onChange READWRITE                       /* {|xValue| ... } */
     PROPERTY readOnly WRITE setReadOnly INIT .F.
-    PROPERTY hide INIT .F.                           /* password mode */
+    PROPERTY hide READWRITE INIT .F.                 /* password mode */
     PROPERTY labelWidth WRITE setLabelWidth INIT 0
     PROPERTY inputWidth INIT 0
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new GET widget with optional parent. */
 METHOD new( ... ) CLASS HTGet
 
     LOCAL p
@@ -72,12 +134,19 @@ METHOD new( ... ) CLASS HTGet
 
 RETURN self
 
-/*
-    setup
-*/
+/** Configures all GET properties and creates the internal TGet instance.
+ * @param xVar Code block for read/write access to the variable
+ * @param cLabel Label text displayed before the input
+ * @param cPicture PICTURE format string (full Clipper/Harbour syntax)
+ * @param bValid Post-validation code block; .F. return rejects focus change
+ * @param bWhen Pre-condition code block; .F. return prevents field activation
+ * @param cHelpLine Help text for status bar
+ * @param bOnChange Callback fired on each value change
+ * @param lReadOnly Read-only mode flag
+ * @param lHide Password mode (shows asterisks)
+ * @param nWidth Total widget width including label
+ */
 METHOD PROCEDURE setup( xVar, cLabel, cPicture, bValid, bWhen, cHelpLine, bOnChange, lReadOnly, lHide, nWidth ) CLASS HTGet
-
-    LOCAL cValue
 
     DEFAULT cLabel    := ""
     DEFAULT cPicture  := ""
@@ -86,15 +155,15 @@ METHOD PROCEDURE setup( xVar, cLabel, cPicture, bValid, bWhen, cHelpLine, bOnCha
     DEFAULT lHide     := .F.
     DEFAULT nWidth    := 30
 
-    ::FxVar     := xVar
-    ::Flabel    := cLabel
-    ::Fpicture  := cPicture
-    ::Fvalid    := bValid
-    ::Fwhen     := bWhen
-    ::FhelpLine := cHelpLine
-    ::FonChange := bOnChange
-    ::FreadOnly := lReadOnly
-    ::Fhide     := lHide
+    ::xVar      := xVar
+    ::label     := cLabel
+    ::picture   := cPicture
+    ::valid     := bValid
+    ::when      := bWhen
+    ::helpLine  := cHelpLine
+    ::onChange   := bOnChange
+    ::readOnly  := lReadOnly
+    ::hide      := lHide
 
     /* calculate label width: label text + 1 space separator */
     IF Len( cLabel ) > 0
@@ -111,58 +180,52 @@ METHOD PROCEDURE setup( xVar, cLabel, cPicture, bValid, bWhen, cHelpLine, bOnCha
         ::Fwidth := ::FlabelWidth + ::FinputWidth
     ENDIF
 
-    /* position cursor at end of current value */
-    IF ::FxVar != NIL
-        cValue := ::getValue()
-        IF hb_isString( cValue )
-            ::FcursorPos := Len( RTrim( cValue ) ) + 1
-        ELSE
-            ::FcursorPos := 1
+    /* create the Harbour TGet instance */
+    IF xVar != NIL
+        ::FoGet := Get():new( 0, ::FlabelWidth, xVar, NIL, cPicture )
+        IF bValid != NIL
+            ::FoGet:postBlock := bValid
+        ENDIF
+        IF bWhen != NIL
+            ::FoGet:preBlock := bWhen
         ENDIF
     ENDIF
 
 RETURN
 
-/*
-    paintEvent
-*/
+/** Renders the label and the TGet edit buffer (or Transform-formatted value when unfocused).
+ * @param event HTPaintEvent (unused)
+ */
 METHOD PROCEDURE paintEvent( event ) CLASS HTGet
 
-    LOCAL cDisplay, cColor, cValue, cTransformed
+    LOCAL cDisplay, cColor, cTransformed
     LOCAL nVisibleWidth
-    LOCAL nCursorCol
+    LOCAL nCursorCol, nCursorPos
     LOCAL nMaxCol := MaxCol()
 
     HB_SYMBOL_UNUSED( event )
 
     /* draw label at (0, 0) */
     IF ::FlabelWidth > 0
-        DispOutAt( 0, 0, PadR( ::Flabel, ::FlabelWidth ), _GET_COLOR_LABEL )
+        DispOutAt( 0, 0, PadR( ::Flabel, ::FlabelWidth ), HTTheme():getColor( HT_CLR_GET_LABEL ) )
     ENDIF
 
     /* determine input color */
     IF ::FreadOnly
-        cColor := _GET_COLOR_READONLY
+        cColor := HTTheme():getColor( HT_CLR_GET_READONLY )
     ELSEIF ::hasFocus()
-        cColor := _GET_COLOR_FOCUSED
+        cColor := HTTheme():getColor( HT_CLR_GET_FOCUSED )
     ELSE
-        cColor := _GET_COLOR_NORMAL
+        cColor := HTTheme():getColor( HT_CLR_GET_NORMAL )
     ENDIF
 
-    /* get display value */
-    cValue := ::getValue()
-
-    IF cValue == NIL
-        cValue := ""
-    ENDIF
-
-    /* apply PICTURE transformation */
-    IF Len( ::Fpicture ) > 0
-        cTransformed := Transform( cValue, ::Fpicture )
-    ELSEIF hb_isString( cValue )
-        cTransformed := cValue
+    /* get display text from TGet buffer (focused) or Transform (unfocused) */
+    IF ::FlGetActive .AND. ::FoGet != NIL .AND. ::FoGet:buffer != NIL
+        cTransformed := ::FoGet:buffer
+        nCursorPos := ::FoGet:pos
     ELSE
-        cTransformed := hb_CStr( cValue )
+        cTransformed := ::getDisplayValue()
+        nCursorPos := 0
     ENDIF
 
     /* password mode: replace with asterisks */
@@ -177,11 +240,15 @@ METHOD PROCEDURE paintEvent( event ) CLASS HTGet
     ENDIF
 
     /* ensure cursor is visible within display window */
-    IF ::FcursorPos < ::FdispOffset
-        ::FdispOffset := ::FcursorPos
-    ENDIF
-    IF ::FcursorPos > ::FdispOffset + nVisibleWidth - 1
-        ::FdispOffset := ::FcursorPos - nVisibleWidth + 1
+    IF nCursorPos > 0
+        IF nCursorPos < ::FdispOffset
+            ::FdispOffset := nCursorPos
+        ENDIF
+        IF nCursorPos > ::FdispOffset + nVisibleWidth - 1
+            ::FdispOffset := nCursorPos - nVisibleWidth + 1
+        ENDIF
+    ELSE
+        ::FdispOffset := 1
     ENDIF
 
     /* extract visible portion of text */
@@ -190,87 +257,75 @@ METHOD PROCEDURE paintEvent( event ) CLASS HTGet
     DispOutAt( 0, ::FlabelWidth, cDisplay, cColor )
 
     /* position cursor if focused */
-    IF ::hasFocus() .AND. ! ::FreadOnly
-        nCursorCol := ::FlabelWidth + ::FcursorPos - ::FdispOffset
+    IF ::hasFocus() .AND. ! ::FreadOnly .AND. nCursorPos > 0
+        nCursorCol := ::FlabelWidth + nCursorPos - ::FdispOffset
         SetPos( 0, nCursorCol )
     ENDIF
 
 RETURN
 
-/*
-    keyEvent
-*/
+/** Delegates keyboard input to the internal TGet for full PICTURE-aware editing.
+ * Supports insert/overwrite toggle (Ins), undo (Ctrl+U), word navigation (Ctrl+Left/Right).
+ * @param keyEvent HTKeyEvent
+ */
 METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTGet
 
     LOCAL parent
-    LOCAL cChar, cValue
-    LOCAL lChanged := .F.
-    LOCAL lWhenOk
+    LOCAL lOldChanged
+    LOCAL cChar
 
-    /* check WHEN condition */
-    IF ::FreadOnly
+    IF ::FreadOnly .OR. ::FoGet == NIL .OR. ! ::FlGetActive
         RETURN
     ENDIF
 
-    IF ::Fwhen != NIL
-        lWhenOk := Eval( ::Fwhen )
-        IF ! lWhenOk
-            RETURN
-        ENDIF
-    ENDIF
-
-    cValue := ::getValue()
-    IF cValue == NIL
-        cValue := ""
-    ENDIF
-    IF ! hb_isString( cValue )
-        cValue := hb_CStr( cValue )
-    ENDIF
+    lOldChanged := ::FoGet:changed
 
     SWITCH keyEvent:key
     CASE K_LEFT
-        IF ::FcursorPos > 1
-            ::FcursorPos--
-        ENDIF
+        ::FoGet:left()
         EXIT
     CASE K_RIGHT
-        IF ::FcursorPos <= Len( cValue )
-            ::FcursorPos++
-        ENDIF
+        ::FoGet:right()
         EXIT
     CASE K_HOME
-        ::FcursorPos := 1
+        ::FoGet:home()
         EXIT
     CASE K_END
-        ::FcursorPos := Len( RTrim( cValue ) ) + 1
+        ::FoGet:end()
+        EXIT
+    CASE K_CTRL_LEFT
+        ::FoGet:wordLeft()
+        EXIT
+    CASE K_CTRL_RIGHT
+        ::FoGet:wordRight()
         EXIT
     CASE K_BS
-        IF ::FcursorPos > 1
-            cValue := Left( cValue, ::FcursorPos - 2 ) + SubStr( cValue, ::FcursorPos )
-            ::FcursorPos--
-            ::setValue( cValue )
-            lChanged := .T.
-        ENDIF
+        ::FoGet:backSpace()
         EXIT
     CASE K_DEL
-        IF ::FcursorPos <= Len( cValue )
-            cValue := Left( cValue, ::FcursorPos - 1 ) + SubStr( cValue, ::FcursorPos + 1 )
-            ::setValue( cValue )
-            lChanged := .T.
-        ENDIF
+        ::FoGet:delete()
+        EXIT
+    CASE K_CTRL_T
+        ::FoGet:delWordRight()
+        EXIT
+    CASE K_CTRL_Y
+        ::FoGet:delEnd()
+        EXIT
+    CASE K_CTRL_U
+        /* undo: restore original value */
+        ::FoGet:undo()
+        EXIT
+    CASE K_INS
+        Set( _SET_INSERT, ! Set( _SET_INSERT ) )
         EXIT
     OTHERWISE
-        /* printable character */
         cChar := hb_keyChar( keyEvent:key )
-        IF Len( cChar ) = 1 .AND. hb_asciiUpper( Asc( cChar ) ) >= 32
-            /* apply PICTURE mask character filtering */
-            IF ! ::isCharAllowed( cChar )
-                RETURN
+        IF Len( cChar ) = 1 .AND. Asc( cChar ) >= 32
+            IF Set( _SET_INSERT )
+                ::FoGet:insert( cChar )
+            ELSE
+                ::FoGet:overStrike( cChar )
             ENDIF
-            cValue := Left( cValue, ::FcursorPos - 1 ) + cChar + SubStr( cValue, ::FcursorPos )
-            ::FcursorPos++
-            ::setValue( cValue )
-            lChanged := .T.
         ELSE
             RETURN
         ENDIF
@@ -278,7 +333,12 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTGet
 
     keyEvent:accept()
 
-    IF lChanged .AND. ::FonChange != NIL
+    /* fire onChange if value was modified */
+    IF ! lOldChanged .AND. ::FoGet:changed .AND. ::FonChange != NIL
+        ::FoGet:assign()
+        Eval( ::FonChange, ::getValue() )
+    ELSEIF lOldChanged .AND. ::FonChange != NIL
+        ::FoGet:assign()
         Eval( ::FonChange, ::getValue() )
     ENDIF
 
@@ -289,20 +349,22 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTGet
 
 RETURN
 
-/*
-    mouseEvent
-*/
+/** Handles mouse click on the input area to reposition cursor.
+ * @param eventMouse HTMouseEvent
+ */
 METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTGet
 
-    LOCAL nClickCol, parent
+    LOCAL nClickCol, parent, nNewPos
 
     IF eventMouse:nKey = K_LBUTTONDOWN
         nClickCol := eventMouse:mouseCol - 1 - ::Fx
 
         /* only react to clicks on the input area */
-        IF nClickCol >= ::FlabelWidth
-            nClickCol := nClickCol - ::FlabelWidth
-            ::FcursorPos := Min( ::FdispOffset + nClickCol, Len( RTrim( hb_CStr( ::getValue() ) ) ) + 1 )
+        IF nClickCol >= ::FlabelWidth .AND. ::FoGet != NIL .AND. ::FlGetActive
+            nNewPos := ::FdispOffset + ( nClickCol - ::FlabelWidth )
+            IF nNewPos >= 1
+                ::FoGet:pos := Min( nNewPos, ::FoGet:nMaxEdit )
+            ENDIF
             parent := ::parent()
             IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
                 parent:repaintChild( self )
@@ -312,27 +374,78 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTGet
 
 RETURN
 
-/*
-    focusOutEvent
-    Validate on losing focus
-*/
+/** Activates the internal TGet (prepares edit buffer, stores original value for undo).
+ * Checks WHEN pre-condition before activation.
+ * @param eventFocus HTFocusEvent
+ */
+METHOD PROCEDURE focusInEvent( eventFocus ) CLASS HTGet
+
+    /* check WHEN pre-condition */
+    IF ::Fwhen != NIL
+        IF ! Eval( ::Fwhen )
+            /* WHEN returned .F. — reject focus */
+            IF eventFocus != NIL
+                eventFocus:ignore()
+            ENDIF
+            RETURN
+        ENDIF
+    ENDIF
+
+    /* activate TGet */
+    IF ::FoGet != NIL .AND. ! ::FlGetActive
+        ::FoGet:setFocus()
+        ::FlGetActive := .T.
+        ::FdispOffset := 1
+    ENDIF
+
+    ::super:focusInEvent( eventFocus )
+
+RETURN
+
+/** Writes the edited value back to the variable via TGet:assign(), runs VALID
+ * post-validation. If VALID returns .F., focus is kept on this field.
+ * @param eventFocus HTFocusEvent
+ */
 METHOD PROCEDURE focusOutEvent( eventFocus ) CLASS HTGet
 
     LOCAL xValue
+    LOCAL parent
 
-    /* run post-validation */
-    IF ::Fvalid != NIL
-        xValue := ::getValue()
-        Eval( ::Fvalid, xValue )
+    IF ::FlGetActive .AND. ::FoGet != NIL
+
+        /* write edited value back to the variable */
+        ::FoGet:assign()
+
+        /* run post-validation */
+        IF ::Fvalid != NIL
+            xValue := ::getValue()
+            IF ! Eval( ::Fvalid, xValue )
+                /* validation failed — reject focus change, keep editing */
+                IF eventFocus != NIL
+                    eventFocus:ignore()
+                ENDIF
+                /* re-focus this widget */
+                parent := ::parent()
+                IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
+                    parent:FfocusWidget := self
+                    parent:repaintChild( self )
+                ENDIF
+                RETURN
+            ENDIF
+        ENDIF
+
+        ::FoGet:killFocus()
+        ::FlGetActive := .F.
+
     ENDIF
 
     ::super:focusOutEvent( eventFocus )
 
 RETURN
 
-/*
-    getValue
-*/
+/** Returns the current value by evaluating the xVar code block.
+ * @return Current value, or empty string if xVar is NIL
+ */
 METHOD FUNCTION getValue() CLASS HTGet
 
     IF ::FxVar != NIL
@@ -341,9 +454,9 @@ METHOD FUNCTION getValue() CLASS HTGet
 
 RETURN ""
 
-/*
-    setValue
-*/
+/** Sets the value by evaluating the xVar code block with the new value.
+ * @param x New value to store
+ */
 METHOD PROCEDURE setValue( x ) CLASS HTGet
 
     IF ::FxVar != NIL
@@ -352,9 +465,9 @@ METHOD PROCEDURE setValue( x ) CLASS HTGet
 
 RETURN
 
-/*
-    setLabel
-*/
+/** Sets the label text and recalculates label/input widths.
+ * @param cLabel New label text
+ */
 METHOD PROCEDURE setLabel( cLabel ) CLASS HTGet
 
     ::Flabel := cLabel
@@ -370,30 +483,44 @@ METHOD PROCEDURE setLabel( cLabel ) CLASS HTGet
 
 RETURN
 
-/*
-    setPicture
-*/
+/** Sets the PICTURE format string and updates the TGet if it exists.
+ * @param cPicture PICTURE clause (full Clipper/Harbour syntax)
+ */
 METHOD PROCEDURE setPicture( cPicture ) CLASS HTGet
     ::Fpicture := cPicture
+    IF ::FoGet != NIL
+        ::FoGet:picture := cPicture
+    ENDIF
 RETURN
 
-/*
-    setXVar
-*/
+/** Sets the variable access code block and recreates the TGet.
+ * @param xVar Code block {|x| IIF(x==NIL, val, val:=x)}
+ */
 METHOD PROCEDURE setXVar( xVar ) CLASS HTGet
     ::FxVar := xVar
+    IF xVar != NIL
+        ::FoGet := Get():new( 0, ::FlabelWidth, xVar, NIL, ::Fpicture )
+        IF ::Fvalid != NIL
+            ::FoGet:postBlock := ::Fvalid
+        ENDIF
+        IF ::Fwhen != NIL
+            ::FoGet:preBlock := ::Fwhen
+        ENDIF
+    ELSE
+        ::FoGet := NIL
+    ENDIF
 RETURN
 
-/*
-    setReadOnly
-*/
+/** Sets the read-only state.
+ * @param lReadOnly .T. to disable editing
+ */
 METHOD PROCEDURE setReadOnly( lReadOnly ) CLASS HTGet
     ::FreadOnly := lReadOnly
 RETURN
 
-/*
-    setLabelWidth
-*/
+/** Overrides the auto-calculated label width and recalculates input width.
+ * @param nWidth Label width in columns
+ */
 METHOD PROCEDURE setLabelWidth( nWidth ) CLASS HTGet
 
     ::FlabelWidth := nWidth
@@ -404,87 +531,23 @@ METHOD PROCEDURE setLabelWidth( nWidth ) CLASS HTGet
 
 RETURN
 
-/*
-    isCharAllowed
-    Apply PICTURE character mask filtering
-    Returns .T. if the character is allowed at current cursor position
-*/
-METHOD FUNCTION isCharAllowed( cChar ) CLASS HTGet
+/** Returns the formatted display value for unfocused state.
+ * @return Transformed display string
+ */
+METHOD FUNCTION getDisplayValue() CLASS HTGet
 
-    LOCAL cMask, cMaskChar
-    LOCAL nFuncEnd, cFunc, cTemplate
-    LOCAL nPos
+    LOCAL cValue
 
-    IF Len( ::Fpicture ) = 0
-        RETURN .T.
+    cValue := ::getValue()
+
+    IF cValue == NIL
+        cValue := ""
     ENDIF
 
-    /* separate function string from template */
-    cFunc := ""
-    cTemplate := ::Fpicture
-
-    IF Left( cTemplate, 1 ) == "@"
-        nFuncEnd := At( " ", cTemplate )
-        IF nFuncEnd > 0
-            cFunc := SubStr( cTemplate, 2, nFuncEnd - 2 )
-            cTemplate := SubStr( cTemplate, nFuncEnd + 1 )
-        ELSE
-            cFunc := SubStr( cTemplate, 2 )
-            cTemplate := ""
-        ENDIF
+    IF Len( ::Fpicture ) > 0
+        RETURN Transform( cValue, ::Fpicture )
+    ELSEIF hb_isString( cValue )
+        RETURN cValue
     ENDIF
 
-    /* function-level checks */
-    IF "!" $ cFunc
-        /* force uppercase - allow all, will be uppercased */
-        RETURN .T.
-    ENDIF
-
-    /* template-level checks */
-    IF Len( cTemplate ) = 0
-        RETURN .T.
-    ENDIF
-
-    nPos := ::FcursorPos
-    IF nPos > Len( cTemplate )
-        RETURN .T.
-    ENDIF
-
-    cMask := cTemplate
-    cMaskChar := SubStr( cMask, nPos, 1 )
-
-    SWITCH cMaskChar
-    CASE "A"
-        /* alpha only */
-        RETURN IsAlpha( cChar )
-    CASE "N"
-        /* alpha, digit, space */
-        RETURN IsAlpha( cChar ) .OR. IsDigit( cChar ) .OR. cChar == " "
-    CASE "9"
-        /* digit, sign */
-        RETURN IsDigit( cChar ) .OR. cChar == "-" .OR. cChar == "+"
-    CASE "#"
-        /* digit, sign, space */
-        RETURN IsDigit( cChar ) .OR. cChar == "-" .OR. cChar == "+" .OR. cChar == " "
-    CASE "L"
-        /* logical: T/F/Y/N */
-        RETURN Upper( cChar ) $ "TFYN"
-    CASE "Y"
-        /* logical: Y/N */
-        RETURN Upper( cChar ) $ "YN"
-    CASE "!"
-        /* force uppercase, any char */
-        RETURN .T.
-    CASE "X"
-        /* any character */
-        RETURN .T.
-    OTHERWISE
-        /* literal character in template - skip */
-        RETURN .T.
-    ENDSWITCH
-
-RETURN .T.
-
-/*
-    EndClass
-*/
+RETURN hb_CStr( cValue )

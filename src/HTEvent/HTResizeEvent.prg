@@ -1,12 +1,10 @@
-/*
- *
+/** @class HTResizeEvent
+ * Event emitted when a widget is resized, carrying old and new sizes.
+ * @extends HTEvent
  */
 
 #include "hbtui.ch"
 
-/*
-    HTResizeEvent
-*/
 CLASS HTResizeEvent FROM HTEvent
 
 PROTECTED:
@@ -21,9 +19,10 @@ PUBLIC:
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new resize event.
+ * @param size New size as HTSize
+ * @param oldSize Previous size as HTSize
+ */
 METHOD new( size, oldSize ) CLASS HTResizeEvent
     ::Fsize := size
     ::FoldSize := oldSize

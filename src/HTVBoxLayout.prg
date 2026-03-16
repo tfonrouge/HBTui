@@ -1,5 +1,6 @@
-/*
- *
+/** @class HTVBoxLayout
+ * Convenience layout that arranges widgets vertically (top to bottom).
+ * @extends HTBoxLayout
  */
 
 #include "hbtui.ch"

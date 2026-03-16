@@ -1,5 +1,6 @@
-/*
- * HTProgressBar - Progress bar widget
+/** @class HTProgressBar
+ * Progress bar that fills proportionally between minimum and maximum values.
+ * @extends HTWidget
  */
 
 #include "hbtui.ch"
@@ -23,9 +24,7 @@ PUBLIC:
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new progress bar with optional parent. */
 METHOD new( parent ) CLASS HTProgressBar
 
     IF parent != NIL
@@ -41,9 +40,9 @@ METHOD new( parent ) CLASS HTProgressBar
 
 RETURN self
 
-/*
-    paintEvent
-*/
+/** Renders a filled/empty bar proportional to the current value within range.
+ * @param paintEvent HTPaintEvent (unused)
+ */
 METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTProgressBar
 
     LOCAL nMaxCol := MaxCol()
@@ -72,9 +71,9 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTProgressBar
 
 RETURN
 
-/*
-    setValue
-*/
+/** Sets the progress value, clamped to range, and triggers repaint.
+ * @param n New value
+ */
 METHOD PROCEDURE setValue( n ) CLASS HTProgressBar
 
     LOCAL parent
@@ -94,9 +93,10 @@ METHOD PROCEDURE setValue( n ) CLASS HTProgressBar
 
 RETURN
 
-/*
-    setRange
-*/
+/** Sets the minimum and maximum range, clamping current value if needed.
+ * @param nMin New minimum
+ * @param nMax New maximum
+ */
 METHOD PROCEDURE setRange( nMin, nMax ) CLASS HTProgressBar
 
     ::Fminimum := nMin

@@ -1,10 +1,6 @@
-/*
- * HTMessageBox - Simple message dialog
- *
- * Static methods for common dialogs:
- *   HTMessageBox():information( cTitle, cMessage )
- *   HTMessageBox():warning( cTitle, cMessage )
- *   HTMessageBox():question( cTitle, cMessage ) → HT_DIALOG_ACCEPTED / HT_DIALOG_REJECTED
+/** @class HTMessageBox
+ * Singleton factory for simple modal message dialogs (information, warning, question).
+ * All methods block until the user dismisses the dialog.
  */
 
 #include "hbtui.ch"
@@ -13,9 +9,6 @@
 #define HT_DIALOG_ACCEPTED  1
 #define HT_DIALOG_REJECTED  0
 
-#define _MSG_COLOR_INFO   "15/01"
-#define _MSG_COLOR_WARN   "14/04"
-#define _MSG_COLOR_QUEST  "15/05"
 
 SINGLETON CLASS HTMessageBox
 
@@ -26,39 +19,48 @@ PUBLIC:
     METHOD information( cTitle, cMessage )
     METHOD warning( cTitle, cMessage )
     METHOD question( cTitle, cMessage )
+    METHOD showDialog( cTitle, cMessage, cColor, lQuestion )
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new instance. */
 METHOD new() CLASS HTMessageBox
 RETURN self
 
-/*
-    information
-*/
+/** Shows an informational message dialog with an OK button.
+ * @param cTitle Dialog title
+ * @param cMessage Message text
+ * @return HT_DIALOG_ACCEPTED or HT_DIALOG_REJECTED
+ */
 METHOD FUNCTION information( cTitle, cMessage ) CLASS HTMessageBox
-RETURN ::showDialog( cTitle, cMessage, _MSG_COLOR_INFO, .F. )
+RETURN ::showDialog( cTitle, cMessage, HTTheme():getColor( HT_CLR_MSGBOX_INFO ), .F. )
 
-/*
-    warning
-*/
+/** Shows a warning message dialog with an OK button.
+ * @param cTitle Dialog title
+ * @param cMessage Message text
+ * @return HT_DIALOG_ACCEPTED or HT_DIALOG_REJECTED
+ */
 METHOD FUNCTION warning( cTitle, cMessage ) CLASS HTMessageBox
-RETURN ::showDialog( cTitle, cMessage, _MSG_COLOR_WARN, .F. )
+RETURN ::showDialog( cTitle, cMessage, HTTheme():getColor( HT_CLR_MSGBOX_WARN ), .F. )
 
-/*
-    question - shows OK and Cancel buttons, returns result code
-*/
+/** Shows a question dialog with OK and Cancel buttons.
+ * @param cTitle Dialog title
+ * @param cMessage Message text
+ * @return HT_DIALOG_ACCEPTED or HT_DIALOG_REJECTED
+ */
 METHOD FUNCTION question( cTitle, cMessage ) CLASS HTMessageBox
-RETURN ::showDialog( cTitle, cMessage, _MSG_COLOR_QUEST, .T. )
+RETURN ::showDialog( cTitle, cMessage, HTTheme():getColor( HT_CLR_MSGBOX_QUEST ), .T. )
 
-/*
-    showDialog (internal)
-*/
+/** Internal: creates and runs a modal message dialog.
+ * @param cTitle Dialog title
+ * @param cMessage Message text
+ * @param cColor Color string for the dialog
+ * @param lQuestion .T. to show OK+Cancel, .F. for OK only
+ * @return HT_DIALOG_ACCEPTED or HT_DIALOG_REJECTED
+ */
 METHOD FUNCTION showDialog( cTitle, cMessage, cColor, lQuestion ) CLASS HTMessageBox
 
-    LOCAL nMsgWidth, nMsgHeight, nWinWidth, nWinHeight
+    LOCAL nMsgWidth, nWinWidth, nWinHeight
     LOCAL nTop, nLeft
     LOCAL nWinId
     LOCAL nKey, nResult

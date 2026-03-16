@@ -1,8 +1,17 @@
-/*
- * HTDialog - Modal dialog window
+/** @class HTDialog
+ * Modal dialog window with a nested event loop.
+ * exec() blocks until closed via accept() or reject(), returning a result code.
+ * @extends HTWidget
  *
- * Runs a nested event loop. exec() blocks until the dialog
- * is closed via accept() or reject(). Returns a result code.
+ * @example
+ *   oDlg := HTDialog():new( oParent, "Confirm" )
+ *   oDlg:resize( 20, 10 )
+ *   /* add child widgets to oDlg... */
+ *   IF oDlg:exec() = HT_DIALOG_ACCEPTED
+ *      /* user pressed Enter/accepted */
+ *   ENDIF
+ *
+ * @see HTMessageBox, HTMainWindow
  */
 
 #include "hbtui.ch"
@@ -26,14 +35,16 @@ PUBLIC:
     METHOD accept()
     METHOD reject()
     METHOD resultCode()  INLINE ::FresultCode
+    METHOD addButtonBar( ... )
 
     METHOD keyEvent( keyEvent )
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new modal dialog.
+ * @param parent Parent widget
+ * @param cTitle Optional window title
+ */
 METHOD new( parent, cTitle ) CLASS HTDialog
 
     ::super:new( parent, HT_DIALOG )
@@ -47,9 +58,9 @@ METHOD new( parent, cTitle ) CLASS HTDialog
 
 RETURN self
 
-/*
-    exec - modal event loop
-*/
+/** Runs the modal event loop. Blocks until accept() or reject() is called.
+ * @return HT_DIALOG_ACCEPTED or HT_DIALOG_REJECTED
+ */
 METHOD FUNCTION exec() CLASS HTDialog
 
     LOCAL nKey
@@ -99,25 +110,72 @@ METHOD FUNCTION exec() CLASS HTDialog
 
 RETURN ::FresultCode
 
-/*
-    accept
-*/
+/** Closes the dialog with an accepted result code. */
 METHOD PROCEDURE accept() CLASS HTDialog
     ::FresultCode := HT_DIALOG_ACCEPTED
     ::Frunning := .F.
 RETURN
 
-/*
-    reject
-*/
+/** Closes the dialog with a rejected result code. */
 METHOD PROCEDURE reject() CLASS HTDialog
     ::FresultCode := HT_DIALOG_REJECTED
     ::Frunning := .F.
 RETURN
 
-/*
-    keyEvent
-*/
+/** Adds a standard button bar at the bottom of the dialog.
+ * With no arguments, creates OK + Cancel. Pass button labels as arguments.
+ * First button triggers accept(), last button (if > 1) triggers reject().
+ * @param ... Optional button labels (strings). Default: "OK", "Cancel"
+ * @return Array of HTPushButton instances for customization
+ */
+METHOD FUNCTION addButtonBar( ... ) CLASS HTDialog
+
+    LOCAL aLabels := {}
+    LOCAL aButtons := {}
+    LOCAL i, nBtnX, oBtn, nBtnWidth
+    LOCAL nBarRow
+
+    /* collect labels from varargs, or use defaults */
+    IF pCount() = 0
+        aLabels := { "OK", "Cancel" }
+    ELSE
+        FOR i := 1 TO pCount()
+            IF hb_isString( hb_pValue( i ) )
+                AAdd( aLabels, hb_pValue( i ) )
+            ENDIF
+        NEXT
+    ENDIF
+
+    IF Len( aLabels ) = 0
+        RETURN aButtons
+    ENDIF
+
+    /* position: 2 rows from bottom of content area */
+    nBarRow := ::Fheight - 4
+
+    /* right-align buttons */
+    nBtnX := ::Fwidth - 3
+    FOR i := Len( aLabels ) TO 1 STEP -1
+        nBtnWidth := Max( Len( aLabels[ i ] ) + 4, 8 )
+        nBtnX -= nBtnWidth + 1
+        oBtn := HTPushButton():new( aLabels[ i ], self )
+        oBtn:move( Max( 1, nBtnX ), nBarRow )
+        AAdd( aButtons, oBtn )
+    NEXT
+
+    /* wire first button to accept, last to reject (if more than one) */
+    IF Len( aButtons ) >= 1
+        aButtons[ 1 ]:onClicked := {|| ::accept() }
+    ENDIF
+    IF Len( aButtons ) >= 2
+        ATail( aButtons ):onClicked := {|| ::reject() }
+    ENDIF
+
+RETURN aButtons
+
+/** Handles key events: ESC rejects the dialog, others delegate to parent.
+ * @param keyEvent HTKeyEvent instance
+ */
 METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTDialog
 
     /* ESC closes the dialog */

@@ -1,12 +1,10 @@
-/*
- *
+/** @class HTMaximizeEvent
+ * Event emitted when a window is maximized.
+ * @extends HTEvent
  */
 
 #include "hbtui.ch"
 
-/*
-    HTMaximizeEvent
-*/
 CLASS HTMaximizeEvent FROM HTEvent
 
 PROTECTED:
@@ -19,8 +17,6 @@ PUBLIC:
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new maximize event. */
 METHOD new() CLASS HTMaximizeEvent
 RETURN self

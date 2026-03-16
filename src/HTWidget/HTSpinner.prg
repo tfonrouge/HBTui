@@ -1,12 +1,11 @@
-/*
- * HTSpinner - Numeric input with Up/Down increment/decrement
+/** @class HTSpinner
+ * Numeric input with Up/Down arrow increment/decrement and direct digit entry.
+ * @extends HTWidget
  */
 
 #include "hbtui.ch"
 #include "inkey.ch"
 
-#define _SPN_COLOR_NORMAL   "N/W"
-#define _SPN_COLOR_FOCUSED  "N/BG"
 
 CLASS HTSpinner FROM HTWidget
 
@@ -37,7 +36,7 @@ PUBLIC:
     PROPERTY minimum WRITE setMinimum INIT 0
     PROPERTY maximum WRITE setMaximum INIT 100
     PROPERTY step INIT 1
-    PROPERTY onChanged                          /* {|nValue| ... } */
+    PROPERTY onChanged READWRITE                 /* {|nValue| ... } */
 
 HIDDEN:
 
@@ -45,9 +44,7 @@ HIDDEN:
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new spinner with optional parent widget. */
 METHOD new( ... ) CLASS HTSpinner
 
     LOCAL p
@@ -70,9 +67,13 @@ METHOD new( ... ) CLASS HTSpinner
 
 RETURN self
 
-/*
-    setup
-*/
+/** Configures the spinner label, range, step, and initial value.
+ * @param cLabel Label text displayed before the value box
+ * @param nMin Minimum allowed value
+ * @param nMax Maximum allowed value
+ * @param nStep Increment/decrement step size
+ * @param nInitial Initial value
+ */
 METHOD PROCEDURE setup( cLabel, nMin, nMax, nStep, nInitial ) CLASS HTSpinner
 
     IF cLabel != NIL
@@ -97,16 +98,16 @@ METHOD PROCEDURE setup( cLabel, nMin, nMax, nStep, nInitial ) CLASS HTSpinner
 
 RETURN
 
-/*
-    paintEvent
-*/
+/** Renders the label and value box with up/down arrow indicators.
+ * @param event HTPaintEvent (unused)
+ */
 METHOD PROCEDURE paintEvent( event ) CLASS HTSpinner
 
     LOCAL cDisplay, cColor, cValueStr, nBoxWidth, cBox, cLabel
 
     HB_SYMBOL_UNUSED( event )
 
-    cColor := IIF( ::hasFocus(), _SPN_COLOR_FOCUSED, _SPN_COLOR_NORMAL )
+    cColor := IIF( ::hasFocus(), HTTheme():getColor( HT_CLR_SPINNER_FOCUSED ), HTTheme():getColor( HT_CLR_SPINNER_NORMAL ) )
 
     /* build label portion */
     cLabel := ""
@@ -132,9 +133,9 @@ METHOD PROCEDURE paintEvent( event ) CLASS HTSpinner
 
 RETURN
 
-/*
-    keyEvent
-*/
+/** Handles Up/Down/Home/End keys and direct digit entry.
+ * @param keyEvent HTKeyEvent
+ */
 METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTSpinner
 
     LOCAL parent
@@ -200,9 +201,9 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTSpinner
 
 RETURN
 
-/*
-    mouseEvent
-*/
+/** Handles mouse wheel scrolling to increment/decrement value.
+ * @param eventMouse HTMouseEvent
+ */
 METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTSpinner
 
     LOCAL parent
@@ -243,9 +244,9 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTSpinner
 
 RETURN
 
-/*
-    setValue
-*/
+/** Sets the value, clamping to the min/max range.
+ * @param n New numeric value
+ */
 METHOD PROCEDURE setValue( n ) CLASS HTSpinner
 
     IF n < ::FnMinimum
@@ -259,9 +260,9 @@ METHOD PROCEDURE setValue( n ) CLASS HTSpinner
 
 RETURN
 
-/*
-    setMinimum
-*/
+/** Sets the minimum value. Adjusts current value if below new minimum.
+ * @param n New minimum
+ */
 METHOD PROCEDURE setMinimum( n ) CLASS HTSpinner
 
     ::FnMinimum := n
@@ -272,9 +273,9 @@ METHOD PROCEDURE setMinimum( n ) CLASS HTSpinner
 
 RETURN
 
-/*
-    setMaximum
-*/
+/** Sets the maximum value. Adjusts current value if above new maximum.
+ * @param n New maximum
+ */
 METHOD PROCEDURE setMaximum( n ) CLASS HTSpinner
 
     ::FnMaximum := n
@@ -285,9 +286,7 @@ METHOD PROCEDURE setMaximum( n ) CLASS HTSpinner
 
 RETURN
 
-/*
-    applyDigitBuf - apply accumulated digit buffer as new value
-*/
+/** Applies the accumulated digit buffer as a new value, clamped to range. */
 METHOD PROCEDURE applyDigitBuf() CLASS HTSpinner
 
     LOCAL nNew

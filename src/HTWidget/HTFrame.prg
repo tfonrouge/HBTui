@@ -1,5 +1,6 @@
-/*
- * HTFrame - Decorative frame/group box with title
+/** @class HTFrame
+ * Decorative frame/group box with an optional title in the top border.
+ * @extends HTWidget
  */
 
 #include "hbtui.ch"
@@ -20,9 +21,9 @@ PUBLIC:
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new frame. Accepts optional title and/or parent.
+ * @param ... Optional (title, parent), (title), (parent), or no args
+ */
 METHOD new( ... ) CLASS HTFrame
 
     LOCAL version := 0
@@ -66,9 +67,9 @@ METHOD new( ... ) CLASS HTFrame
 
 RETURN self
 
-/*
-    paintEvent
-*/
+/** Draws the box border and title text.
+ * @param paintEvent HTPaintEvent instance
+ */
 METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTFrame
 
     LOCAL nMaxRow := MaxRow()
@@ -90,9 +91,7 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTFrame
 
 RETURN
 
-/*
-    setTitle
-*/
+/** Sets the frame title. @param cTitle Title string */
 METHOD PROCEDURE setTitle( cTitle ) CLASS HTFrame
     ::Ftitle := cTitle
 RETURN

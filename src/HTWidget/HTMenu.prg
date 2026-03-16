@@ -1,5 +1,7 @@
-/*
- *   31-12-2014
+/** @class HTMenu
+ * Submenu container that holds actions, separators, and nested submenus.
+ * Typically added to an HTMenuBar via addMenu().
+ * @extends HTWidget
  */
 
 #include "hbtui.ch"
@@ -23,9 +25,9 @@ PUBLIC:
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new menu, optionally with a title and parent.
+ * @param ... Optional (parent) or (title, parent)
+ */
 METHOD new( ... ) CLASS HTMenu
 
     LOCAL version := 0
@@ -61,9 +63,10 @@ METHOD new( ... ) CLASS HTMenu
 
 RETURN self
 
-/*
-    addAction
-*/
+/** Adds an action to this menu. Accepts text, (text, receiver, member, shortcut), or HTAction.
+ * @param ... String text, tuple, or HTAction object
+ * @return HTAction instance
+ */
 METHOD FUNCTION addAction( ... ) CLASS HTMenu
 
     LOCAL version := 0
@@ -117,9 +120,9 @@ METHOD FUNCTION addAction( ... ) CLASS HTMenu
 
 RETURN action
 
-/*
-    addMenu
-*/
+/** Adds a submenu. Accepts HTMenu object or title string.
+ * @return HTMenu instance or menu action
+ */
 METHOD FUNCTION addMenu() CLASS HTMenu
 
     LOCAL version := 0
@@ -156,9 +159,9 @@ METHOD FUNCTION addMenu() CLASS HTMenu
 
 RETURN retValue
 
-/*
-    addSeparator
-*/
+/** Adds a separator action (horizontal line) to this menu.
+ * @return HTAction separator instance
+ */
 METHOD FUNCTION addSeparator() CLASS HTMenu
 
     LOCAL action
@@ -170,16 +173,16 @@ METHOD FUNCTION addSeparator() CLASS HTMenu
 
 RETURN action
 
-/*
-    menuAction
-*/
+/** Returns the action that represents this menu in a parent menu bar.
+ * @return HTAction or NIL
+ */
 METHOD FUNCTION menuAction() CLASS HTMenu
     LOCAL action := NIL
 RETURN action
 
-/*
-    paintEvent
-*/
+/** Paints the menu title at its position.
+ * @param event HTPaintEvent instance
+ */
 METHOD PROCEDURE paintEvent( event ) CLASS HTMenu
     HB_SYMBOL_UNUSED( event )
     dispOutAt( ::x, ::y, ::title, "00/07" )

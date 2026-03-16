@@ -1,5 +1,6 @@
-/*
- *
+/** @class HTHBoxLayout
+ * Convenience layout that arranges widgets horizontally (left to right).
+ * @extends HTBoxLayout
  */
 
 #include "hbtui.ch"

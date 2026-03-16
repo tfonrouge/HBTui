@@ -1,13 +1,11 @@
-/*
- * HTToolBar - Horizontal toolbar with buttons
+/** @class HTToolBar
+ * Horizontal toolbar with clickable buttons and optional shortcut keys.
+ * @extends HTWidget
  */
 
 #include "hbtui.ch"
 #include "inkey.ch"
 
-#define _TBR_COLOR_NORMAL   "N/W"
-#define _TBR_COLOR_FOCUSED  "N/BG"
-#define _TBR_COLOR_ACTIVE   "W+/B"
 
 CLASS HTToolBar FROM HTWidget
 
@@ -33,9 +31,7 @@ HIDDEN:
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new toolbar with optional parent widget. */
 METHOD new( ... ) CLASS HTToolBar
 
     LOCAL p
@@ -58,9 +54,12 @@ METHOD new( ... ) CLASS HTToolBar
 
 RETURN self
 
-/*
-    addButton
-*/
+/** Adds a button to the toolbar.
+ * @param cText Button label text
+ * @param bAction Code block invoked on activation
+ * @param nShortcutKey Optional Inkey code for keyboard shortcut
+ * @return 1-based button index
+ */
 METHOD addButton( cText, bAction, nShortcutKey ) CLASS HTToolBar
 
     LOCAL nIndex
@@ -77,9 +76,7 @@ METHOD addButton( cText, bAction, nShortcutKey ) CLASS HTToolBar
 
 RETURN nIndex
 
-/*
-    recalcWidth
-*/
+/** Recalculates total widget width from button labels and separators. */
 METHOD PROCEDURE recalcWidth() CLASS HTToolBar
 
     LOCAL i, nTotal := 0
@@ -95,9 +92,9 @@ METHOD PROCEDURE recalcWidth() CLASS HTToolBar
 
 RETURN
 
-/*
-    paintEvent
-*/
+/** Renders buttons with active-button highlighting when focused.
+ * @param event HTPaintEvent (unused)
+ */
 METHOD PROCEDURE paintEvent( event ) CLASS HTToolBar
 
     LOCAL i, cDisplay, cBtnText, cColor, cBtnColor
@@ -106,7 +103,7 @@ METHOD PROCEDURE paintEvent( event ) CLASS HTToolBar
 
     HB_SYMBOL_UNUSED( event )
 
-    cColor := IIF( lFocused, _TBR_COLOR_FOCUSED, _TBR_COLOR_NORMAL )
+    cColor := IIF( lFocused, HTTheme():getColor( HT_CLR_TOOLBAR_FOCUSED ), HTTheme():getColor( HT_CLR_TOOLBAR_NORMAL ) )
     cDisplay := ""
 
     FOR i := 1 TO Len( ::FaButtons )
@@ -116,7 +113,7 @@ METHOD PROCEDURE paintEvent( event ) CLASS HTToolBar
         ENDIF
 
         IF lFocused .AND. i = ::FnActiveButton
-            cBtnColor := _TBR_COLOR_ACTIVE
+            cBtnColor := HTTheme():getColor( HT_CLR_TOOLBAR_ACTIVE )
         ELSE
             cBtnColor := cColor
         ENDIF
@@ -132,9 +129,9 @@ METHOD PROCEDURE paintEvent( event ) CLASS HTToolBar
 
 RETURN
 
-/*
-    keyEvent
-*/
+/** Handles Left/Right navigation, Enter/Space activation, and shortcut keys.
+ * @param keyEvent HTKeyEvent
+ */
 METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTToolBar
 
     LOCAL parent
@@ -187,9 +184,9 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTToolBar
 
 RETURN
 
-/*
-    mouseEvent
-*/
+/** Handles mouse click to activate the clicked button.
+ * @param eventMouse HTMouseEvent
+ */
 METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTToolBar
 
     LOCAL nClickCol, nCol, i, nBtnStart, nBtnEnd

@@ -115,7 +115,7 @@
 FUNCTION <clsName>() ;;
 STATIC obj, once ;;
 IF obj == NIL ;;
-   hb_threadOnce( @once, {|| obj := __S_<clsName>() } ) ;;
+   hb_threadOnce( @once, {|| obj := __S_<clsName>():new() } ) ;;
 END ;;
 RETURN obj;;
 CLASS <clsName> [ FROM <fromCls1> ] [, <fromClsN> ] STATIC FUNCTION __S_<clsName>

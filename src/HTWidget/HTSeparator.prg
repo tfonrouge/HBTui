@@ -1,12 +1,10 @@
-/*
- * HTSeparator - Horizontal or vertical line separator
+/** @class HTSeparator
+ * Horizontal or vertical visual line separator. Does not accept focus.
+ * @extends HTWidget
  */
 
 #include "hbtui.ch"
 #include "inkey.ch"
-
-#define HT_SEPARATOR_HORIZONTAL  0
-#define HT_SEPARATOR_VERTICAL    1
 
 CLASS HTSeparator FROM HTWidget
 
@@ -23,9 +21,7 @@ PUBLIC:
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new separator. Accepts optional orientation and/or parent widget. */
 METHOD new( ... ) CLASS HTSeparator
 
     LOCAL version := 0
@@ -74,9 +70,9 @@ METHOD new( ... ) CLASS HTSeparator
 
 RETURN self
 
-/*
-    paintEvent
-*/
+/** Draws a horizontal or vertical line depending on orientation.
+ * @param paintEvent HTPaintEvent (unused)
+ */
 METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTSeparator
 
     LOCAL nMaxRow := MaxRow()
@@ -97,9 +93,9 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTSeparator
 
 RETURN
 
-/*
-    setOrientation
-*/
+/** Sets orientation and adjusts default dimensions accordingly.
+ * @param n HT_SEPARATOR_HORIZONTAL or HT_SEPARATOR_VERTICAL
+ */
 METHOD PROCEDURE setOrientation( n ) CLASS HTSeparator
 
     ::Forientation := n

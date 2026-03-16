@@ -1,12 +1,9 @@
-/*
- *
+/** @class HTHideEvent
+ * Event emitted when a widget is hidden.
+ * @extends HTEvent
  */
 
 #include "hbtui.ch"
-
-/*
-    HTHideEvent
-*/
 
 CLASS HTHideEvent FROM HTEvent
 
@@ -20,8 +17,6 @@ PUBLIC:
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new hide event. */
 METHOD new() CLASS HTHideEvent
 RETURN self

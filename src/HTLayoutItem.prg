@@ -1,5 +1,6 @@
-/*
- *
+/** @class HTLayoutItem
+ * Mixin providing alignment support for layout-managed items.
+ * @extends HTBase
  */
 
 #include "hbtui.ch"
@@ -16,9 +17,9 @@ PUBLIC:
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new layout item with optional alignment.
+ * @param alignment Alignment flags (default 0)
+ */
 METHOD new( alignment ) CLASS HTLayoutItem
 
     IF alignment = NIL
@@ -28,9 +29,9 @@ METHOD new( alignment ) CLASS HTLayoutItem
 
 RETURN self
 
-/*
-    setAlignment
-*/
+/** Sets the alignment property.
+ * @param alignment New alignment flags
+ */
 METHOD PROCEDURE setAlignment( alignment ) CLASS HTLayoutItem
     ::Falignment := alignment
 RETURN

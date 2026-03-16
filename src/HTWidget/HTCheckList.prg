@@ -1,14 +1,11 @@
-/*
- * HTCheckList - ListBox where each item has a checkbox
+/** @class HTCheckList
+ * Scrollable list where each item has a checkbox toggled with Space.
+ * @extends HTWidget
  */
 
 #include "hbtui.ch"
 #include "inkey.ch"
 
-#define _CKL_COLOR_NORMAL    "N/W"
-#define _CKL_COLOR_FOCUSED   "N/W"
-#define _CKL_COLOR_SELECTED  "W+/B"
-#define _CKL_COLOR_SELUNFOC  "N/BG"
 
 CLASS HTCheckList FROM HTWidget
 
@@ -36,7 +33,7 @@ PUBLIC:
     METHOD currentIndex()   INLINE ::FcurrentIndex
     METHOD currentText()    INLINE IIF( ::FcurrentIndex > 0 .AND. ::FcurrentIndex <= Len( ::Fitems ), ::Fitems[ ::FcurrentIndex ], "" )
 
-    PROPERTY onChanged                          /* {|nIndex, lChecked| ... } */
+    PROPERTY onChanged READWRITE                 /* {|nIndex, lChecked| ... } */
 
 HIDDEN:
 
@@ -44,9 +41,7 @@ HIDDEN:
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new checklist with optional parent widget. */
 METHOD new( ... ) CLASS HTCheckList
 
     LOCAL p
@@ -69,9 +64,9 @@ METHOD new( ... ) CLASS HTCheckList
 
 RETURN self
 
-/*
-    paintEvent
-*/
+/** Renders visible items with checkbox marks and scroll indicator.
+ * @param paintEvent HTPaintEvent (unused)
+ */
 METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTCheckList
 
     LOCAL i, nRow, cText, cColor, cCheckMark, cLine
@@ -79,13 +74,13 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTCheckList
     LOCAL nMaxCol := MaxCol()
     LOCAL nVisibleRows := nMaxRow + 1
     LOCAL lFocused := ::hasFocus()
-    LOCAL cSelColor := IIF( lFocused, _CKL_COLOR_SELECTED, _CKL_COLOR_SELUNFOC )
-    LOCAL cNrmColor := IIF( lFocused, _CKL_COLOR_FOCUSED, _CKL_COLOR_NORMAL )
+    LOCAL cSelColor := IIF( lFocused, HTTheme():getColor( HT_CLR_CHECKLIST_SELECTED ), HTTheme():getColor( HT_CLR_CHECKLIST_SELUNFOC ) )
+    LOCAL cNrmColor := IIF( lFocused, HTTheme():getColor( HT_CLR_CHECKLIST_NORMAL ), HTTheme():getColor( HT_CLR_CHECKLIST_NORMAL ) )
     LOCAL nItemCount := Len( ::Fitems )
-    LOCAL nScrollPos, cScrollChar
+    LOCAL cScrollChar
+    LOCAL nThumbPos, nThumbSize, nRange
 
     HB_SYMBOL_UNUSED( paintEvent )
-    HB_SYMBOL_UNUSED( nScrollPos )
 
     /* ensure topIndex keeps current item visible */
     IF ::FcurrentIndex > 0
@@ -97,16 +92,25 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTCheckList
         ENDIF
     ENDIF
 
+    /* calculate proportional scrollbar thumb */
+    nThumbPos := 0
+    nThumbSize := 0
+    IF nItemCount > nVisibleRows
+        nRange := nItemCount - nVisibleRows
+        nThumbSize := Max( 1, Int( nVisibleRows * nVisibleRows / nItemCount ) )
+        nThumbPos := Int( ( ::FtopIndex - 1 ) * ( nVisibleRows - nThumbSize ) / Max( 1, nRange ) )
+        nThumbPos := Max( 0, Min( nThumbPos, nVisibleRows - nThumbSize ) )
+    ENDIF
+
     nRow := 0
     FOR i := ::FtopIndex TO Min( ::FtopIndex + nVisibleRows - 1, nItemCount )
         cCheckMark := IIF( ::FitemChecked[ i ], Chr( 251 ), " " )
         cLine := "[" + cCheckMark + "] " + ::Fitems[ i ]
         cText := PadR( cLine, Max( 0, nMaxCol ) )
 
-        /* scroll indicator on right edge */
+        /* proportional scrollbar on right edge */
         IF nItemCount > nVisibleRows .AND. nMaxCol >= 0
-            nScrollPos := Int( ( i - 1 ) * nVisibleRows / nItemCount )
-            cScrollChar := IIF( nRow = Int( ( ::FcurrentIndex - 1 ) * nVisibleRows / nItemCount ), e"\xDB", e"\xB0" )
+            cScrollChar := IIF( nRow >= nThumbPos .AND. nRow < nThumbPos + nThumbSize, e"\xDB", e"\xB0" )
             cText += cScrollChar
         ELSE
             cText += " "
@@ -125,9 +129,9 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTCheckList
 
 RETURN
 
-/*
-    keyEvent
-*/
+/** Handles navigation, Space to toggle checkbox, and first-letter search.
+ * @param keyEvent HTKeyEvent
+ */
 METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTCheckList
 
     LOCAL parent
@@ -189,9 +193,9 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTCheckList
 
 RETURN
 
-/*
-    mouseEvent
-*/
+/** Handles mouse click to select item and mouse wheel to scroll.
+ * @param eventMouse HTMouseEvent
+ */
 METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTCheckList
 
     LOCAL nClickRow, nIndex
@@ -233,9 +237,10 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTCheckList
 
 RETURN
 
-/*
-    addItem
-*/
+/** Appends an item to the checklist.
+ * @param cText Display text
+ * @param lChecked Initial checked state (default .F.)
+ */
 METHOD PROCEDURE addItem( cText, lChecked ) CLASS HTCheckList
 
     IF lChecked = NIL
@@ -249,9 +254,10 @@ METHOD PROCEDURE addItem( cText, lChecked ) CLASS HTCheckList
 
 RETURN
 
-/*
-    isChecked
-*/
+/** Returns the checked state of an item.
+ * @param nIndex 1-based item index
+ * @return .T. if checked, .F. otherwise
+ */
 METHOD isChecked( nIndex ) CLASS HTCheckList
 
     IF nIndex >= 1 .AND. nIndex <= Len( ::FitemChecked )
@@ -260,9 +266,10 @@ METHOD isChecked( nIndex ) CLASS HTCheckList
 
 RETURN .F.
 
-/*
-    setChecked
-*/
+/** Sets the checked state of an item.
+ * @param nIndex 1-based item index
+ * @param lChecked New checked state
+ */
 METHOD PROCEDURE setChecked( nIndex, lChecked ) CLASS HTCheckList
 
     IF nIndex >= 1 .AND. nIndex <= Len( ::FitemChecked )
@@ -271,9 +278,9 @@ METHOD PROCEDURE setChecked( nIndex, lChecked ) CLASS HTCheckList
 
 RETURN
 
-/*
-    checkedItems
-*/
+/** Returns an array of 1-based indices for all checked items.
+ * @return Array of checked item indices
+ */
 METHOD checkedItems() CLASS HTCheckList
 
     LOCAL aResult := {}
@@ -287,9 +294,9 @@ METHOD checkedItems() CLASS HTCheckList
 
 RETURN aResult
 
-/*
-    checkedCount
-*/
+/** Returns the number of checked items.
+ * @return Count of checked items
+ */
 METHOD checkedCount() CLASS HTCheckList
 
     LOCAL nCount := 0
@@ -303,9 +310,9 @@ METHOD checkedCount() CLASS HTCheckList
 
 RETURN nCount
 
-/*
-    firstLetterSearch
-*/
+/** Jumps to the next item starting with the given letter, wrapping around.
+ * @param cLetter Uppercase letter to search for
+ */
 METHOD PROCEDURE firstLetterSearch( cLetter ) CLASS HTCheckList
 
     LOCAL i, nStart

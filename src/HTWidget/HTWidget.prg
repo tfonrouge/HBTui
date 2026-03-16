@@ -1,13 +1,14 @@
-/*
- *
+/** @class HTWidget
+ * Core base class for all visible UI controls.
+ * Provides rendering via CT window viewports, event dispatch, focus management,
+ * keyboard/mouse handling, layout support, and window system button interactions.
+ * @extends HTObject
  */
 
 #include "hbtui.ch"
 #include "inkey.ch"
 
-#define _DESKTOP_COLOR  "03/01"
 #define _DESKTOP_CHAR   e"\xB1"
-#define _WIDGET_COLOR   "11/09"
 #define _WIDGET_CHAR    e"\x20"
 #define _WIDGET_SHADOW  8
 
@@ -63,6 +64,7 @@ PUBLIC:
     METHOD actions()
     METHOD addAction( action )
     METHOD addEvent( event, priority )
+    METHOD destroy()
 
     METHOD closeEvent( closeEvent )
     METHOD event( event )
@@ -114,19 +116,25 @@ PUBLIC:
     PROPERTY width INIT 0
     PROPERTY windowFlags INIT 0
     PROPERTY windowId READ getWindowId WRITE setWindowId /* only main windows have it */
-    PROPERTY helpLine                                  /* context help text for this control */
+    PROPERTY helpLine READWRITE                         /* context help text for this control */
+    PROPERTY contextMenu READWRITE                      /* HTContextMenu instance for right-click */
     PROPERTY windowTitle INIT ""
     PROPERTY x INIT 0
     PROPERTY y INIT 0
+    PROPERTY minimumWidth INIT 0
+    PROPERTY minimumHeight INIT 0
+    PROPERTY maximumWidth INIT 0              /* 0 = no maximum */
+    PROPERTY maximumHeight INIT 0             /* 0 = no maximum */
 
     METHOD onKey( nKey, bAction )
     METHOD setHelpLineWidget( oStatusBar )
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new widget.
+ * @param parent Optional parent widget (HTWidget or NIL)
+ * @param f Optional window flags bitmask
+ */
 METHOD new( ... ) CLASS HTWidget
 
     LOCAL version := 0
@@ -154,46 +162,82 @@ METHOD new( ... ) CLASS HTWidget
 
 RETURN self
 
-/*
-    actions
-*/
+/** Returns the array of HTAction objects attached to this widget.
+ * @return Array of HTAction
+ */
 METHOD FUNCTION actions() CLASS HTWidget
 
 RETURN ::Factions
 
-/*
-    addAction
-*/
+/** Adds an action to this widget if not already present.
+ * @param action HTAction instance to add
+ */
 METHOD PROCEDURE addAction( action ) CLASS HTWidget
     IF AScan( ::Factions, action ) = 0
         AAdd( ::Factions, action )
     ENDIF
 RETURN
 
-/*
-    addEvent
-*/
+/** Queues an event for this widget in the application event loop.
+ * @param event HTEvent instance to enqueue
+ * @param priority Optional priority (HT_EVENT_PRIORITY_HIGH/NORMAL/LOW)
+ */
 METHOD PROCEDURE addEvent( event, priority ) CLASS HTWidget
     event:setWidget( self )
     HTApplication():queueEvent( event, priority )
 RETURN
 
-/*
-    closeEvent
-*/
-METHOD PROCEDURE closeEvent( closeEvent ) CLASS HTWidget
-    closeEvent:accept()
+/** Destroys this widget: recursively destroys children, closes CT windows,
+ * removes from parent, and clears focus references.
+ */
+METHOD PROCEDURE destroy() CLASS HTWidget
+
+    LOCAL i
+    LOCAL parent
+
+    ht_debugLog( "destroy: " + ::className() + " windowId=" + hb_ntos( hb_defaultValue( ::FwindowId, 0 ) ) )
+
+    /* recursively destroy children (iterate backwards since array shrinks) */
+    FOR i := Len( ::Fchildren ) TO 1 STEP -1
+        IF ::Fchildren[ i ]:isDerivedFrom( "HTWidget" )
+            ::Fchildren[ i ]:destroy()
+        ENDIF
+    NEXT
+
+    /* close CT window if this is a top-level window */
     IF ::FwindowId != NIL
+        HTApplication():removeTopLevelWindow( ::FwindowId )
         WClose( ::FwindowId )
+        ::FwindowId := NIL
     ENDIF
+
+    /* clear parent's focus reference if it points to us */
+    parent := ::parent()
+    IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
+        IF parent:focusWidget() == self
+            parent:FfocusWidget := NIL
+        ENDIF
+        parent:removeChild( self )
+    ENDIF
+
+    ::FisVisible := .F.
+
 RETURN
 
-/*
-    childAt
-    Find child widget at content-area coordinates (nRow, nCol).
-    Coordinates are relative to the content area (inside border).
-    Returns the child widget or NIL if no child at that position.
-*/
+/** Handles a close event by accepting it and destroying this widget.
+ * @param closeEvent HTCloseEvent instance
+ */
+METHOD PROCEDURE closeEvent( closeEvent ) CLASS HTWidget
+    closeEvent:accept()
+    ::destroy()
+RETURN
+
+/** Finds the child widget at content-area coordinates.
+ * Coordinates are relative to the content area (inside border).
+ * @param nRow Row position within content area
+ * @param nCol Column position within content area
+ * @return Child widget at position or NIL
+ */
 METHOD FUNCTION childAt( nRow, nCol ) CLASS HTWidget
 
     LOCAL child
@@ -209,9 +253,7 @@ METHOD FUNCTION childAt( nRow, nCol ) CLASS HTWidget
 
 RETURN NIL
 
-/*
-    displayLayout
-*/
+/** Calculates layout positions and paints child widgets managed by the layout. */
 METHOD PROCEDURE displayLayout() CLASS HTWidget
 
     LOCAL child
@@ -241,9 +283,11 @@ METHOD PROCEDURE displayLayout() CLASS HTWidget
 
 RETURN
 
-/*
-    event
-*/
+/** Dispatches an event to the appropriate type-specific handler method.
+ * Unaccepted events propagate to the parent widget.
+ * @param event HTEvent instance
+ * @return .T. if the event was accepted
+ */
 METHOD FUNCTION event( event ) CLASS HTWidget
     LOCAL parent
 
@@ -287,9 +331,10 @@ METHOD FUNCTION event( event ) CLASS HTWidget
 
 RETURN event:accept()
 
-/*
-    focusInEvent
-*/
+/** Handles focus-in: selects CT window, auto-focuses first child,
+ * repaints for focus highlight, and updates help line.
+ * @param eventFocus HTFocusEvent instance or NIL
+ */
 METHOD PROCEDURE focusInEvent( eventFocus ) CLASS HTWidget
 
     LOCAL aFocusable
@@ -326,9 +371,9 @@ METHOD PROCEDURE focusInEvent( eventFocus ) CLASS HTWidget
 
 RETURN
 
-/*
-    focusOutEvent
-*/
+/** Handles focus-out by repainting to remove focus highlight.
+ * @param eventFocus HTFocusEvent instance (unused)
+ */
 METHOD PROCEDURE focusOutEvent( eventFocus ) CLASS HTWidget
 
     LOCAL parent
@@ -343,9 +388,9 @@ METHOD PROCEDURE focusOutEvent( eventFocus ) CLASS HTWidget
 
 RETURN
 
-/*
-    getColor
-*/
+/** Returns the effective color string, inheriting from parent or theme if not set.
+ * @return Color string (e.g. "07/15")
+ */
 METHOD FUNCTION getColor CLASS HTWidget
     LOCAL parent
 
@@ -357,11 +402,11 @@ METHOD FUNCTION getColor CLASS HTWidget
             RETURN parent:Color
         ENDIF
     ENDIF
-RETURN IIF( ::FAsDesktopWidget = .T., _DESKTOP_COLOR, _WIDGET_COLOR )
+RETURN IIF( ::FAsDesktopWidget = .T., HTTheme():getColor( HT_CLR_DESKTOP ), HTTheme():getColor( HT_CLR_WINDOW ) )
 
-/*
-    getWindowId
-*/
+/** Returns the CT window handle, walking up to parent if this widget has none.
+ * @return Numeric CT window handle or NIL
+ */
 METHOD FUNCTION getWindowId() CLASS HTWidget
     LOCAL parent := ::parent()
     IF ::FwindowId = NIL .AND. parent != NIL
@@ -369,10 +414,9 @@ METHOD FUNCTION getWindowId() CLASS HTWidget
     ENDIF
 RETURN ::FwindowId
 
-/*
-    focusableChildren
-    Returns array of children that can receive focus (focusPolicy != HT_FOCUS_NONE)
-*/
+/** Returns array of visible children that can receive focus.
+ * @return Array of HTWidget with focusPolicy != HT_FOCUS_NONE
+ */
 METHOD FUNCTION focusableChildren() CLASS HTWidget
 
     LOCAL aResult := {}
@@ -387,10 +431,9 @@ METHOD FUNCTION focusableChildren() CLASS HTWidget
 
 RETURN aResult
 
-/*
-    focusNextChild
-    Move focus to next focusable child. Returns .T. if focus moved.
-*/
+/** Moves focus to the next focusable child, wrapping around at the end.
+ * @return .T. if focus was moved, .F. if no focusable children
+ */
 METHOD FUNCTION focusNextChild() CLASS HTWidget
 
     LOCAL aFocusable := ::focusableChildren()
@@ -426,10 +469,9 @@ METHOD FUNCTION focusNextChild() CLASS HTWidget
 
 RETURN .T.
 
-/*
-    focusPrevChild
-    Move focus to previous focusable child. Returns .T. if focus moved.
-*/
+/** Moves focus to the previous focusable child, wrapping around at the start.
+ * @return .T. if focus was moved, .F. if no focusable children
+ */
 METHOD FUNCTION focusPrevChild() CLASS HTWidget
 
     LOCAL aFocusable := ::focusableChildren()
@@ -464,10 +506,9 @@ METHOD FUNCTION focusPrevChild() CLASS HTWidget
 
 RETURN .T.
 
-/*
-    hasFocus
-    Returns .T. if this widget currently has focus within its parent
-*/
+/** Returns .T. if this widget is the currently focused child of its parent.
+ * @return Logical
+ */
 METHOD FUNCTION hasFocus() CLASS HTWidget
 
     LOCAL parent := ::parent()
@@ -478,10 +519,10 @@ METHOD FUNCTION hasFocus() CLASS HTWidget
 
 RETURN .F.
 
-/*
-    keyEvent
-    Dispatches key events to focused child; handles Tab/Shift+Tab focus cycling
-*/
+/** Dispatches key events: tries menu bar first, then key bindings,
+ * then Tab/Shift+Tab focus cycling, then the focused child widget.
+ * @param keyEvent HTKeyEvent instance
+ */
 METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTWidget
 
     LOCAL menuBar
@@ -523,9 +564,10 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTWidget
 
 RETURN
 
-/*
-    mouseEvent
-*/
+/** Handles mouse events: window system buttons (close/hide/maximize/resize/move),
+ * child hit-testing with focus transfer, and right-click context menus.
+ * @param eventMouse HTMouseEvent instance
+ */
 METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
 
     LOCAL x
@@ -631,13 +673,35 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
 
         ENDIF
 
+        EXIT
+
+    CASE K_RBUTTONDOWN
+
+        /* right-click: show context menu on the child under cursor, or on self */
+        nContentRow := eventMouse:mouseRow - 1
+        nContentCol := eventMouse:mouseCol - 1
+
+        IF nContentRow >= 0 .AND. nContentCol >= 0
+            oHitChild := ::childAt( nContentRow, nContentCol )
+            IF oHitChild != NIL .AND. oHitChild:contextMenu != NIL
+                oHitChild:contextMenu:popup( mRow( .T. ), mCol( .T. ) )
+                ::repaint()
+            ELSEIF ::FcontextMenu != NIL
+                ::FcontextMenu:popup( mRow( .T. ), mCol( .T. ) )
+                ::repaint()
+            ENDIF
+        ELSEIF ::FcontextMenu != NIL
+            ::FcontextMenu:popup( mRow( .T. ), mCol( .T. ) )
+            ::repaint()
+        ENDIF
+
     ENDSWITCH
 
 RETURN
 
-/*
-    move
-*/
+/** Moves the widget to a new position. Accepts HTPoint or (x, y) numeric pair.
+ * @param ... HTPoint or two numeric coordinates (x, y)
+ */
 METHOD PROCEDURE move( ... ) CLASS HTWidget
     LOCAL pos
 
@@ -661,9 +725,10 @@ METHOD PROCEDURE move( ... ) CLASS HTWidget
 
 RETURN
 
-/*
-    moveEvent
-*/
+/** Handles a move event: physically moves CT window for top-level widgets,
+ * or stores new position for child widgets.
+ * @param moveEvent HTMoveEvent with the new position
+ */
 METHOD PROCEDURE moveEvent( moveEvent ) CLASS HTWidget
     LOCAL pos
 
@@ -683,9 +748,10 @@ METHOD PROCEDURE moveEvent( moveEvent ) CLASS HTWidget
 
 RETURN
 
-/*
-    paintEvent
-*/
+/** Handles a paint event: creates/repaints the CT window for top-level widgets,
+ * then paints child widgets.
+ * @param event HTPaintEvent instance
+ */
 METHOD PROCEDURE paintEvent( event ) CLASS HTWidget
 
     HB_SYMBOL_UNUSED( event )
@@ -699,9 +765,10 @@ METHOD PROCEDURE paintEvent( event ) CLASS HTWidget
 
 RETURN
 
-/*
-    paintTopLevelWindow
-*/
+/** Creates or repaints the CT window for a top-level widget.
+ * On first paint, creates the window with borders and system buttons.
+ * On repaint, clears the content area inside the border.
+ */
 METHOD PROCEDURE paintTopLevelWindow() CLASS HTWidget
 
     LOCAL n
@@ -780,9 +847,10 @@ METHOD PROCEDURE paintTopLevelWindow() CLASS HTWidget
 
 RETURN
 
-/*
-    paintChild
-*/
+/** Paints a child widget inside a wFormat viewport.
+ * Sets margins so the child sees (0,0) to (MaxRow(),MaxCol()) as its world.
+ * @param child HTWidget child to paint
+ */
 METHOD PROCEDURE paintChild( child ) CLASS HTWidget
 
     LOCAL nTopMargin, nLeftMargin, nBottomMargin, nRightMargin
@@ -834,10 +902,10 @@ METHOD PROCEDURE paintChild( child ) CLASS HTWidget
 
 RETURN
 
-/*
-    repaintChild - repaint a single child without clearing the whole window.
-    Use this for targeted repaints (focus change, state change).
-*/
+/** Repaints a single child without clearing the whole window.
+ * Used for targeted repaints on focus change or state change.
+ * @param child HTWidget child to repaint
+ */
 METHOD PROCEDURE repaintChild( child ) CLASS HTWidget
 
     IF ::FwindowId != NIL
@@ -849,9 +917,7 @@ METHOD PROCEDURE repaintChild( child ) CLASS HTWidget
 
 RETURN
 
-/*
-    paintWidget
-*/
+/** Paints all child widgets: menu bar first, then layout or direct children. */
 METHOD PROCEDURE paintWidget() CLASS HTWidget
 
     LOCAL menuBar := ht_objectFromId( ::FmenuBar )
@@ -873,16 +939,14 @@ METHOD PROCEDURE paintWidget() CLASS HTWidget
 
 RETURN
 
-/*
-    repaint
-*/
+/** Triggers an immediate repaint by calling paintEvent directly. */
 METHOD PROCEDURE repaint() CLASS HTWidget
     ::paintEvent()
 RETURN
 
-/*
-    resize
-*/
+/** Resizes the widget. Accepts HTSize or (width, height) numeric pair.
+ * @param ... HTSize or two numeric values (width, height)
+ */
 METHOD PROCEDURE resize( ... ) CLASS HTWidget
 
     LOCAL eventResize
@@ -900,9 +964,9 @@ METHOD PROCEDURE resize( ... ) CLASS HTWidget
     ENDIF
 RETURN
 
-/*
-    resizeEvent
-*/
+/** Handles a resize event by storing the new width and height.
+ * @param event HTResizeEvent with the new size
+ */
 METHOD PROCEDURE resizeEvent( event ) CLASS HTWidget
 
     LOCAL oSize
@@ -917,9 +981,7 @@ METHOD PROCEDURE resizeEvent( event ) CLASS HTWidget
 
 RETURN
 
-/*
-    setAsDesktopWidget
-*/
+/** Marks this widget as the desktop background widget (singleton). */
 METHOD PROCEDURE setAsDesktopWidget CLASS HTWidget
 
     /* just one widget can be the desktop widget */
@@ -929,16 +991,14 @@ METHOD PROCEDURE setAsDesktopWidget CLASS HTWidget
 
 RETURN
 
-/*
-    setBackgroundColor
-*/
+/** Sets the background color. @param color Color value */
 METHOD FUNCTION setBackgroundColor( color ) CLASS HTWidget
     ::FbackgroundColor := color
 RETURN ::FbackgroundColor
 
-/*
-    setFocus
-*/
+/** Programmatically gives focus to this top-level widget,
+ * removing focus from the previously active window.
+ */
 METHOD PROCEDURE setFocus() CLASS HTWidget
 
     LOCAL activeWindow := HTApplication():activeWindow()
@@ -952,32 +1012,28 @@ METHOD PROCEDURE setFocus() CLASS HTWidget
 
 RETURN
 
-/*
-    setFocusPolicy
-*/
+/** Sets the focus policy. @param policy HT_FOCUS_NONE/TAB/CLICK/STRONG */
 METHOD PROCEDURE setFocusPolicy( policy ) CLASS HTWidget
     ::FfocusPolicy := policy
 RETURN
 
-/*
-    setForegroundColor
-*/
+/** Sets the foreground color. @param color Color value */
 METHOD FUNCTION setForegroundColor( color ) CLASS HTWidget
     ::FforegroundColor := color
 RETURN ::FforegroundColor
 
-/*
-    setLayout
-*/
+/** Sets the layout manager for this widget (only if none is set).
+ * @param layout HTLayout instance
+ */
 METHOD PROCEDURE setLayout( layout ) CLASS HTWidget
     IF ::Flayout = NIL
         ::Flayout := layout
     ENDIF
 RETURN
 
-/*
-    setWindowId
-*/
+/** Sets the CT window handle and registers as a top-level window.
+ * @param windowId Numeric CT window handle
+ */
 METHOD PROCEDURE setWindowId( windowId ) CLASS HTWidget
     IF ::FwindowId = NIL
         ::FwindowId := windowId
@@ -985,16 +1041,15 @@ METHOD PROCEDURE setWindowId( windowId ) CLASS HTWidget
     ENDIF
 RETURN
 
-/*
-    setWindowTitle
-*/
+/** Sets the window title. @param title Title string */
 METHOD PROCEDURE setWindowTitle( title ) CLASS HTWidget
     ::FwindowTitle := title
 RETURN
 
-/*
-    onKey - register a key binding (nKey => bAction) on this window
-*/
+/** Registers a per-window key binding.
+ * @param nKey Inkey code to bind
+ * @param bAction Code block to execute when the key is pressed
+ */
 METHOD PROCEDURE onKey( nKey, bAction ) CLASS HTWidget
 
     IF ::FonKeyBindings = NIL
@@ -1005,16 +1060,16 @@ METHOD PROCEDURE onKey( nKey, bAction ) CLASS HTWidget
 
 RETURN
 
-/*
-    setHelpLineWidget - set the status bar widget used for help line display
-*/
+/** Sets the status bar widget used for displaying context help lines.
+ * @param oStatusBar HTStatusBar instance
+ */
 METHOD PROCEDURE setHelpLineWidget( oStatusBar ) CLASS HTWidget
     ::FhelpLineWidget := oStatusBar
 RETURN
 
-/*
-    show
-*/
+/** Makes the widget visible and queues paint, focus, and show events
+ * at LOW priority so any pending move/resize events are processed first.
+ */
 METHOD PROCEDURE show() CLASS HTWidget
 
     ::FisVisible := .T.
@@ -1027,13 +1082,11 @@ METHOD PROCEDURE show() CLASS HTWidget
 
 RETURN
 
-/*
-    showEvent
-*/
+/** Handles a show event by accepting it. Override for custom show behavior.
+ * @param showEvent HTShowEvent instance
+ */
 METHOD PROCEDURE showEvent( showEvent ) CLASS HTWidget
     showEvent:accept()
 RETURN
 
-/*
-    EndClass
-*/
+/* EndClass */

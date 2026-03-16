@@ -1,12 +1,10 @@
-/*
- *
+/** @class HTMoveEvent
+ * Event emitted when a widget is moved, carrying old and new positions.
+ * @extends HTEvent
  */
 
 #include "hbtui.ch"
 
-/*
-  HTMoveEvent
-*/
 CLASS HTMoveEvent FROM HTEvent
 
 PROTECTED:
@@ -21,9 +19,10 @@ PUBLIC:
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new move event.
+ * @param pos New position as HTPoint
+ * @param oldPos Previous position as HTPoint
+ */
 METHOD new( pos, oldPos ) CLASS HTMoveEvent
     ::Fpos := pos
     ::FoldPos := oldPos

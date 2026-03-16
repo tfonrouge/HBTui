@@ -1,12 +1,10 @@
-/*
- *
+/** @class HTCloseEvent
+ * Event emitted when a window is requested to close.
+ * @extends HTEvent
  */
 
 #include "hbtui.ch"
 
-/*
-    HTCloseEvent
-*/
 CLASS HTCloseEvent FROM HTEvent
 
 PROTECTED:
@@ -19,8 +17,6 @@ PUBLIC:
     
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new close event. */
 METHOD new() CLASS HTCloseEvent
 RETURN self

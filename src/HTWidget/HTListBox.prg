@@ -1,14 +1,11 @@
-/*
- * HTListBox - Scrollable selectable list widget
+/** @class HTListBox
+ * Scrollable selectable list with keyboard navigation, mouse support, and first-letter search.
+ * @extends HTWidget
  */
 
 #include "hbtui.ch"
 #include "inkey.ch"
 
-#define _LST_COLOR_NORMAL    "N/W"
-#define _LST_COLOR_FOCUSED   "N/W"
-#define _LST_COLOR_SELECTED  "W+/B"
-#define _LST_COLOR_SELUNFOC  "N/BG"
 
 CLASS HTListBox FROM HTWidget
 
@@ -36,15 +33,14 @@ PUBLIC:
     METHOD currentData()    INLINE IIF( ::FcurrentIndex > 0 .AND. ::FcurrentIndex <= Len( ::FitemData ), ::FitemData[ ::FcurrentIndex ], NIL )
     METHOD setCurrentIndex( n )
     METHOD itemText( n )    INLINE IIF( n > 0 .AND. n <= Len( ::Fitems ), ::Fitems[ n ], "" )
+    METHOD firstLetterSearch( cLetter )
 
-    PROPERTY onChanged                          /* {|nIndex| ... } */
-    PROPERTY onActivated                        /* {|nIndex| ... } Enter/dblclick */
+    PROPERTY onChanged READWRITE                 /* {|nIndex| ... } */
+    PROPERTY onActivated READWRITE               /* {|nIndex| ... } Enter/dblclick */
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new list box with optional parent widget. */
 METHOD new( ... ) CLASS HTListBox
 
     LOCAL p
@@ -67,9 +63,9 @@ METHOD new( ... ) CLASS HTListBox
 
 RETURN self
 
-/*
-    paintEvent
-*/
+/** Renders visible items with selection highlight and scroll indicator.
+ * @param paintEvent HTPaintEvent (unused)
+ */
 METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTListBox
 
     LOCAL i, nRow, cText, cColor
@@ -77,13 +73,13 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTListBox
     LOCAL nMaxCol := MaxCol()
     LOCAL nVisibleRows := nMaxRow + 1
     LOCAL lFocused := ::hasFocus()
-    LOCAL cSelColor := IIF( lFocused, _LST_COLOR_SELECTED, _LST_COLOR_SELUNFOC )
-    LOCAL cNrmColor := IIF( lFocused, _LST_COLOR_FOCUSED, _LST_COLOR_NORMAL )
+    LOCAL cSelColor := IIF( lFocused, HTTheme():getColor( HT_CLR_LIST_SELECTED ), HTTheme():getColor( HT_CLR_LIST_SEL_UNFOC ) )
+    LOCAL cNrmColor := IIF( lFocused, HTTheme():getColor( HT_CLR_LIST_NORMAL ), HTTheme():getColor( HT_CLR_LIST_NORMAL ) )
     LOCAL nItemCount := Len( ::Fitems )
-    LOCAL nScrollPos, cScrollChar
+    LOCAL cScrollChar
+    LOCAL nThumbPos, nThumbSize, nRange
 
     HB_SYMBOL_UNUSED( paintEvent )
-    HB_SYMBOL_UNUSED( nScrollPos )
 
     /* ensure topIndex keeps current item visible */
     IF ::FcurrentIndex > 0
@@ -95,14 +91,23 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTListBox
         ENDIF
     ENDIF
 
+    /* calculate proportional scrollbar thumb */
+    nThumbPos := 0
+    nThumbSize := 0
+    IF nItemCount > nVisibleRows
+        nRange := nItemCount - nVisibleRows
+        nThumbSize := Max( 1, Int( nVisibleRows * nVisibleRows / nItemCount ) )
+        nThumbPos := Int( ( ::FtopIndex - 1 ) * ( nVisibleRows - nThumbSize ) / Max( 1, nRange ) )
+        nThumbPos := Max( 0, Min( nThumbPos, nVisibleRows - nThumbSize ) )
+    ENDIF
+
     nRow := 0
     FOR i := ::FtopIndex TO Min( ::FtopIndex + nVisibleRows - 1, nItemCount )
         cText := PadR( ::Fitems[ i ], Max( 0, nMaxCol ) )
 
-        /* scroll indicator on right edge */
+        /* proportional scrollbar on right edge */
         IF nItemCount > nVisibleRows .AND. nMaxCol >= 0
-            nScrollPos := Int( ( i - 1 ) * nVisibleRows / nItemCount )
-            cScrollChar := IIF( nRow = Int( ( ::FcurrentIndex - 1 ) * nVisibleRows / nItemCount ), e"\xDB", e"\xB0" )
+            cScrollChar := IIF( nRow >= nThumbPos .AND. nRow < nThumbPos + nThumbSize, e"\xDB", e"\xB0" )
             cText += cScrollChar
         ELSE
             cText += " "
@@ -121,9 +126,9 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTListBox
 
 RETURN
 
-/*
-    keyEvent
-*/
+/** Handles navigation (Up/Down/PgUp/PgDn/Home/End), Enter activation, and first-letter search.
+ * @param keyEvent HTKeyEvent
+ */
 METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTListBox
 
     LOCAL parent
@@ -183,9 +188,9 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTListBox
 
 RETURN
 
-/*
-    mouseEvent
-*/
+/** Handles mouse click to select item and mouse wheel to scroll.
+ * @param eventMouse HTMouseEvent
+ */
 METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTListBox
 
     LOCAL nClickRow, nIndex
@@ -227,9 +232,10 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTListBox
 
 RETURN
 
-/*
-    addItem
-*/
+/** Appends an item to the list.
+ * @param cText Display text
+ * @param xData Optional associated data
+ */
 METHOD PROCEDURE addItem( cText, xData ) CLASS HTListBox
     AAdd( ::Fitems, cText )
     AAdd( ::FitemData, xData )
@@ -239,9 +245,9 @@ METHOD PROCEDURE addItem( cText, xData ) CLASS HTListBox
     ::Fwidth := Max( ::Fwidth, Len( cText ) )
 RETURN
 
-/*
-    removeItem
-*/
+/** Removes the item at the given index.
+ * @param nIndex 1-based item index
+ */
 METHOD PROCEDURE removeItem( nIndex ) CLASS HTListBox
     IF nIndex >= 1 .AND. nIndex <= Len( ::Fitems )
         ADel( ::Fitems, nIndex )
@@ -254,9 +260,7 @@ METHOD PROCEDURE removeItem( nIndex ) CLASS HTListBox
     ENDIF
 RETURN
 
-/*
-    clear
-*/
+/** Removes all items and resets selection. */
 METHOD PROCEDURE clear() CLASS HTListBox
     ::Fitems := {}
     ::FitemData := {}
@@ -264,18 +268,18 @@ METHOD PROCEDURE clear() CLASS HTListBox
     ::FtopIndex := 1
 RETURN
 
-/*
-    setCurrentIndex
-*/
+/** Sets the current selection index.
+ * @param n 1-based item index
+ */
 METHOD PROCEDURE setCurrentIndex( n ) CLASS HTListBox
     IF n >= 1 .AND. n <= Len( ::Fitems )
         ::FcurrentIndex := n
     ENDIF
 RETURN
 
-/*
-    firstLetterSearch (HIDDEN - used internally by keyEvent)
-*/
+/** Jumps to the next item starting with the given letter, wrapping around.
+ * @param cLetter Uppercase letter to search for
+ */
 METHOD PROCEDURE firstLetterSearch( cLetter ) CLASS HTListBox
     LOCAL i, nStart
 

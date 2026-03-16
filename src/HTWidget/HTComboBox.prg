@@ -1,18 +1,12 @@
-/*
- * HTComboBox - Combo box with dropdown list
- *
- * Displays current selection in a compact row.
- * Alt+Down, Space, or click opens a dropdown popup (CT window).
- * Up/Down without opening changes selection directly.
+/** @class HTComboBox
+ * Dropdown combo box. Shows current selection in a single row;
+ * opens a CT popup window for item selection via Alt+Down, Space, or click.
+ * @extends HTWidget
  */
 
 #include "hbtui.ch"
 #include "inkey.ch"
 
-#define _CMB_COLOR_NORMAL   "N/W"
-#define _CMB_COLOR_FOCUSED  "N/BG"
-#define _CMB_COLOR_DROP_N   "N/W"
-#define _CMB_COLOR_DROP_S   "W+/B"
 #define _CMB_DROP_MAXROWS   8
 
 CLASS HTComboBox FROM HTWidget
@@ -25,15 +19,19 @@ PROTECTED:
     DATA FdroppedDown    INIT .F.
     DATA FdropWinId      INIT NIL
     DATA FdropTopIndex   INIT 1
+    DATA FtypeBuffer     INIT ""
+    DATA FtypeTime       INIT 0
 
     METHOD showPopup()
     METHOD hidePopup()
     METHOD paintDropdown()
+    METHOD typeSearch( cChar )
 
 PUBLIC:
 
     CONSTRUCTOR new( ... )
 
+    METHOD destroy()
     METHOD paintEvent( paintEvent )
     METHOD keyEvent( keyEvent )
     METHOD mouseEvent( eventMouse )
@@ -45,13 +43,11 @@ PUBLIC:
     METHOD currentData()    INLINE IIF( ::FcurrentIndex > 0 .AND. ::FcurrentIndex <= Len( ::FitemData ), ::FitemData[ ::FcurrentIndex ], NIL )
     METHOD setCurrentIndex( n )
 
-    PROPERTY onChanged                          /* {|nIndex| ... } */
+    PROPERTY onChanged READWRITE                 /* {|nIndex| ... } */
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new combo box with optional parent widget. */
 METHOD new( ... ) CLASS HTComboBox
 
     LOCAL p
@@ -74,9 +70,15 @@ METHOD new( ... ) CLASS HTComboBox
 
 RETURN self
 
-/*
-    paintEvent
-*/
+/** Closes the dropdown popup if open, then destroys the widget. */
+METHOD PROCEDURE destroy() CLASS HTComboBox
+    ::hidePopup()
+    ::super:destroy()
+RETURN
+
+/** Renders the current selection text with a dropdown arrow indicator.
+ * @param paintEvent HTPaintEvent (unused)
+ */
 METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTComboBox
 
     LOCAL cDisplay, cArrow, cColor
@@ -84,7 +86,7 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTComboBox
 
     HB_SYMBOL_UNUSED( paintEvent )
 
-    cColor := IIF( ::hasFocus(), _CMB_COLOR_FOCUSED, _CMB_COLOR_NORMAL )
+    cColor := IIF( ::hasFocus(), HTTheme():getColor( HT_CLR_COMBO_FOCUSED ), HTTheme():getColor( HT_CLR_COMBO_NORMAL ) )
     cArrow := IIF( ::FdroppedDown, e"\x1e", e"\x1f" )
 
     cDisplay := ""
@@ -102,9 +104,9 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTComboBox
 
 RETURN
 
-/*
-    keyEvent
-*/
+/** Handles navigation in both closed (Up/Down) and open (full navigation + Enter/Esc) states.
+ * @param keyEvent HTKeyEvent
+ */
 METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTComboBox
 
     LOCAL parent
@@ -143,6 +145,10 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTComboBox
             ::hidePopup()
             EXIT
         OTHERWISE
+            /* type-to-filter in dropdown */
+            IF ::typeSearch( hb_keyChar( keyEvent:key ) )
+                EXIT
+            ENDIF
             RETURN
         ENDSWITCH
 
@@ -187,6 +193,10 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTComboBox
             ENDIF
             EXIT
         OTHERWISE
+            /* type-to-filter when closed */
+            IF ::typeSearch( hb_keyChar( keyEvent:key ) )
+                EXIT
+            ENDIF
             RETURN
         ENDSWITCH
 
@@ -206,9 +216,9 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTComboBox
 
 RETURN
 
-/*
-    mouseEvent
-*/
+/** Toggles the dropdown popup on left-button click.
+ * @param eventMouse HTMouseEvent
+ */
 METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTComboBox
 
     IF eventMouse:nKey = K_LBUTTONDOWN
@@ -221,9 +231,7 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTComboBox
 
 RETURN
 
-/*
-    showPopup
-*/
+/** Opens the dropdown popup as a CT window below (or above) the combo box. */
 METHOD PROCEDURE showPopup() CLASS HTComboBox
 
     LOCAL nDropRows, nDropTop, nDropLeft, nDropBottom, nDropRight
@@ -270,9 +278,7 @@ METHOD PROCEDURE showPopup() CLASS HTComboBox
 
 RETURN
 
-/*
-    hidePopup
-*/
+/** Closes the dropdown popup CT window and reselects the parent window. */
 METHOD PROCEDURE hidePopup() CLASS HTComboBox
 
     LOCAL parent
@@ -292,9 +298,7 @@ METHOD PROCEDURE hidePopup() CLASS HTComboBox
 
 RETURN
 
-/*
-    paintDropdown
-*/
+/** Paints the dropdown list items with selection highlight inside the popup CT window. */
 METHOD PROCEDURE paintDropdown() CLASS HTComboBox
 
     LOCAL i, nRow, cText, cColor
@@ -322,21 +326,22 @@ METHOD PROCEDURE paintDropdown() CLASS HTComboBox
     nRow := 0
     FOR i := ::FdropTopIndex TO Min( ::FdropTopIndex + nVisibleRows - 1, Len( ::Fitems ) )
         cText := PadR( ::Fitems[ i ], nMaxCol + 1 )
-        cColor := IIF( i = ::FcurrentIndex, _CMB_COLOR_DROP_S, _CMB_COLOR_DROP_N )
+        cColor := IIF( i = ::FcurrentIndex, HTTheme():getColor( HT_CLR_COMBO_DROP_S ), HTTheme():getColor( HT_CLR_COMBO_DROP_N ) )
         DispOutAt( nRow, 0, cText, cColor )
         nRow++
     NEXT
 
     DO WHILE nRow <= nMaxRow
-        DispOutAt( nRow, 0, Space( nMaxCol + 1 ), _CMB_COLOR_DROP_N )
+        DispOutAt( nRow, 0, Space( nMaxCol + 1 ), HTTheme():getColor( HT_CLR_COMBO_DROP_N ) )
         nRow++
     ENDDO
 
 RETURN
 
-/*
-    addItem
-*/
+/** Appends an item to the combo box.
+ * @param cText Display text
+ * @param xData Optional associated data
+ */
 METHOD PROCEDURE addItem( cText, xData ) CLASS HTComboBox
     AAdd( ::Fitems, cText )
     AAdd( ::FitemData, xData )
@@ -345,11 +350,44 @@ METHOD PROCEDURE addItem( cText, xData ) CLASS HTComboBox
     ENDIF
 RETURN
 
-/*
-    setCurrentIndex
-*/
+/** Sets the current selection index.
+ * @param n 1-based item index
+ */
 METHOD PROCEDURE setCurrentIndex( n ) CLASS HTComboBox
     IF n >= 1 .AND. n <= Len( ::Fitems )
         ::FcurrentIndex := n
     ENDIF
 RETURN
+
+/** Accumulates typed characters and jumps to the first matching item.
+ * Resets the type buffer after 1 second of inactivity.
+ * @param cChar Character typed
+ * @return .T. if the character was consumed
+ */
+METHOD FUNCTION typeSearch( cChar ) CLASS HTComboBox
+
+    LOCAL i, nNow
+
+    IF ! hb_isString( cChar ) .OR. Len( cChar ) != 1 .OR. Asc( cChar ) < 32
+        RETURN .F.
+    ENDIF
+
+    nNow := Seconds()
+
+    /* reset buffer after 1 second gap */
+    IF nNow - ::FtypeTime > 1
+        ::FtypeBuffer := ""
+    ENDIF
+
+    ::FtypeBuffer += Upper( cChar )
+    ::FtypeTime := nNow
+
+    /* search for first item starting with the accumulated buffer */
+    FOR i := 1 TO Len( ::Fitems )
+        IF Upper( Left( ::Fitems[ i ], Len( ::FtypeBuffer ) ) ) == ::FtypeBuffer
+            ::FcurrentIndex := i
+            RETURN .T.
+        ENDIF
+    NEXT
+
+RETURN .T.

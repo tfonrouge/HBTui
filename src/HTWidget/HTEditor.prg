@@ -1,5 +1,6 @@
-/*
- *
+/** @class HTEditor
+ * Legacy multi-line file viewer/editor using direct file I/O and scrolling.
+ * @extends HTWidget
  */
 
 #include "hbtui.ch"
@@ -21,9 +22,14 @@ CLASS HTEditor FROM HTWidget
 
 ENDCLASS
 
-/*
-   new
-*/
+/** Creates a new editor instance with file path and screen coordinates.
+ * @param cFile File path to edit
+ * @param nTop Top row
+ * @param nLeft Left column
+ * @param nBottom Bottom row
+ * @param nRight Right column
+ * @param cColor Color string
+ */
 METHOD new( cFile, nTop, nLeft, nBottom, nRight, cColor ) CLASS HTEditor
 
     ::super:new()
@@ -37,9 +43,14 @@ METHOD new( cFile, nTop, nLeft, nBottom, nRight, cColor ) CLASS HTEditor
 
 RETURN self
 
-/*
-   View
-*/
+/** Opens and displays the file with keyboard-driven scrolling (Up/Down/PgUp/PgDn/Left/Right).
+ * @param cFile File path (uses instance default if empty)
+ * @param nTop Top row override
+ * @param nLeft Left column override
+ * @param nBottom Bottom row override
+ * @param nRight Right column override
+ * @param cColor Color string override
+ */
 METHOD View( cFile, nTop, nLeft, nBottom, nRight, cColor )
    LOCAL nHandle
    LOCAL nLength
@@ -244,9 +255,10 @@ METHOD View( cFile, nTop, nLeft, nBottom, nRight, cColor )
 
 RETURN self
 
-/*
-   NextLine
-*/
+/** Reads the next line from the file handle, advancing the file pointer.
+ * @param nHandle Open file handle
+ * @return Line text without CR/LF
+ */
 FUNCTION NextLine( nHandle )
 
    LOCAL cBufferVar                   // cZmienna
@@ -285,9 +297,10 @@ FUNCTION NextLine( nHandle )
 
 RETURN cSubstring
 
-/*
-   PrevLine
-*/
+/** Reads the previous line from the file handle, moving the file pointer backward.
+ * @param nHandle Open file handle
+ * @return Line text without CR/LF
+ */
 FUNCTION PrevLine( nHandle )
 
    LOCAL cBufferVar := " "
@@ -341,9 +354,10 @@ FUNCTION PrevLine( nHandle )
 
 RETURN cSubstring
 
-/*
-   AMax
-*/
+/** Returns the length of the longest string in an array.
+ * @param aTarget Array of strings
+ * @return Maximum string length
+ */
 FUNCTION AMax( aTarget )
 
    LOCAL nLarger := 0

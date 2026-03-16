@@ -1,12 +1,11 @@
-/*
- *
+/** @class HTRadioButton
+ * Radio button with auto-exclusive behavior: selecting one unchecks siblings in the same parent.
+ * @extends HTAbstractButton
  */
 
 #include "hbtui.ch"
 #include "inkey.ch"
 
-#define _RDO_COLOR_NORMAL   "00/07"
-#define _RDO_COLOR_FOCUSED  "15/01"
 
 CLASS HTRadioButton FROM HTAbstractButton
 
@@ -21,9 +20,7 @@ PUBLIC:
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new radio button. Accepts optional text and/or parent widget. */
 METHOD new( ... ) CLASS HTRadioButton
 
     LOCAL p
@@ -49,9 +46,9 @@ METHOD new( ... ) CLASS HTRadioButton
 
 RETURN self
 
-/*
-    paintEvent
-*/
+/** Renders the radio button as "(*) text" or "( ) text" with focus coloring.
+ * @param paintEvent HTPaintEvent (unused)
+ */
 METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTRadioButton
 
     LOCAL cMark
@@ -62,7 +59,7 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTRadioButton
 
     cMark := IIF( ::Fchecked, "*", " " )
     cDisplay := "(" + cMark + ") " + ::Ftext
-    cColor := IIF( ::hasFocus(), _RDO_COLOR_FOCUSED, _RDO_COLOR_NORMAL )
+    cColor := IIF( ::hasFocus(), HTTheme():getColor( HT_CLR_CHECK_FOCUSED ), HTTheme():getColor( HT_CLR_CHECK_NORMAL ) )
 
     IF Len( cDisplay ) > MaxCol() + 1
         cDisplay := Left( cDisplay, MaxCol() + 1 )
@@ -72,9 +69,9 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTRadioButton
 
 RETURN
 
-/*
-    keyEvent
-*/
+/** Selects this radio button on Space key.
+ * @param keyEvent HTKeyEvent
+ */
 METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTRadioButton
 
     IF keyEvent:key = K_SPACE
@@ -84,9 +81,9 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTRadioButton
 
 RETURN
 
-/*
-    mouseEvent
-*/
+/** Selects this radio button on left-button click.
+ * @param eventMouse HTMouseEvent
+ */
 METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTRadioButton
 
     IF eventMouse:nKey = K_LBUTTONDOWN
@@ -95,10 +92,7 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTRadioButton
 
 RETURN
 
-/*
-    select
-    Select this radio button, uncheck siblings (autoExclusive)
-*/
+/** Selects this radio button, unchecking sibling radio buttons in the same parent. */
 METHOD PROCEDURE select() CLASS HTRadioButton
 
     LOCAL parent

@@ -1,5 +1,5 @@
-/*
- *
+/** @class HTSize
+ * Immutable 2D size value type with width and height.
  */
 
 #define HB_CLS_NOTOBJECT
@@ -22,9 +22,10 @@ PUBLIC:
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new size.
+ * @param width Width in characters
+ * @param height Height in rows
+ */
 METHOD new( width, height ) CLASS HTSize
 
     ::Fwidth := width

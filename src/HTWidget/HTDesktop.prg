@@ -1,5 +1,7 @@
-/*
- *
+/** @class HTDesktop
+ * Singleton desktop background widget that fills the entire screen.
+ * Creates the CT window system and renders the desktop pattern.
+ * @extends HTWidget
  */
 
 #include "hbtui.ch"
@@ -15,9 +17,7 @@ PUBLIC:
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates the desktop with a default system menu (About, Quit). */
 METHOD new() CLASS HTDesktop
 
     LOCAL menu
@@ -32,9 +32,10 @@ METHOD new() CLASS HTDesktop
 
 RETURN self
 
-/*
-    paintEvent
-*/
+/** Initializes the CT window system, paints the desktop background,
+ * and registers as window 0.
+ * @param paintEvent HTPaintEvent instance
+ */
 METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTDesktop
 
     ctWInit()

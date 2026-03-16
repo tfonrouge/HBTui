@@ -1,5 +1,6 @@
-/*
- *
+/** @class HTAction
+ * Menu action item with text, keyboard shortcut, and triggered callback.
+ * @extends HTObject
  */
 
 #include "hbtui.ch"
@@ -20,15 +21,15 @@ PUBLIC:
     METHOD setText( text )         INLINE ::Ftext := text
     METHOD trigger()
 
-    PROPERTY onTriggered                        /* {|| action } */
+    PROPERTY onTriggered READWRITE               /* {|| action } */
     PROPERTY shortcut
     PROPERTY text
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new action.
+ * @param ... Accepts (parent) or (text, parent)
+ */
 METHOD new( ... ) CLASS HTAction
 
     LOCAL version := 0
@@ -64,16 +65,14 @@ METHOD new( ... ) CLASS HTAction
 
 RETURN self
 
-/*
-    setShortcut
-*/
+/** Sets the keyboard shortcut for this action.
+ * @param shortcut Key code for the shortcut
+ */
 METHOD PROCEDURE setShortcut( shortcut ) CLASS HTAction
     ::Fshortcut := shortcut
 RETURN
 
-/*
-    trigger - execute the action's callback
-*/
+/** Executes the action's onTriggered callback, if set. */
 METHOD PROCEDURE trigger() CLASS HTAction
     IF ::FonTriggered != NIL
         Eval( ::FonTriggered )

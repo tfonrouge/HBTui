@@ -1,12 +1,9 @@
-/*
- *
+/** @class HTLabel
+ * Static text display with left, center, or right alignment.
+ * @extends HTWidget
  */
 
 #include "hbtui.ch"
-
-#define HT_ALIGN_LEFT    0
-#define HT_ALIGN_CENTER  1
-#define HT_ALIGN_RIGHT   2
 
 CLASS HTLabel FROM HTWidget
 
@@ -24,9 +21,7 @@ PUBLIC:
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new label. Accepts optional text and/or parent widget. */
 METHOD new( ... ) CLASS HTLabel
 
     LOCAL version := 0
@@ -69,9 +64,9 @@ METHOD new( ... ) CLASS HTLabel
 
 RETURN self
 
-/*
-    paintEvent
-*/
+/** Renders the label text with the configured alignment.
+ * @param paintEvent HTPaintEvent (unused)
+ */
 METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTLabel
 
     LOCAL cDisplay
@@ -102,9 +97,9 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTLabel
 
 RETURN
 
-/*
-    setText
-*/
+/** Sets the label text and adjusts widget width to match.
+ * @param text New text string
+ */
 METHOD PROCEDURE setText( text ) CLASS HTLabel
     ::Ftext := text
     ::Fwidth := Len( text )

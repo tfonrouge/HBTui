@@ -1,12 +1,11 @@
-/*
- *
+/** @class HTCheckBox
+ * Checkbox toggle widget. Toggles on Space key or mouse click.
+ * @extends HTAbstractButton
  */
 
 #include "hbtui.ch"
 #include "inkey.ch"
 
-#define _CHK_COLOR_NORMAL   "00/07"
-#define _CHK_COLOR_FOCUSED  "15/01"
 
 CLASS HTCheckBox FROM HTAbstractButton
 
@@ -21,9 +20,7 @@ PUBLIC:
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new checkbox. Accepts optional text and/or parent widget. */
 METHOD new( ... ) CLASS HTCheckBox
 
     LOCAL p
@@ -48,9 +45,9 @@ METHOD new( ... ) CLASS HTCheckBox
 
 RETURN self
 
-/*
-    paintEvent
-*/
+/** Renders the checkbox as "[x] text" or "[ ] text" with focus coloring.
+ * @param paintEvent HTPaintEvent (unused)
+ */
 METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTCheckBox
 
     LOCAL cMark
@@ -61,7 +58,7 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTCheckBox
 
     cMark := IIF( ::Fchecked, e"\xFB", " " )
     cDisplay := "[" + cMark + "] " + ::Ftext
-    cColor := IIF( ::hasFocus(), _CHK_COLOR_FOCUSED, _CHK_COLOR_NORMAL )
+    cColor := IIF( ::hasFocus(), HTTheme():getColor( HT_CLR_CHECK_FOCUSED ), HTTheme():getColor( HT_CLR_CHECK_NORMAL ) )
 
     IF Len( cDisplay ) > MaxCol() + 1
         cDisplay := Left( cDisplay, MaxCol() + 1 )
@@ -71,9 +68,9 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTCheckBox
 
 RETURN
 
-/*
-    keyEvent
-*/
+/** Toggles the checkbox on Space key.
+ * @param keyEvent HTKeyEvent
+ */
 METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTCheckBox
 
     IF keyEvent:key = K_SPACE
@@ -83,9 +80,9 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTCheckBox
 
 RETURN
 
-/*
-    mouseEvent
-*/
+/** Toggles the checkbox on left-button click.
+ * @param eventMouse HTMouseEvent
+ */
 METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTCheckBox
 
     IF eventMouse:nKey = K_LBUTTONDOWN
@@ -94,9 +91,7 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTCheckBox
 
 RETURN
 
-/*
-    toggle
-*/
+/** Toggles the checked state and fires onToggled/onClicked callbacks. */
 METHOD PROCEDURE toggle() CLASS HTCheckBox
 
     LOCAL parent

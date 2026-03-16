@@ -1,12 +1,10 @@
-/*
- *
+/** @class HTInputEvent
+ * Base class for user input events (keyboard and mouse).
+ * @extends HTEvent
  */
 
 #include "hbtui.ch"
 
-/*
-    HTInputEvent
-*/
 CLASS HTInputEvent FROM HTEvent
 
 PROTECTED:
@@ -21,9 +19,7 @@ PUBLIC:
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new input event with the current timestamp. */
 METHOD new() CLASS HTInputEvent
     ::Ftimestamp := hb_dateTime()
 RETURN self

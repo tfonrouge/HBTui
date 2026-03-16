@@ -1,11 +1,11 @@
-/*
- * HTStatusBar - Status bar with sections
+/** @class HTStatusBar
+ * Horizontal status bar with multiple text sections separated by vertical bars.
+ * @extends HTWidget
  */
 
 #include "hbtui.ch"
 #include "inkey.ch"
 
-#define _STATUSBAR_COLOR "00/07"
 
 CLASS HTStatusBar FROM HTWidget
 
@@ -24,9 +24,7 @@ PUBLIC:
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new status bar with optional parent. */
 METHOD new( parent ) CLASS HTStatusBar
 
     IF parent != NIL
@@ -39,13 +37,13 @@ METHOD new( parent ) CLASS HTStatusBar
     ::FisVisible := .T.
     ::Fheight := 1
     ::Fwidth := 40
-    ::Fcolor := _STATUSBAR_COLOR
+    ::Fcolor := HTTheme():getColor( HT_CLR_STATUSBAR )
 
 RETURN self
 
-/*
-    paintEvent
-*/
+/** Renders all sections as a single row with vertical-bar separators.
+ * @param paintEvent HTPaintEvent (unused)
+ */
 METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTStatusBar
 
     LOCAL nMaxCol := MaxCol()
@@ -75,9 +73,10 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTStatusBar
 
 RETURN
 
-/*
-    setSection
-*/
+/** Updates the text of an existing section and triggers repaint.
+ * @param nIndex 1-based section index
+ * @param cText New section text
+ */
 METHOD PROCEDURE setSection( nIndex, cText ) CLASS HTStatusBar
 
     LOCAL parent
@@ -92,9 +91,9 @@ METHOD PROCEDURE setSection( nIndex, cText ) CLASS HTStatusBar
 
 RETURN
 
-/*
-    addSection
-*/
+/** Appends a new section to the status bar.
+ * @param cText Section text
+ */
 METHOD PROCEDURE addSection( cText ) CLASS HTStatusBar
     AAdd( ::Fsections, cText )
 RETURN

@@ -1,12 +1,10 @@
-/*
- *
+/** @class HTKeyEvent
+ * Keyboard input event carrying key code and character text.
+ * @extends HTInputEvent
  */
 
 #include "hbtui.ch"
 
-/*
-    HTKeyEvent
-*/
 CLASS HTKeyEvent FROM HTInputEvent
 
 PROTECTED:
@@ -21,9 +19,9 @@ PUBLIC:
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new key event.
+ * @param nKey Inkey key code
+ */
 METHOD new( nKey ) CLASS HTKeyEvent
     ::Fkey := nKey
     ::Ftext := hb_keyChar( nKey )

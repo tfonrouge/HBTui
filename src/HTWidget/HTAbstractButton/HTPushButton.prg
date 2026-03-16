@@ -1,12 +1,11 @@
-/*
- *
+/** @class HTPushButton
+ * Standard push button activated by Enter or Space key.
+ * @extends HTAbstractButton
  */
 
 #include "hbtui.ch"
 #include "inkey.ch"
 
-#define _BTN_COLOR_NORMAL   "00/07"
-#define _BTN_COLOR_FOCUSED  "15/01"
 
 CLASS HTPushButton FROM HTAbstractButton
 
@@ -22,9 +21,7 @@ PUBLIC:
 
 ENDCLASS
 
-/*
-    new
-*/
+/** Creates a new push button. Accepts optional text and/or parent widget. */
 METHOD new( ... ) CLASS HTPushButton
 
     LOCAL p
@@ -48,9 +45,9 @@ METHOD new( ... ) CLASS HTPushButton
 
 RETURN self
 
-/*
-    paintEvent
-*/
+/** Renders the button as "[ text ]" with focus-dependent coloring.
+ * @param paintEvent HTPaintEvent (unused)
+ */
 METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTPushButton
 
     LOCAL cDisplay
@@ -58,7 +55,7 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTPushButton
 
     HB_SYMBOL_UNUSED( paintEvent )
 
-    cColor := IIF( ::hasFocus(), _BTN_COLOR_FOCUSED, _BTN_COLOR_NORMAL )
+    cColor := IIF( ::hasFocus(), HTTheme():getColor( HT_CLR_BUTTON_FOCUSED ), HTTheme():getColor( HT_CLR_BUTTON_NORMAL ) )
     cDisplay := "[ " + ::Ftext + " ]"
 
     IF Len( cDisplay ) > MaxCol() + 1
@@ -69,9 +66,9 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTPushButton
 
 RETURN
 
-/*
-    keyEvent
-*/
+/** Fires the onClicked callback on Enter or Space.
+ * @param keyEvent HTKeyEvent
+ */
 METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTPushButton
 
     IF keyEvent:key = K_ENTER .OR. keyEvent:key = K_SPACE
