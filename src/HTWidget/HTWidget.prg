@@ -116,12 +116,6 @@ PUBLIC:
     PROPERTY x INIT 0
     PROPERTY y INIT 0
 
-    /* */
-
-    PROPERTY posUp
-
-    /* */
-
 ENDCLASS
 
 /*
@@ -293,13 +287,15 @@ RETURN event:accept()
 METHOD PROCEDURE focusInEvent( eventFocus ) CLASS HTWidget
 
     LOCAL aFocusable
+    LOCAL parent
 
     IF eventFocus != NIL
         eventFocus:accept()
     ENDIF
 
     IF ::FwindowId != NIL
-        wSelect( ::windowId )
+        /* select and bring window to top (Z-order) */
+        wSelect( ::windowId, .T. )
     ENDIF
 
     /* auto-focus first focusable child if none focused */
@@ -311,8 +307,10 @@ METHOD PROCEDURE focusInEvent( eventFocus ) CLASS HTWidget
         ENDIF
     ENDIF
 
-    IF eventFocus != NIL .AND. MLeftDown()
-        ::addEvent( HTMouseEvent():new( K_LBUTTONDOWN ) )
+    /* repaint this widget to show focus highlight */
+    parent := ::parent()
+    IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
+        parent:repaintChild( self )
     ENDIF
 
 RETURN
@@ -321,9 +319,17 @@ RETURN
     focusOutEvent
 */
 METHOD PROCEDURE focusOutEvent( eventFocus ) CLASS HTWidget
-    IF eventFocus:isAccepted()
 
+    LOCAL parent
+
+    HB_SYMBOL_UNUSED( eventFocus )
+
+    /* repaint this widget so it loses focus highlight */
+    parent := ::parent()
+    IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
+        parent:repaintChild( self )
     ENDIF
+
 RETURN
 
 /*
@@ -479,7 +485,6 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTWidget
     /* Tab / Shift+Tab: cycle focus among children */
     IF keyEvent:key = K_TAB
         IF ::focusNextChild()
-            ::repaint()
             keyEvent:accept()
         ENDIF
         RETURN
@@ -487,7 +492,6 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTWidget
 
     IF keyEvent:key = K_SH_TAB
         IF ::focusPrevChild()
-            ::repaint()
             keyEvent:accept()
         ENDIF
         RETURN

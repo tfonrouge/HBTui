@@ -79,8 +79,11 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTListBox
     LOCAL lFocused := ::hasFocus()
     LOCAL cSelColor := IIF( lFocused, _LST_COLOR_SELECTED, _LST_COLOR_SELUNFOC )
     LOCAL cNrmColor := IIF( lFocused, _LST_COLOR_FOCUSED, _LST_COLOR_NORMAL )
+    LOCAL nItemCount := Len( ::Fitems )
+    LOCAL nScrollPos, cScrollChar
 
     HB_SYMBOL_UNUSED( paintEvent )
+    HB_SYMBOL_UNUSED( nScrollPos )
 
     /* ensure topIndex keeps current item visible */
     IF ::FcurrentIndex > 0
@@ -93,8 +96,18 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTListBox
     ENDIF
 
     nRow := 0
-    FOR i := ::FtopIndex TO Min( ::FtopIndex + nVisibleRows - 1, Len( ::Fitems ) )
-        cText := PadR( ::Fitems[ i ], nMaxCol + 1 )
+    FOR i := ::FtopIndex TO Min( ::FtopIndex + nVisibleRows - 1, nItemCount )
+        cText := PadR( ::Fitems[ i ], Max( 0, nMaxCol ) )
+
+        /* scroll indicator on right edge */
+        IF nItemCount > nVisibleRows .AND. nMaxCol >= 0
+            nScrollPos := Int( ( i - 1 ) * nVisibleRows / nItemCount )
+            cScrollChar := IIF( nRow = Int( ( ::FcurrentIndex - 1 ) * nVisibleRows / nItemCount ), e"\xDB", e"\xB0" )
+            cText += cScrollChar
+        ELSE
+            cText += " "
+        ENDIF
+
         cColor := IIF( i = ::FcurrentIndex, cSelColor, cNrmColor )
         DispOutAt( nRow, 0, cText, cColor )
         nRow++

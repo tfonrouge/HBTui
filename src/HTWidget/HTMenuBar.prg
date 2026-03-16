@@ -193,7 +193,7 @@ METHOD PROCEDURE paintEvent( event ) CLASS HTMenuBar
 
     HB_SYMBOL_UNUSED( event )
 
-    wSelect( ::windowId, .F. )
+    wSelect( ::parent():windowId, .F. )
     wFormat()
     wFormat( 1, 0, 1, 0 )
     DispOutAt( 0, 0, Space( ::parent():width ), _MENUBAR_COLOR )
