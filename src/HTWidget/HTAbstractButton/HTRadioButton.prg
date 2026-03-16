@@ -121,8 +121,20 @@ METHOD PROCEDURE select() CLASS HTRadioButton
 
     ::Fchecked := .T.
 
+    IF ::FonToggled != NIL
+        Eval( ::FonToggled, ::Fchecked )
+    ENDIF
+    IF ::FonClicked != NIL
+        Eval( ::FonClicked )
+    ENDIF
+
+    /* repaint self and siblings (unchecked siblings changed state) */
     IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
-        parent:repaint()
+        FOR EACH sibling IN parent:children
+            IF sibling:isDerivedFrom( "HTRadioButton" )
+                parent:repaintChild( sibling )
+            ENDIF
+        NEXT
     ENDIF
 
 RETURN

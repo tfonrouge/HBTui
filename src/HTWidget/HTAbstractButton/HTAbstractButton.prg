@@ -19,6 +19,8 @@ PUBLIC:
     PROPERTY checkable      INIT .F.
     PROPERTY checked WRITE setChecked INIT .F.
     PROPERTY down           INIT .F.
+    PROPERTY onClicked                          /* code block: {|| action } */
+    PROPERTY onToggled                          /* code block: {|lChecked| action } */
     PROPERTY shortcut
     PROPERTY text WRITE setText INIT ""
 

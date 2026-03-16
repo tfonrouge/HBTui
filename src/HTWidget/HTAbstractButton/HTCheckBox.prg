@@ -103,9 +103,16 @@ METHOD PROCEDURE toggle() CLASS HTCheckBox
 
     ::Fchecked := ! ::Fchecked
 
+    IF ::FonToggled != NIL
+        Eval( ::FonToggled, ::Fchecked )
+    ENDIF
+    IF ::FonClicked != NIL
+        Eval( ::FonClicked )
+    ENDIF
+
     parent := ::parent()
     IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
-        parent:repaint()
+        parent:repaintChild( self )
     ENDIF
 
 RETURN

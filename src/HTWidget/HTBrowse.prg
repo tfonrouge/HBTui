@@ -60,6 +60,8 @@ PUBLIC:
     /* direct access to TBrowse object */
     METHOD browse() INLINE ::FoBrowse
 
+    PROPERTY onActivated                        /* {|nRow, nCol| ... } Enter/dblclick */
+
 ENDCLASS
 
 /*
@@ -166,6 +168,12 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTBrowse
     CASE K_RIGHT
         ::FoBrowse:right()
         EXIT
+    CASE K_ENTER
+        IF ::FonActivated != NIL
+            Eval( ::FonActivated, ::FoBrowse:rowPos, ::FoBrowse:colPos )
+        ENDIF
+        keyEvent:accept()
+        RETURN
     CASE K_CTRL_HOME
         ::FoBrowse:goTop()
         EXIT
@@ -193,7 +201,7 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTBrowse
     /* repaint via parent to re-establish the viewport */
     parent := ::parent()
     IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
-        parent:repaint()
+        parent:repaintChild( self )
     ENDIF
 
 RETURN
@@ -256,7 +264,7 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTBrowse
 
         parent := ::parent()
         IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
-            parent:repaint()
+            parent:repaintChild( self )
         ENDIF
 
         EXIT
@@ -265,7 +273,7 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTBrowse
         ::FoBrowse:up()
         parent := ::parent()
         IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
-            parent:repaint()
+            parent:repaintChild( self )
         ENDIF
         EXIT
 
@@ -273,7 +281,7 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTBrowse
         ::FoBrowse:down()
         parent := ::parent()
         IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
-            parent:repaint()
+            parent:repaintChild( self )
         ENDIF
         EXIT
 
@@ -348,7 +356,7 @@ METHOD PROCEDURE refreshAll() CLASS HTBrowse
 
     parent := ::parent()
     IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
-        parent:repaint()
+        parent:repaintChild( self )
     ENDIF
 
 RETURN
@@ -364,7 +372,7 @@ METHOD PROCEDURE refreshCurrent() CLASS HTBrowse
 
     parent := ::parent()
     IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
-        parent:repaint()
+        parent:repaintChild( self )
     ENDIF
 
 RETURN

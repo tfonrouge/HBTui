@@ -75,6 +75,9 @@ RETURN
 METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTPushButton
 
     IF keyEvent:key = K_ENTER .OR. keyEvent:key = K_SPACE
+        IF ::FonClicked != NIL
+            Eval( ::FonClicked )
+        ENDIF
         keyEvent:accept()
     ENDIF
 

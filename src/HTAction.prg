@@ -18,7 +18,9 @@ PUBLIC:
     METHOD setSeparator( b )       INLINE ::FisSeparator := b
     METHOD setShortcut( shortcut )
     METHOD setText( text )         INLINE ::Ftext := text
+    METHOD trigger()
 
+    PROPERTY onTriggered                        /* {|| action } */
     PROPERTY shortcut
     PROPERTY text
 
@@ -66,7 +68,14 @@ RETURN self
     setShortcut
 */
 METHOD PROCEDURE setShortcut( shortcut ) CLASS HTAction
-
     ::Fshortcut := shortcut
+RETURN
 
+/*
+    trigger - execute the action's callback
+*/
+METHOD PROCEDURE trigger() CLASS HTAction
+    IF ::FonTriggered != NIL
+        Eval( ::FonTriggered )
+    ENDIF
 RETURN

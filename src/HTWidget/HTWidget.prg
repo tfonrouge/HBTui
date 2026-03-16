@@ -41,6 +41,7 @@ PROTECTED:
     METHOD getClearA INLINE ::FclearA
     METHOD getClearB INLINE ::FclearB
     METHOD paintChild( child )
+    METHOD repaintChild( child )
     METHOD getColor
     METHOD getPos() INLINE HTPoint():new( ::x, ::y )
     METHOD getShadow INLINE ::Fshadow
@@ -212,9 +213,30 @@ RETURN NIL
     displayLayout
 */
 METHOD PROCEDURE displayLayout() CLASS HTWidget
-    LOCAL itm
 
-    FOR EACH itm IN ::Flayout
+    LOCAL child
+    LOCAL nContentWidth, nContentHeight
+
+    IF ::Flayout = NIL
+        RETURN
+    ENDIF
+
+    /* content area = window minus borders */
+    nContentWidth  := ::Fwidth - 2
+    nContentHeight := ::Fheight - 2
+
+    IF nContentWidth <= 0 .OR. nContentHeight <= 0
+        RETURN
+    ENDIF
+
+    /* calculate positions */
+    ::Flayout:doLayout( nContentWidth, nContentHeight )
+
+    /* paint widgets from the layout */
+    FOR EACH child IN ::Flayout:widgetList()
+        IF child:isDerivedFrom( "HTWidget" )
+            ::paintChild( child )
+        ENDIF
     NEXT
 
 RETURN
@@ -787,6 +809,21 @@ METHOD PROCEDURE paintChild( child ) CLASS HTWidget
 
     /* reset margins back to 0,0,0,0 */
     wFormat()
+
+RETURN
+
+/*
+    repaintChild - repaint a single child without clearing the whole window.
+    Use this for targeted repaints (focus change, state change).
+*/
+METHOD PROCEDURE repaintChild( child ) CLASS HTWidget
+
+    IF ::FwindowId != NIL
+        wSelect( ::FwindowId, .F. )
+        wFormat()
+    ENDIF
+
+    ::paintChild( child )
 
 RETURN
 

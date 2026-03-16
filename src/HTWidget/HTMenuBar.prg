@@ -20,6 +20,7 @@ CLASS HTMenuBar FROM HTWidget
 PROTECTED:
 
     DATA FactiveMenu     INIT 0
+    DATA FactiveItem     INIT 0
     DATA FmenuOpen       INIT .F.
     DATA FdropWinId      INIT NIL
 
@@ -221,6 +222,7 @@ METHOD FUNCTION handleKey( nKey ) CLASS HTMenuBar
     LOCAL cKey
     LOCAL i
     LOCAL parent
+    LOCAL aActions, nActionCount
 
     IF nMenuCount = 0
         RETURN .F.
@@ -264,35 +266,89 @@ METHOD FUNCTION handleKey( nKey ) CLASS HTMenuBar
     ENDIF
 
     /* menu bar is active: handle navigation */
+    IF ::FmenuOpen .AND. ::FactiveMenu >= 1 .AND. ::FactiveMenu <= nMenuCount
+        aActions := aMenus[ ::FactiveMenu ]:actions()
+        nActionCount := Len( aActions )
+    ELSE
+        aActions := {}
+        nActionCount := 0
+    ENDIF
+
     SWITCH nKey
     CASE K_LEFT
         ::FactiveMenu := IIF( ::FactiveMenu <= 1, nMenuCount, ::FactiveMenu - 1 )
         IF ::FmenuOpen
+            ::FactiveItem := 0
             ::openMenu( ::FactiveMenu )
         ENDIF
         EXIT
     CASE K_RIGHT
         ::FactiveMenu := IIF( ::FactiveMenu >= nMenuCount, 1, ::FactiveMenu + 1 )
         IF ::FmenuOpen
-            ::openMenu( ::FactiveMenu )
-        ENDIF
-        EXIT
-    CASE K_ENTER
-        IF ::FmenuOpen
-            ::closeMenu()
-            ::FactiveMenu := 0
-        ELSE
+            ::FactiveItem := 0
             ::openMenu( ::FactiveMenu )
         ENDIF
         EXIT
     CASE K_DOWN
-        IF ! ::FmenuOpen
+        IF ::FmenuOpen
+            /* navigate down in dropdown, skip separators */
+            ::FactiveItem++
+            DO WHILE ::FactiveItem <= nActionCount .AND. aActions[ ::FactiveItem ]:isSeparator
+                ::FactiveItem++
+            ENDDO
+            IF ::FactiveItem > nActionCount
+                ::FactiveItem := 1
+                DO WHILE ::FactiveItem <= nActionCount .AND. aActions[ ::FactiveItem ]:isSeparator
+                    ::FactiveItem++
+                ENDDO
+            ENDIF
+            ::paintDropdown( aMenus[ ::FactiveMenu ] )
+            /* reselect parent window */
+            parent := ::parent()
+            IF parent != NIL
+                wSelect( parent:windowId, .F. )
+            ENDIF
+        ELSE
             ::openMenu( ::FactiveMenu )
+        ENDIF
+        EXIT
+    CASE K_UP
+        IF ::FmenuOpen .AND. nActionCount > 0
+            ::FactiveItem--
+            DO WHILE ::FactiveItem >= 1 .AND. aActions[ ::FactiveItem ]:isSeparator
+                ::FactiveItem--
+            ENDDO
+            IF ::FactiveItem < 1
+                ::FactiveItem := nActionCount
+                DO WHILE ::FactiveItem >= 1 .AND. aActions[ ::FactiveItem ]:isSeparator
+                    ::FactiveItem--
+                ENDDO
+            ENDIF
+            ::paintDropdown( aMenus[ ::FactiveMenu ] )
+            parent := ::parent()
+            IF parent != NIL
+                wSelect( parent:windowId, .F. )
+            ENDIF
+        ENDIF
+        EXIT
+    CASE K_ENTER
+        IF ::FmenuOpen .AND. ::FactiveItem >= 1 .AND. ::FactiveItem <= nActionCount
+            /* trigger the selected action */
+            aActions[ ::FactiveItem ]:trigger()
+            ::closeMenu()
+            ::FactiveMenu := 0
+            ::FactiveItem := 0
+        ELSEIF ! ::FmenuOpen
+            ::openMenu( ::FactiveMenu )
+        ELSE
+            ::closeMenu()
+            ::FactiveMenu := 0
         ENDIF
         EXIT
     CASE K_ESC
         ::closeMenu()
         ::FactiveMenu := 0
+        ::FactiveItem := 0
         EXIT
     OTHERWISE
         RETURN .F.
@@ -388,6 +444,8 @@ METHOD PROCEDURE paintDropdown( oMenu ) CLASS HTMenuBar
     LOCAL itm
     LOCAL nRow := 0
     LOCAL nMaxCol
+    LOCAL nIdx := 0
+    LOCAL cColor
 
     IF ::FdropWinId = NIL
         RETURN
@@ -400,10 +458,12 @@ METHOD PROCEDURE paintDropdown( oMenu ) CLASS HTMenuBar
     nMaxCol := MaxCol()
 
     FOR EACH itm IN oMenu:actions()
+        nIdx++
         IF itm:isSeparator
             DispOutAt( nRow, 0, Replicate( e"\xC4", nMaxCol + 1 ), _MENU_COLOR_SEP )
         ELSE
-            DispOutAt( nRow, 0, PadR( " " + itm:text, nMaxCol + 1 ), _MENU_COLOR )
+            cColor := IIF( nIdx = ::FactiveItem, _MENU_COLOR_SEL, _MENU_COLOR )
+            DispOutAt( nRow, 0, PadR( " " + itm:text, nMaxCol + 1 ), cColor )
         ENDIF
         nRow++
     NEXT

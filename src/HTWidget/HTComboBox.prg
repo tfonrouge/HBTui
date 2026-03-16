@@ -45,6 +45,8 @@ PUBLIC:
     METHOD currentData()    INLINE IIF( ::FcurrentIndex > 0 .AND. ::FcurrentIndex <= Len( ::FitemData ), ::FitemData[ ::FcurrentIndex ], NIL )
     METHOD setCurrentIndex( n )
 
+    PROPERTY onChanged                          /* {|nIndex| ... } */
+
 ENDCLASS
 
 /*
@@ -146,18 +148,22 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTComboBox
 
         keyEvent:accept()
 
+        IF ::FcurrentIndex != nOldIndex .AND. ::FonChanged != NIL
+            Eval( ::FonChanged, ::FcurrentIndex )
+        ENDIF
+
         IF ::FdroppedDown
             ::paintDropdown()
             /* reselect parent window after painting dropdown */
             parent := ::parent()
             IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
                 wSelect( parent:windowId, .F. )
-                parent:repaint()
+                parent:repaintChild( self )
             ENDIF
         ELSE
             parent := ::parent()
             IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
-                parent:repaint()
+                parent:repaintChild( self )
             ENDIF
         ENDIF
 
@@ -187,9 +193,12 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTComboBox
         keyEvent:accept()
 
         IF ::FcurrentIndex != nOldIndex
+            IF ::FonChanged != NIL
+                Eval( ::FonChanged, ::FcurrentIndex )
+            ENDIF
             parent := ::parent()
             IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
-                parent:repaint()
+                parent:repaintChild( self )
             ENDIF
         ENDIF
 
