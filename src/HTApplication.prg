@@ -102,7 +102,9 @@ METHOD FUNCTION exec() CLASS HTApplication
 
                     widget := IIF( event:widget = NIL, ::activeWindow(), event:widget )
 
-                    widget:event( event )
+                    IF widget != NIL
+                        widget:event( event )
+                    ENDIF
 
                 ENDDO
             NEXT

@@ -445,6 +445,15 @@ RETURN .F.
 */
 METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTWidget
 
+    LOCAL menuBar
+
+    /* let the menu bar handle F10 and Alt+letter before anything else */
+    menuBar := ht_objectFromId( ::FmenuBar )
+    IF menuBar != NIL .AND. menuBar:handleKey( keyEvent:key )
+        keyEvent:accept()
+        RETURN
+    ENDIF
+
     /* Tab / Shift+Tab: cycle focus among children */
     IF keyEvent:key = K_TAB
         IF ::focusNextChild()

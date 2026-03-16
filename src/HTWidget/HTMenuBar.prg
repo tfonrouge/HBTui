@@ -1,13 +1,33 @@
 /*
- *   31-12-2014
+ *   HTMenuBar - Horizontal menu bar with keyboard activation
+ *
+ *   F10 or Alt activates the menu bar.
+ *   Left/Right navigates menus. Enter opens dropdown.
+ *   Alt+letter accelerators (first letter of menu title).
  */
 
 #include "hbtui.ch"
 #include "inkey.ch"
 
+#define _MENUBAR_COLOR       "00/07"
+#define _MENUBAR_COLOR_SEL   "15/01"
+#define _MENU_COLOR          "00/07"
+#define _MENU_COLOR_SEL      "00/BG"
+#define _MENU_COLOR_SEP      "00/07"
+
 CLASS HTMenuBar FROM HTWidget
 
 PROTECTED:
+
+    DATA FactiveMenu     INIT 0
+    DATA FmenuOpen       INIT .F.
+    DATA FdropWinId      INIT NIL
+
+    METHOD openMenu( nIndex )
+    METHOD closeMenu()
+    METHOD paintDropdown( oMenu )
+    METHOD getMenus()
+
 PUBLIC:
 
     CONSTRUCTOR new( parent )
@@ -17,6 +37,7 @@ PUBLIC:
     METHOD addSeparator()
 
     METHOD paintEvent( event )
+    METHOD handleKey( nKey )
 
 ENDCLASS
 
@@ -144,26 +165,249 @@ METHOD FUNCTION addSeparator() CLASS HTMenuBar
 RETURN self
 
 /*
+    getMenus - returns array of menu children
+*/
+METHOD FUNCTION getMenus() CLASS HTMenuBar
+
+    LOCAL aMenus := {}
+    LOCAL itm
+
+    FOR EACH itm IN ::children
+        IF itm:isDerivedFrom("HTMenu")
+            AAdd( aMenus, itm )
+        ENDIF
+    NEXT
+
+RETURN aMenus
+
+/*
     paintEvent
 */
 METHOD PROCEDURE paintEvent( event ) CLASS HTMenuBar
 
     LOCAL itm
     LOCAL y := 0
+    LOCAL nIdx := 0
+    LOCAL cColor
 
     HB_SYMBOL_UNUSED( event )
 
     wSelect( ::windowId, .F. )
     wFormat()
     wFormat( 1, 0, 1, 0 )
-    DispOutAt( 0, 0, Space( ::parent():width ), "00/07" )
+    DispOutAt( 0, 0, Space( ::parent():width ), _MENUBAR_COLOR )
     FOR EACH itm IN ::children
         IF itm:isDerivedFrom("HTMenu")
+            nIdx++
+            cColor := IIF( nIdx = ::FactiveMenu, _MENUBAR_COLOR_SEL, _MENUBAR_COLOR )
             itm:move( 0, ++y )
-            y += Len( itm:title )
+            DispOutAt( 0, y, " " + itm:title + " ", cColor )
+            y += Len( itm:title ) + 2
         ENDIF
     NEXT
     wFormat()
     wFormat( 1, 1, 1, 1 )
+
+RETURN
+
+/*
+    handleKey - process keyboard input for the menu bar
+    Returns .T. if the key was consumed
+*/
+METHOD FUNCTION handleKey( nKey ) CLASS HTMenuBar
+
+    LOCAL aMenus := ::getMenus()
+    LOCAL nMenuCount := Len( aMenus )
+    LOCAL cKey
+    LOCAL i
+    LOCAL parent
+
+    IF nMenuCount = 0
+        RETURN .F.
+    ENDIF
+
+    /* F10 toggles menu activation */
+    IF nKey = K_F10
+        IF ::FactiveMenu = 0
+            ::FactiveMenu := 1
+        ELSE
+            ::FactiveMenu := 0
+            ::closeMenu()
+        ENDIF
+        parent := ::parent()
+        IF parent != NIL
+            parent:repaint()
+        ENDIF
+        RETURN .T.
+    ENDIF
+
+    /* Alt+letter accelerators (check first letter of each menu title) */
+    IF ::FactiveMenu = 0
+        cKey := Upper( hb_keyChar( nKey ) )
+        /* check for Alt+letter: Alt key codes are typically K_ALT_A to K_ALT_Z */
+        FOR i := 1 TO nMenuCount
+            IF nKey = hb_keyCode( "Alt+" + Upper( Left( aMenus[ i ]:title, 1 ) ) )
+                ::FactiveMenu := i
+                ::openMenu( i )
+                parent := ::parent()
+                IF parent != NIL
+                    parent:repaint()
+                ENDIF
+                RETURN .T.
+            ENDIF
+        NEXT
+    ENDIF
+
+    /* if menu bar is not active, don't consume keys */
+    IF ::FactiveMenu = 0
+        RETURN .F.
+    ENDIF
+
+    /* menu bar is active: handle navigation */
+    SWITCH nKey
+    CASE K_LEFT
+        ::FactiveMenu := IIF( ::FactiveMenu <= 1, nMenuCount, ::FactiveMenu - 1 )
+        IF ::FmenuOpen
+            ::openMenu( ::FactiveMenu )
+        ENDIF
+        EXIT
+    CASE K_RIGHT
+        ::FactiveMenu := IIF( ::FactiveMenu >= nMenuCount, 1, ::FactiveMenu + 1 )
+        IF ::FmenuOpen
+            ::openMenu( ::FactiveMenu )
+        ENDIF
+        EXIT
+    CASE K_ENTER
+        IF ::FmenuOpen
+            ::closeMenu()
+            ::FactiveMenu := 0
+        ELSE
+            ::openMenu( ::FactiveMenu )
+        ENDIF
+        EXIT
+    CASE K_DOWN
+        IF ! ::FmenuOpen
+            ::openMenu( ::FactiveMenu )
+        ENDIF
+        EXIT
+    CASE K_ESC
+        ::closeMenu()
+        ::FactiveMenu := 0
+        EXIT
+    OTHERWISE
+        RETURN .F.
+    ENDSWITCH
+
+    parent := ::parent()
+    IF parent != NIL
+        parent:repaint()
+    ENDIF
+
+RETURN .T.
+
+/*
+    openMenu
+*/
+METHOD PROCEDURE openMenu( nIndex ) CLASS HTMenuBar
+
+    LOCAL aMenus := ::getMenus()
+    LOCAL oMenu
+    LOCAL nActions, nMaxWidth
+    LOCAL nDropTop, nDropLeft, nDropBottom, nDropRight
+    LOCAL itm, nMenuLeft
+
+    IF nIndex < 1 .OR. nIndex > Len( aMenus )
+        RETURN
+    ENDIF
+
+    /* close any existing dropdown */
+    ::closeMenu()
+
+    oMenu := aMenus[ nIndex ]
+    ::FmenuOpen := .T.
+
+    /* calculate dropdown position */
+    nActions := 0
+    nMaxWidth := 10
+    FOR EACH itm IN oMenu:actions()
+        nActions++
+        nMaxWidth := Max( nMaxWidth, Len( itm:text ) + 4 )
+    NEXT
+
+    IF nActions = 0
+        RETURN
+    ENDIF
+
+    /* find menu's horizontal position */
+    nMenuLeft := 0
+    FOR itm := 1 TO nIndex - 1
+        nMenuLeft += Len( aMenus[ itm ]:title ) + 3
+    NEXT
+    nMenuLeft++
+
+    nDropTop    := wRow() + 2
+    nDropLeft   := wCol() + nMenuLeft
+    nDropBottom := nDropTop + nActions + 1
+    nDropRight  := nDropLeft + nMaxWidth
+
+    ::FdropWinId := wOpen( nDropTop, nDropLeft, nDropBottom, nDropRight, .T. )
+    wSetShadow( 8 )
+    wBox( NIL, _MENU_COLOR )
+    wFormat()
+
+    ::paintDropdown( oMenu )
+
+RETURN
+
+/*
+    closeMenu
+*/
+METHOD PROCEDURE closeMenu() CLASS HTMenuBar
+
+    LOCAL parent
+
+    IF ::FdropWinId != NIL
+        wClose( ::FdropWinId )
+        ::FdropWinId := NIL
+    ENDIF
+
+    ::FmenuOpen := .F.
+
+    parent := ::parent()
+    IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
+        wSelect( parent:windowId, .F. )
+    ENDIF
+
+RETURN
+
+/*
+    paintDropdown
+*/
+METHOD PROCEDURE paintDropdown( oMenu ) CLASS HTMenuBar
+
+    LOCAL itm
+    LOCAL nRow := 0
+    LOCAL nMaxCol
+
+    IF ::FdropWinId = NIL
+        RETURN
+    ENDIF
+
+    wSelect( ::FdropWinId, .T. )
+    wFormat()
+    wFormat( 1, 1, 1, 1 )
+
+    nMaxCol := MaxCol()
+
+    FOR EACH itm IN oMenu:actions()
+        IF itm:isSeparator
+            DispOutAt( nRow, 0, Replicate( e"\xC4", nMaxCol + 1 ), _MENU_COLOR_SEP )
+        ELSE
+            DispOutAt( nRow, 0, PadR( " " + itm:text, nMaxCol + 1 ), _MENU_COLOR )
+        ENDIF
+        nRow++
+    NEXT
+
+    wFormat()
 
 RETURN
