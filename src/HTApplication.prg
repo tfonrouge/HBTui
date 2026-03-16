@@ -82,8 +82,10 @@ METHOD FUNCTION exec() CLASS HTApplication
 
         result := 0
 
-        /* paint desktop */
-        ::Fdesktop:show()
+        /* paint desktop synchronously BEFORE processing queued events,
+         * so that ctWInit() and the desktop rendering happen first,
+         * before any user windows are created */
+        ::Fdesktop:paintEvent( HTPaintEvent():new() )
 
         ::Fexecute := .T.
 
@@ -132,7 +134,7 @@ METHOD PROCEDURE getEvent() CLASS HTApplication
     ENDIF
 
     IF mCoords[ 1 ] != mrow .OR. mCoords[ 2 ] != mcol
-        HTApplication():addEvent( self, HTMouseEvent():new( K_MOUSEMOVE ) )
+        ::queueEvent( HTMouseEvent():new( K_MOUSEMOVE ) )
         mCoords[ 1 ] := mrow
         mCoords[ 2 ] := mcol
         RETURN
@@ -141,11 +143,17 @@ METHOD PROCEDURE getEvent() CLASS HTApplication
     nKey := Inkey( 1 )
 
     IF nKey != 0
-        IF !Empty( window := ::getTopLevelWindowFromWindowId( ht_windowAtMousePos() ) )
-            IF nKey >= K_MINMOUSE .AND. nKey <= K_MAXMOUSE
-                ::addEvent( window, HTMouseEvent():new( nKey ) )
-            ELSE
-                ::addEvent( window, HTKeyEvent():new( nKey ) )
+        IF nKey >= K_MINMOUSE .AND. nKey <= K_MAXMOUSE
+            /* mouse events go to the window under the mouse */
+            window := ::getTopLevelWindowFromWindowId( ht_windowAtMousePos() )
+            IF ! Empty( window )
+                window:addEvent( HTMouseEvent():new( nKey ) )
+            ENDIF
+        ELSE
+            /* keyboard events go to the active (focused) window */
+            window := ::activeWindow()
+            IF ! Empty( window )
+                window:addEvent( HTKeyEvent():new( nKey ) )
             ENDIF
         ENDIF
     ENDIF

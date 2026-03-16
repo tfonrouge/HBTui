@@ -12,16 +12,24 @@ PUBLIC:
 
     METHOD new( parent ) INLINE ::super:new( parent )
 
+    METHOD setChecked( checked )
     METHOD setText( text )
 
     PROPERTY autoExclusive  INIT .F.
     PROPERTY checkable      INIT .F.
-    PROPERTY checked        INIT .F.
+    PROPERTY checked WRITE setChecked INIT .F.
     PROPERTY down           INIT .F.
     PROPERTY shortcut
     PROPERTY text WRITE setText INIT ""
 
 ENDCLASS
+
+/*
+    setChecked
+*/
+METHOD PROCEDURE setChecked( checked ) CLASS HTAbstractButton
+    ::Fchecked := checked
+RETURN
 
 /*
     setText

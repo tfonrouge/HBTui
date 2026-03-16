@@ -28,6 +28,12 @@
 #define HT_EVENT_PRIORITY_LOW       3
 
 
+/* focus policies */
+#define HT_FOCUS_NONE               0
+#define HT_FOCUS_TAB                1
+#define HT_FOCUS_CLICK              2
+#define HT_FOCUS_STRONG             3
+
 #define HT_WIDGET                   0x00000000
 #define HT_WINDOW                   0x00000001
 #define HT_DIALOG                   hb_bitOr( 0x00000002, HT_WINDOW )

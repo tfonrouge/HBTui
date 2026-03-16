@@ -28,15 +28,19 @@ PROTECTED:
 //    DATA FposUp
     DATA Fshadow    INIT _WIDGET_SHADOW
     DATA FwindowId  /* CT Handle */
+    DATA FfocusWidget                       /* currently focused child (object ref or NIL) */
     DATA FwinSysBtnMove     INIT .F.
     DATA FwinSysBtnClose    INIT .F.
     DATA FwinSysBtnHide     INIT .F.
     DATA FwinSysBtnMaximize INIT .F.
     DATA FwinSysBtnResize   INIT .F.
 
+    METHOD childAt( nRow, nCol )
     METHOD displayLayout()
+    METHOD focusableChildren()
     METHOD getClearA INLINE ::FclearA
     METHOD getClearB INLINE ::FclearB
+    METHOD paintChild( child )
     METHOD getColor
     METHOD getPos() INLINE HTPoint():new( ::x, ::y )
     METHOD getShadow INLINE ::Fshadow
@@ -55,7 +59,7 @@ PUBLIC:
 
     METHOD actions()
     METHOD addAction( action )
-    METHOD addEvent( target, event, priority )
+    METHOD addEvent( event, priority )
 
     METHOD closeEvent( closeEvent )
     METHOD event( event )
@@ -70,9 +74,14 @@ PUBLIC:
     METHOD resize( ... )
     METHOD resizeEvent( event )
 
+    METHOD focusNextChild()
+    METHOD focusPrevChild()
+    METHOD focusWidget() INLINE ::FfocusWidget
+    METHOD hasFocus()
     METHOD setAsDesktopWidget
     METHOD setBackgroundColor( color )
     METHOD setFocus()
+    METHOD setFocusPolicy( policy )
     METHOD setForegroundColor( color )
     METHOD setLayout( layout )
     METHOD setWindowFlags( type ) INLINE ::FwindowFlags := type
@@ -91,6 +100,7 @@ PUBLIC:
     PROPERTY clearA READ getClearA WRITE setClearA
     PROPERTY clearB READ getClearB WRITE setClearB
     PROPERTY color READ getColor WRITE SetColor
+    PROPERTY focusPolicy WRITE setFocusPolicy INIT HT_FOCUS_NONE
     PROPERTY foregroundColor WRITE setForegroundColor
     PROPERTY height INIT 0
     PROPERTY isVisible INIT .F.
@@ -162,7 +172,7 @@ RETURN
 /*
     addEvent
 */
-METHOD PROCEDURE addEvent( target, event, priority ) CLASS HTWidget
+METHOD PROCEDURE addEvent( event, priority ) CLASS HTWidget
     event:setWidget( self )
     HTApplication():queueEvent( event, priority )
 RETURN
@@ -176,6 +186,27 @@ METHOD PROCEDURE closeEvent( closeEvent ) CLASS HTWidget
         WClose( ::FwindowId )
     ENDIF
 RETURN
+
+/*
+    childAt
+    Find child widget at content-area coordinates (nRow, nCol).
+    Coordinates are relative to the content area (inside border).
+    Returns the child widget or NIL if no child at that position.
+*/
+METHOD FUNCTION childAt( nRow, nCol ) CLASS HTWidget
+
+    LOCAL child
+
+    FOR EACH child IN ::Fchildren
+        IF child:isDerivedFrom( "HTWidget" ) .AND. child:isVisible .AND. ;
+           child:width > 0 .AND. child:height > 0 .AND. ;
+           nRow >= child:y .AND. nRow < child:y + child:height .AND. ;
+           nCol >= child:x .AND. nCol < child:x + child:width
+            RETURN child
+        ENDIF
+    NEXT
+
+RETURN NIL
 
 /*
     displayLayout
@@ -238,13 +269,30 @@ RETURN event:accept()
     focusInEvent
 */
 METHOD PROCEDURE focusInEvent( eventFocus ) CLASS HTWidget
-    eventFocus:accept()
-    IF eventFocus:isAccepted()
+
+    LOCAL aFocusable
+
+    IF eventFocus != NIL
+        eventFocus:accept()
+    ENDIF
+
+    IF ::FwindowId != NIL
         wSelect( ::windowId )
-        IF MLeftDown()
-            ::addEvent( HTMouseEvent():new( K_LBUTTONDOWN ) )
+    ENDIF
+
+    /* auto-focus first focusable child if none focused */
+    IF ::FfocusWidget = NIL
+        aFocusable := ::focusableChildren()
+        IF Len( aFocusable ) > 0
+            ::FfocusWidget := aFocusable[ 1 ]
+            ::FfocusWidget:focusInEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ) )
         ENDIF
     ENDIF
+
+    IF eventFocus != NIL .AND. MLeftDown()
+        ::addEvent( HTMouseEvent():new( K_LBUTTONDOWN ) )
+    ENDIF
+
 RETURN
 
 /*
@@ -283,10 +331,143 @@ METHOD FUNCTION getWindowId() CLASS HTWidget
 RETURN ::FwindowId
 
 /*
+    focusableChildren
+    Returns array of children that can receive focus (focusPolicy != HT_FOCUS_NONE)
+*/
+METHOD FUNCTION focusableChildren() CLASS HTWidget
+
+    LOCAL aResult := {}
+    LOCAL child
+
+    FOR EACH child IN ::Fchildren
+        IF child:isDerivedFrom( "HTWidget" ) .AND. child:isVisible .AND. ;
+           child:focusPolicy != HT_FOCUS_NONE
+            AAdd( aResult, child )
+        ENDIF
+    NEXT
+
+RETURN aResult
+
+/*
+    focusNextChild
+    Move focus to next focusable child. Returns .T. if focus moved.
+*/
+METHOD FUNCTION focusNextChild() CLASS HTWidget
+
+    LOCAL aFocusable := ::focusableChildren()
+    LOCAL nPos
+    LOCAL nLen := Len( aFocusable )
+
+    IF nLen = 0
+        RETURN .F.
+    ENDIF
+
+    IF ::FfocusWidget = NIL
+        /* no current focus: focus first child */
+        ::FfocusWidget := aFocusable[ 1 ]
+        ::FfocusWidget:focusInEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ) )
+        RETURN .T.
+    ENDIF
+
+    nPos := AScan( aFocusable, {|w| w == ::FfocusWidget } )
+
+    IF nPos = 0
+        /* current focus widget not in list: focus first */
+        ::FfocusWidget:focusOutEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSOUT ) )
+        ::FfocusWidget := aFocusable[ 1 ]
+        ::FfocusWidget:focusInEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ) )
+        RETURN .T.
+    ENDIF
+
+    /* move to next, wrap around */
+    ::FfocusWidget:focusOutEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSOUT ) )
+    nPos := IIF( nPos >= nLen, 1, nPos + 1 )
+    ::FfocusWidget := aFocusable[ nPos ]
+    ::FfocusWidget:focusInEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ) )
+
+RETURN .T.
+
+/*
+    focusPrevChild
+    Move focus to previous focusable child. Returns .T. if focus moved.
+*/
+METHOD FUNCTION focusPrevChild() CLASS HTWidget
+
+    LOCAL aFocusable := ::focusableChildren()
+    LOCAL nPos
+    LOCAL nLen := Len( aFocusable )
+
+    IF nLen = 0
+        RETURN .F.
+    ENDIF
+
+    IF ::FfocusWidget = NIL
+        /* no current focus: focus last child */
+        ::FfocusWidget := aFocusable[ nLen ]
+        ::FfocusWidget:focusInEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ) )
+        RETURN .T.
+    ENDIF
+
+    nPos := AScan( aFocusable, {|w| w == ::FfocusWidget } )
+
+    IF nPos = 0
+        ::FfocusWidget:focusOutEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSOUT ) )
+        ::FfocusWidget := aFocusable[ nLen ]
+        ::FfocusWidget:focusInEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ) )
+        RETURN .T.
+    ENDIF
+
+    /* move to previous, wrap around */
+    ::FfocusWidget:focusOutEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSOUT ) )
+    nPos := IIF( nPos <= 1, nLen, nPos - 1 )
+    ::FfocusWidget := aFocusable[ nPos ]
+    ::FfocusWidget:focusInEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ) )
+
+RETURN .T.
+
+/*
+    hasFocus
+    Returns .T. if this widget currently has focus within its parent
+*/
+METHOD FUNCTION hasFocus() CLASS HTWidget
+
+    LOCAL parent := ::parent()
+
+    IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
+        RETURN parent:focusWidget() == self
+    ENDIF
+
+RETURN .F.
+
+/*
     keyEvent
+    Dispatches key events to focused child; handles Tab/Shift+Tab focus cycling
 */
 METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTWidget
-    HB_SYMBOL_UNUSED( keyEvent )
+
+    /* Tab / Shift+Tab: cycle focus among children */
+    IF keyEvent:key = K_TAB
+        IF ::focusNextChild()
+            ::repaint()
+            keyEvent:accept()
+        ENDIF
+        RETURN
+    ENDIF
+
+    IF keyEvent:key = K_SH_TAB
+        IF ::focusPrevChild()
+            ::repaint()
+            keyEvent:accept()
+        ENDIF
+        RETURN
+    ENDIF
+
+    /* dispatch to focused child widget */
+    IF ::FfocusWidget != NIL
+        ::FfocusWidget:keyEvent( keyEvent )
+        RETURN
+    ENDIF
+
 RETURN
 
 /*
@@ -296,6 +477,8 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
 
     LOCAL x
     LOCAL y
+    LOCAL oHitChild
+    LOCAL nContentRow, nContentCol
 
     SWITCH eventMouse:nKey
     CASE K_LBUTTONDOWN
@@ -315,10 +498,38 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
             ::FwinSysBtnMove := .T.
         ENDIF
 
-        OutStd( ::FposDown:y, ::FposDown:x, e"\n" )
-
         IF HTApplication():activeWindow() = NIL .OR. HTApplication():activeWindow():windowId != ::windowId
             ::addEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ) )
+        ENDIF
+
+        /*
+         * Child hit-testing: check if click landed on a child widget.
+         * Mouse coords are relative to the CT window (margins=0).
+         * Content area starts at (1,1) after the border.
+         */
+        nContentRow := ::FposDown:y - 1
+        nContentCol := ::FposDown:x - 1
+
+        IF nContentRow >= 0 .AND. nContentCol >= 0
+            oHitChild := ::childAt( nContentRow, nContentCol )
+
+            IF oHitChild != NIL
+                /* focus the clicked child if it accepts click focus */
+                IF oHitChild:focusPolicy = HT_FOCUS_CLICK .OR. ;
+                   oHitChild:focusPolicy = HT_FOCUS_STRONG
+                    IF ! oHitChild == ::FfocusWidget
+                        IF ::FfocusWidget != NIL
+                            ::FfocusWidget:focusOutEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSOUT ) )
+                        ENDIF
+                        ::FfocusWidget := oHitChild
+                        ::FfocusWidget:focusInEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ) )
+                        ::repaint()
+                    ENDIF
+                ENDIF
+
+                /* dispatch mouse event to child */
+                oHitChild:mouseEvent( eventMouse )
+            ENDIF
         ENDIF
 
         EXIT
@@ -406,12 +617,15 @@ METHOD PROCEDURE moveEvent( moveEvent ) CLASS HTWidget
     pos := moveEvent:pos
 
     IF ::FwindowId != NIL
+        /* top-level window: physically move the CT window */
         wSelect( ::FwindowId, .F. )
         wMove( pos:y, pos:x )
     ELSE
+        /* child widget: just store position.
+         * The parent will paint us during its paint cycle
+         * with the correct viewport via paintChild(). */
         ::Fx := pos:x
         ::Fy := pos:y
-        ::repaint()
     ENDIF
 
 RETURN
@@ -439,57 +653,130 @@ METHOD PROCEDURE paintTopLevelWindow() CLASS HTWidget
 
     LOCAL n
 
-    ::Fheight := 10
-    ::Fwidth := 40
+    IF ::FwindowId = NIL
+        /* first paint: create the CT window */
 
-    IF ::Fx = NIL
-        ::Fx := MaxRow() / 2 - ::Fheight / 2
-    ENDIF
+        /* use user-specified dimensions, default to 10x40 if not set */
+        IF ::Fheight <= 0
+            ::Fheight := 10
+        ENDIF
+        IF ::Fwidth <= 0
+            ::Fwidth := 40
+        ENDIF
 
-    IF ::Fy = NIL
-        ::Fy := MaxCol() / 2 - ::Fwidth / 2
-    ENDIF
+        /* center window if position not set */
+        IF ::Fx = NIL
+            ::Fx := MaxRow() / 2 - ::Fheight / 2
+        ENDIF
 
-    ::setWindowId( wOpen( ::Fx, ::Fy, ::Fx + ::Fheight - 1, ::Fy + ::Fwidth - 1, .T. ) )
+        IF ::Fy = NIL
+            ::Fy := MaxCol() / 2 - ::Fwidth / 2
+        ENDIF
 
-    SetClearB( _WIDGET_CHAR )
-    wBox( NIL, ::color ) /* border window */
-    wFormat()
+        ::setWindowId( wOpen( ::Fx, ::Fy, ::Fx + ::Fheight - 1, ::Fy + ::Fwidth - 1, .T. ) )
 
-    n := 1
+        SetClearB( _WIDGET_CHAR )
+        wBox( NIL, ::color ) /* border window */
+        wFormat()
 
-    IF ::charWidgetClose = NIL
-        ::FbtnClosePos := NIL
+        n := 1
+
+        IF ::charWidgetClose = NIL
+            ::FbtnClosePos := NIL
+        ELSE
+            ::FbtnClosePos := { n, n += Len( ::charWidgetClose ) - 1 }
+            DispOutAt( 0, n, ::charWidgetClose, "04/09" )
+            ++n
+        ENDIF
+
+        IF ::charWidgetHide = NIL
+            ::FBtnHidePos := NIL
+        ELSE
+            ::FBtnHidePos := { n, n += Len( ::charWidgetHide ) - 1 }
+            DispOutAt( 0, n, ::charWidgetHide, "14/09" )
+            ++n
+        ENDIF
+
+        IF ::charWidgetMaximize = NIL
+            ::FbtnMaximizePos := NIL
+        ELSE
+            ::FbtnMaximizePos := { n, n += Len( ::charWidgetMaximize ) - 1 }
+            DispOutAt( 0, n, ::charWidgetMaximize, "02/09" )
+            ++n
+        ENDIF
+
+        IF ::charWidgetResize = NIL
+            ::FbtnResizePos := NIL
+        ELSE
+            n := Len( ::charWidgetResize )
+            ::FbtnResizePos := { ::Fwidth - n, ::Fwidth }
+            DispOutAt( ::Fheight - 1, ::FbtnResizePos[ 1 ], ::charWidgetResize, ::color )
+        ENDIF
+
+        wFormat()
+
     ELSE
-        ::FbtnClosePos := { n, n += Len( ::charWidgetClose ) - 1 }
-        DispOutAt( 0, n, ::charWidgetClose, "04/09" )
-        ++n
+        /* repaint: select the existing CT window, reset margins,
+         * and clear the content area inside the border */
+        wSelect( ::FwindowId, .F. )
+        wFormat()
+        wFormat( 1, 1, 1, 1 )
+        DispBox( 0, 0, MaxRow(), MaxCol(), Replicate( _WIDGET_CHAR, 9 ), ::color )
+        wFormat()
     ENDIF
 
-    IF ::charWidgetHide = NIL
-        ::FBtnHidePos := NIL
-    ELSE
-        ::FBtnHidePos := { n, n += Len( ::charWidgetHide ) - 1 }
-        DispOutAt( 0, n, ::charWidgetHide, "14/09" )
-        ++n
+RETURN
+
+/*
+    paintChild
+*/
+METHOD PROCEDURE paintChild( child ) CLASS HTWidget
+
+    LOCAL nTopMargin, nLeftMargin, nBottomMargin, nRightMargin
+
+    IF ! child:isVisible
+        RETURN
     ENDIF
 
-    IF ::charWidgetMaximize = NIL
-        ::FbtnMaximizePos := NIL
-    ELSE
-        ::FbtnMaximizePos := { n, n += Len( ::charWidgetMaximize ) - 1 }
-        DispOutAt( 0, n, ::charWidgetMaximize, "02/09" )
-        ++n
+    IF child:width <= 0 .OR. child:height <= 0
+        RETURN
     ENDIF
 
-    IF ::charWidgetResize = NIL
-        ::FbtnResizePos := NIL
-    ELSE
-        n := Len( ::charWidgetResize )
-        ::FbtnResizePos := { ::Fwidth - n, ::Fwidth }
-        DispOutAt( ::Fheight - 1, ::FbtnResizePos[ 1 ], ::charWidgetResize, ::color )
+    /* ensure we are in the right CT window */
+    IF ::FwindowId != NIL
+        wSelect( ::FwindowId, .F. )
     ENDIF
 
+    /*
+     * Calculate margins for the child viewport.
+     * After paintTopLevelWindow(), margins are 0,0,0,0 (full window).
+     * Child x,y are relative to the content area (inside border),
+     * so we add 1 for the border on each side.
+     * wFormat() is additive from current margins (which are 0).
+     */
+    nTopMargin    := 1 + child:y
+    nLeftMargin   := 1 + child:x
+    nBottomMargin := ::Fheight - 1 - child:y - child:height
+    nRightMargin  := ::Fwidth  - 1 - child:x - child:width
+
+    /* clamp to valid range */
+    nTopMargin    := Max( nTopMargin, 0 )
+    nLeftMargin   := Max( nLeftMargin, 0 )
+    nBottomMargin := Max( nBottomMargin, 0 )
+    nRightMargin  := Max( nRightMargin, 0 )
+
+    /* validate: margins must leave room for content */
+    IF nTopMargin + nBottomMargin >= ::Fheight .OR. nLeftMargin + nRightMargin >= ::Fwidth
+        RETURN
+    ENDIF
+
+    /* set format area to child viewport */
+    wFormat( nTopMargin, nLeftMargin, nBottomMargin, nRightMargin )
+
+    /* child sees (0,0) to (MaxRow(), MaxCol()) as its world */
+    child:paintEvent( HTPaintEvent():new() )
+
+    /* reset margins back to 0,0,0,0 */
     wFormat()
 
 RETURN
@@ -511,7 +798,7 @@ METHOD PROCEDURE paintWidget() CLASS HTWidget
     ELSE
         FOR EACH child IN ::Fchildren
             IF ! menuBar == child .AND. child:isDerivedFrom( "HTWidget" )
-                child:repaint()
+                ::paintChild( child )
             ENDIF
         NEXT
     ENDIF
@@ -549,7 +836,17 @@ RETURN
     resizeEvent
 */
 METHOD PROCEDURE resizeEvent( event ) CLASS HTWidget
-    HB_SYMBOL_UNUSED( event )
+
+    LOCAL oSize
+
+    IF event != NIL
+        oSize := event:size
+        IF oSize != NIL
+            ::Fwidth  := oSize:width
+            ::Fheight := oSize:height
+        ENDIF
+    ENDIF
+
 RETURN
 
 /*
@@ -585,6 +882,13 @@ METHOD PROCEDURE setFocus() CLASS HTWidget
         ::focusInEvent( NIL )
     ENDIF
 
+RETURN
+
+/*
+    setFocusPolicy
+*/
+METHOD PROCEDURE setFocusPolicy( policy ) CLASS HTWidget
+    ::FfocusPolicy := policy
 RETURN
 
 /*
@@ -627,9 +931,11 @@ METHOD PROCEDURE show() CLASS HTWidget
 
     ::FisVisible := .T.
 
-    ::addEvent( HTPaintEvent():new() )
-    ::addEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ) )
-    ::addEvent( HTShowEvent():new() )
+    /* use LOW priority so that any move/resize events queued
+     * before show() are processed first */
+    ::addEvent( HTPaintEvent():new(), HT_EVENT_PRIORITY_LOW )
+    ::addEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ), HT_EVENT_PRIORITY_LOW )
+    ::addEvent( HTShowEvent():new(), HT_EVENT_PRIORITY_LOW )
 
 RETURN
 
