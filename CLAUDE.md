@@ -12,7 +12,7 @@ hbmk2 hbtui.hbp
 cd samples/showcase && hbmk2 showcase.prg hbmk.hbm
 
 # Run tests (all headless, exit 0 = pass)
-cd tests && for t in test_basic test_layout test_theme test_widgets; do hbmk2 $t.prg hbmk.hbm && ./$t; done
+cd tests && for t in test_basic test_layout test_theme test_widgets test_browse test_get; do hbmk2 $t.prg hbmk.hbm && ./$t; done
 ```
 
 Requires: Harbour compiler at `~/git/core`, hbct contrib library.
@@ -115,6 +115,7 @@ HTGet wraps Harbour's core `Get` class for full Clipper-compatible input editing
 - `-es2` flag treats warnings as errors — unused variables/params will fail build
 - `K_HOME = K_CTRL_A = 1`, `K_PGDN = K_CTRL_C = 3`, `K_DOWN = K_CTRL_X = 24` — same key codes, can't have both in SWITCH. Use `hb_gtInfo(HB_GTI_KBDSHIFTS)` + `HB_GTI_KBD_CTRL` to detect Ctrl modifier.
 - Callback properties MUST use `READWRITE` or `WRITE setter` — plain `PROPERTY onFoo` is read-only
+- `PROPERTY readOnly ...` is broken: the preprocessor parses `FreadOnly` as `F` + scope keyword `READONLY`, naming the DATA `"F"` instead of `"FreadOnly"`. Workaround: declare `DATA FreadOnly INIT .F.` explicitly in `PROTECTED:` and use `METHOD readOnly() INLINE ::FreadOnly` + `METHOD _readOnly(b) INLINE ::FreadOnly := b` in `PUBLIC:`. Same issue would affect any property whose name case-insensitively matches a scope keyword: `EXPORTED`, `EXPORT`, `VISIBLE`, `PUBLIC`, `PROTECTED`, `HIDDEN`, `PRIVATE`, `READONLY`, `RO`, `PUBLISHED`.
 
 ## Source Layout
 
@@ -134,5 +135,8 @@ tests/            Automated test suite (headless, -gtnul, exit code 0/1)
   test_layout     HTBoxLayout, HTGridLayout item management
   test_theme      HTTheme singleton, all 4 themes, invalid index fallback
   test_widgets    HTLabel, HTLineEdit, HTCheckBox, HTPushButton, HTListBox,
-                  HTComboBox, HTCheckList, HTSpinner, HTProgressBar, HTScrollBar
+                  HTComboBox, HTCheckList, HTSpinner, HTProgressBar, HTScrollBar,
+                  HTTextEdit, HTContextMenu
+  test_browse     HTBrowse column management, navigation blocks, callbacks
+  test_get        HTGet setup/getValue/setValue, label/picture/width, readOnly
 ```

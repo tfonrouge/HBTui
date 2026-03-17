@@ -74,6 +74,7 @@ PROTECTED:
     DATA FoGet                                          /* Harbour TGet instance */
     DATA FlGetActive     INIT .F.                       /* whether TGet currently has focus */
     DATA FdispOffset     INIT 1
+    DATA FreadOnly       INIT .F.                       /* explicit: avoids READONLY keyword clash */
 
 PUBLIC:
 
@@ -95,6 +96,9 @@ PUBLIC:
     METHOD setLabelWidth( nWidth )
     METHOD getDisplayValue()
 
+    METHOD readOnly()   INLINE ::FreadOnly
+    METHOD _readOnly( b ) INLINE ::FreadOnly := b
+
     PROPERTY label WRITE setLabel INIT ""
     PROPERTY picture WRITE setPicture INIT ""
     PROPERTY xVar WRITE setXVar                     /* {|x| IIF( x == NIL, cValue, cValue := x ) } */
@@ -102,7 +106,6 @@ PUBLIC:
     PROPERTY when READWRITE                          /* {|| lEnabled } — .F. prevents focus entry */
     PROPERTY helpLine READWRITE INIT ""
     PROPERTY onChange READWRITE                       /* {|xValue| ... } */
-    PROPERTY readOnly WRITE setReadOnly INIT .F.
     PROPERTY hide READWRITE INIT .F.                 /* password mode */
     PROPERTY labelWidth WRITE setLabelWidth INIT 0
     PROPERTY inputWidth INIT 0
