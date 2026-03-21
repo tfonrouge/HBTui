@@ -185,7 +185,7 @@ METHOD PROCEDURE setup( xVar, cLabel, cPicture, bValid, bWhen, cHelpLine, bOnCha
 
     /* create the Harbour TGet instance */
     IF xVar != NIL
-        ::FoGet := Get():new( 0, ::FlabelWidth, xVar, NIL, cPicture )
+        ::FoGet := HTGetBackend():new( 0, ::FlabelWidth, xVar, NIL, cPicture )
         IF bValid != NIL
             ::FoGet:postBlock := bValid
         ENDIF
