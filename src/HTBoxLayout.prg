@@ -90,7 +90,7 @@ METHOD PROCEDURE addLayout( oLayout ) CLASS HTBoxLayout
 
     oContainer := HTWidget():new()
     oContainer:setLayout( oLayout )
-    oContainer:FisVisible := .T.
+    oContainer:show()
     AAdd( ::FitemList, { oContainer, _ITEM_WIDGET, 0 } )
 
 RETURN
@@ -171,7 +171,7 @@ METHOD PROCEDURE doLayout( nWidth, nHeight ) CLASS HTBoxLayout
         ENDIF
     ENDIF
 
-    /* second pass: assign positions */
+    /* second pass: assign positions (synchronous — no event queuing) */
     IF ::Fdirection = 2
         /* vertical */
         nPos := ::FmarginTop
@@ -183,11 +183,7 @@ METHOD PROCEDURE doLayout( nWidth, nHeight ) CLASS HTBoxLayout
             ELSE
                 w := itm[ 1 ]
                 IF w:isDerivedFrom( "HTWidget" )
-                    w:Fx := ::FmarginLeft
-                    w:Fy := nPos
-                    w:Fwidth := nContentWidth
-                    w:Fheight := nItemSize
-                    w:FisVisible := .T.
+                    w:setGeometry( ::FmarginLeft, nPos, nContentWidth, nItemSize )
                 ENDIF
                 nPos += nItemSize + ::Fspacing
             ENDIF
@@ -198,7 +194,7 @@ METHOD PROCEDURE doLayout( nWidth, nHeight ) CLASS HTBoxLayout
             IF itm[ 2 ] = _ITEM_WIDGET
                 w := itm[ 1 ]
                 IF w:isDerivedFrom( "HTWidget" )
-                    w:Fheight := Max( 1, ::FmarginTop + nContentHeight - w:Fy )
+                    w:setGeometry( w:x, w:y, w:width, Max( 1, ::FmarginTop + nContentHeight - w:y ) )
                 ENDIF
                 EXIT
             ENDIF
@@ -214,11 +210,7 @@ METHOD PROCEDURE doLayout( nWidth, nHeight ) CLASS HTBoxLayout
             ELSE
                 w := itm[ 1 ]
                 IF w:isDerivedFrom( "HTWidget" )
-                    w:Fx := nPos
-                    w:Fy := ::FmarginTop
-                    w:Fwidth := nItemSize
-                    w:Fheight := nContentHeight
-                    w:FisVisible := .T.
+                    w:setGeometry( nPos, ::FmarginTop, nItemSize, nContentHeight )
                 ENDIF
                 nPos += nItemSize + ::Fspacing
             ENDIF
@@ -229,7 +221,7 @@ METHOD PROCEDURE doLayout( nWidth, nHeight ) CLASS HTBoxLayout
             IF itm[ 2 ] = _ITEM_WIDGET
                 w := itm[ 1 ]
                 IF w:isDerivedFrom( "HTWidget" )
-                    w:Fwidth := Max( 1, ::FmarginLeft + nContentWidth - w:Fx )
+                    w:setGeometry( w:x, w:y, Max( 1, ::FmarginLeft + nContentWidth - w:x ), w:height )
                 ENDIF
                 EXIT
             ENDIF

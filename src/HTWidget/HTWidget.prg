@@ -88,6 +88,7 @@ PUBLIC:
     METHOD setFocus()
     METHOD setFocusChild( oChild ) INLINE ::FfocusWidget := oChild
     METHOD setFocusPolicy( policy )
+    METHOD setGeometry( nX, nY, nW, nH ) /* synchronous position+size for layouts */
     METHOD setForegroundColor( color )
     METHOD setLayout( layout )
     METHOD setWindowFlags( type ) INLINE ::FwindowFlags := type
@@ -995,6 +996,20 @@ RETURN
 /** Handles a resize event by storing the new width and height.
  * @param event HTResizeEvent with the new size
  */
+/** Sets position and size synchronously (no event queuing).
+ * Used by layout managers that need immediate geometry changes.
+ * @param nX Column position
+ * @param nY Row position
+ * @param nW Width
+ * @param nH Height
+ */
+METHOD PROCEDURE setGeometry( nX, nY, nW, nH ) CLASS HTWidget
+    ::Fx      := nX
+    ::Fy      := nY
+    ::Fwidth  := nW
+    ::Fheight := nH
+RETURN
+
 METHOD PROCEDURE resizeEvent( event ) CLASS HTWidget
 
     LOCAL oSize

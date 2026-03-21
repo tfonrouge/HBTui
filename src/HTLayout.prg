@@ -21,7 +21,7 @@ PUBLIC:
     METHOD addWidget( w ) VIRTUAL
     METHOD setContentsMargins( nTop, nLeft, nBottom, nRight )
 
-    PROPERTY spacing INIT 0
+    PROPERTY spacing READWRITE INIT 0
 
 ENDCLASS
 
