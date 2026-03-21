@@ -446,6 +446,7 @@ METHOD FUNCTION focusNextChild() CLASS HTWidget
     LOCAL nPos
     LOCAL nLen := Len( aFocusable )
     LOCAL oFocusOut
+    LOCAL oOldWidget
 
     IF nLen = 0
         RETURN .F.
@@ -462,18 +463,24 @@ METHOD FUNCTION focusNextChild() CLASS HTWidget
 
     IF nPos = 0
         /* current focus widget not in list: focus first */
-        ::FfocusWidget:focusOutEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSOUT ) )
+        oOldWidget := ::FfocusWidget
+        ::FfocusWidget := NIL
+        oOldWidget:focusOutEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSOUT ) )
         ::FfocusWidget := aFocusable[ 1 ]
         ::FfocusWidget:focusInEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ) )
         RETURN .T.
     ENDIF
 
-    /* move to next, wrap around */
+    /* move to next, wrap around — clear FfocusWidget first so
+       hasFocus() returns .F. during the old widget's focusOutEvent repaint */
     oFocusOut := HTFocusEvent():new( HT_EVENT_TYPE_FOCUSOUT )
-    ::FfocusWidget:focusOutEvent( oFocusOut )
+    oOldWidget := ::FfocusWidget
+    ::FfocusWidget := NIL
+    oOldWidget:focusOutEvent( oFocusOut )
     IF ! oFocusOut:isAccepted
         /* VALID rejected — re-activate current widget and stay */
-        ::FfocusWidget:focusInEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ) )
+        ::FfocusWidget := oOldWidget
+        oOldWidget:focusInEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ) )
         RETURN .F.
     ENDIF
     nPos := IIF( nPos >= nLen, 1, nPos + 1 )
@@ -491,6 +498,7 @@ METHOD FUNCTION focusPrevChild() CLASS HTWidget
     LOCAL nPos
     LOCAL nLen := Len( aFocusable )
     LOCAL oFocusOut
+    LOCAL oOldWidget
 
     IF nLen = 0
         RETURN .F.
@@ -506,18 +514,24 @@ METHOD FUNCTION focusPrevChild() CLASS HTWidget
     nPos := AScan( aFocusable, {|w| w == ::FfocusWidget } )
 
     IF nPos = 0
-        ::FfocusWidget:focusOutEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSOUT ) )
+        oOldWidget := ::FfocusWidget
+        ::FfocusWidget := NIL
+        oOldWidget:focusOutEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSOUT ) )
         ::FfocusWidget := aFocusable[ nLen ]
         ::FfocusWidget:focusInEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ) )
         RETURN .T.
     ENDIF
 
-    /* move to previous, wrap around */
+    /* move to previous, wrap around — clear FfocusWidget first so
+       hasFocus() returns .F. during the old widget's focusOutEvent repaint */
     oFocusOut := HTFocusEvent():new( HT_EVENT_TYPE_FOCUSOUT )
-    ::FfocusWidget:focusOutEvent( oFocusOut )
+    oOldWidget := ::FfocusWidget
+    ::FfocusWidget := NIL
+    oOldWidget:focusOutEvent( oFocusOut )
     IF ! oFocusOut:isAccepted
         /* VALID rejected — re-activate current widget and stay */
-        ::FfocusWidget:focusInEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ) )
+        ::FfocusWidget := oOldWidget
+        oOldWidget:focusInEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ) )
         RETURN .F.
     ENDIF
     nPos := IIF( nPos <= 1, nLen, nPos - 1 )
@@ -593,6 +607,7 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
     LOCAL x
     LOCAL y
     LOCAL oHitChild
+    LOCAL oOldWidget
     LOCAL nContentRow, nContentCol
 
     SWITCH eventMouse:nKey
@@ -634,8 +649,10 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
                    oHitChild:focusPolicy = HT_FOCUS_STRONG
                     IF ! oHitChild == ::FfocusWidget
                         IF ::FfocusWidget != NIL
-                            /* mouse clicks always transfer focus; VALID fires for feedback only */
-                            ::FfocusWidget:focusOutEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSOUT ) )
+                            /* clear FfocusWidget so hasFocus() returns .F. during repaint */
+                            oOldWidget := ::FfocusWidget
+                            ::FfocusWidget := NIL
+                            oOldWidget:focusOutEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSOUT ) )
                         ENDIF
                         ::FfocusWidget := oHitChild
                         ::FfocusWidget:focusInEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ) )
