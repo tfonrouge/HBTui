@@ -26,7 +26,7 @@ PROTECTED:
     DATA FclearB    INIT _DESKTOP_CHAR
     DATA Fcolor
     DATA FposDown
-//    DATA FposUp
+    DATA FposUp
     DATA Fshadow    INIT _WIDGET_SHADOW
     DATA FwindowId  /* CT Handle */
     DATA FfocusWidget                       /* currently focused child (object ref or NIL) */
@@ -44,7 +44,6 @@ PROTECTED:
     METHOD getClearA INLINE ::FclearA
     METHOD getClearB INLINE ::FclearB
     METHOD paintChild( child )
-    METHOD repaintChild( child )
     METHOD getColor
     METHOD getPos() INLINE HTPoint():new( ::x, ::y )
     METHOD getShadow INLINE ::Fshadow
@@ -65,6 +64,7 @@ PUBLIC:
     METHOD addAction( action )
     METHOD addEvent( event, priority )
     METHOD destroy()
+    METHOD repaintChild( child )
 
     METHOD closeEvent( closeEvent )
     METHOD event( event )
@@ -86,6 +86,7 @@ PUBLIC:
     METHOD setAsDesktopWidget
     METHOD setBackgroundColor( color )
     METHOD setFocus()
+    METHOD setFocusChild( oChild ) INLINE ::FfocusWidget := oChild
     METHOD setFocusPolicy( policy )
     METHOD setForegroundColor( color )
     METHOD setLayout( layout )
@@ -241,8 +242,12 @@ RETURN
 METHOD FUNCTION childAt( nRow, nCol ) CLASS HTWidget
 
     LOCAL child
+    LOCAL nI
 
-    FOR EACH child IN ::Fchildren
+    /* iterate in reverse: last-added (topmost) widgets are checked first,
+       so interactive controls painted over decorative frames win hit-testing */
+    FOR nI := Len( ::Fchildren ) TO 1 STEP -1
+        child := ::Fchildren[ nI ]
         IF child:isDerivedFrom( "HTWidget" ) .AND. child:isVisible .AND. ;
            child:width > 0 .AND. child:height > 0 .AND. ;
            nRow >= child:y .AND. nRow < child:y + child:height .AND. ;
@@ -439,6 +444,7 @@ METHOD FUNCTION focusNextChild() CLASS HTWidget
     LOCAL aFocusable := ::focusableChildren()
     LOCAL nPos
     LOCAL nLen := Len( aFocusable )
+    LOCAL oFocusOut
 
     IF nLen = 0
         RETURN .F.
@@ -462,7 +468,13 @@ METHOD FUNCTION focusNextChild() CLASS HTWidget
     ENDIF
 
     /* move to next, wrap around */
-    ::FfocusWidget:focusOutEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSOUT ) )
+    oFocusOut := HTFocusEvent():new( HT_EVENT_TYPE_FOCUSOUT )
+    ::FfocusWidget:focusOutEvent( oFocusOut )
+    IF ! oFocusOut:isAccepted
+        /* VALID rejected — re-activate current widget and stay */
+        ::FfocusWidget:focusInEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ) )
+        RETURN .F.
+    ENDIF
     nPos := IIF( nPos >= nLen, 1, nPos + 1 )
     ::FfocusWidget := aFocusable[ nPos ]
     ::FfocusWidget:focusInEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ) )
@@ -477,6 +489,7 @@ METHOD FUNCTION focusPrevChild() CLASS HTWidget
     LOCAL aFocusable := ::focusableChildren()
     LOCAL nPos
     LOCAL nLen := Len( aFocusable )
+    LOCAL oFocusOut
 
     IF nLen = 0
         RETURN .F.
@@ -499,7 +512,13 @@ METHOD FUNCTION focusPrevChild() CLASS HTWidget
     ENDIF
 
     /* move to previous, wrap around */
-    ::FfocusWidget:focusOutEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSOUT ) )
+    oFocusOut := HTFocusEvent():new( HT_EVENT_TYPE_FOCUSOUT )
+    ::FfocusWidget:focusOutEvent( oFocusOut )
+    IF ! oFocusOut:isAccepted
+        /* VALID rejected — re-activate current widget and stay */
+        ::FfocusWidget:focusInEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ) )
+        RETURN .F.
+    ENDIF
     nPos := IIF( nPos <= 1, nLen, nPos - 1 )
     ::FfocusWidget := aFocusable[ nPos ]
     ::FfocusWidget:focusInEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ) )
@@ -614,6 +633,7 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
                    oHitChild:focusPolicy = HT_FOCUS_STRONG
                     IF ! oHitChild == ::FfocusWidget
                         IF ::FfocusWidget != NIL
+                            /* mouse clicks always transfer focus; VALID fires for feedback only */
                             ::FfocusWidget:focusOutEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSOUT ) )
                         ENDIF
                         ::FfocusWidget := oHitChild
@@ -772,6 +792,7 @@ RETURN
 METHOD PROCEDURE paintTopLevelWindow() CLASS HTWidget
 
     LOCAL n
+    LOCAL nTitleCol
 
     IF ::FwindowId = NIL
         /* first paint: create the CT window */
@@ -825,12 +846,19 @@ METHOD PROCEDURE paintTopLevelWindow() CLASS HTWidget
             ++n
         ENDIF
 
+        nTitleCol := n  /* save column before resize overwrites n */
+
         IF ::charWidgetResize = NIL
             ::FbtnResizePos := NIL
         ELSE
             n := Len( ::charWidgetResize )
             ::FbtnResizePos := { ::Fwidth - n, ::Fwidth }
             DispOutAt( ::Fheight - 1, ::FbtnResizePos[ 1 ], ::charWidgetResize, ::color )
+        ENDIF
+
+        /* draw window title on the border row after system buttons */
+        IF Len( ::FwindowTitle ) > 0
+            DispOutAt( 0, nTitleCol, ::FwindowTitle, ::color )
         ENDIF
 
         wFormat()
@@ -984,8 +1012,12 @@ RETURN
 /** Marks this widget as the desktop background widget (singleton). */
 METHOD PROCEDURE setAsDesktopWidget CLASS HTWidget
 
-    /* just one widget can be the desktop widget */
-    IF ::FAsDesktopWidget = NIL .AND. HTApplication():desktop = NIL
+    /* just one widget can be the desktop widget.
+     * NOTE: do NOT call HTApplication() here — this method is invoked from
+     * HTApplication:new() while the singleton obj is still NIL (mid-construction),
+     * so HTApplication() would return NIL and any message send on it would fail.
+     * The HTApplication:new() caller already guards with IF ::Fdesktop = NIL. */
+    IF ::FAsDesktopWidget = NIL
         ::FAsDesktopWidget := .T.
     ENDIF
 

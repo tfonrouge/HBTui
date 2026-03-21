@@ -202,7 +202,6 @@ METHOD PROCEDURE paintEvent( event ) CLASS HTMenuBar
         ENDIF
     NEXT
     wFormat()
-    wFormat( 1, 1, 1, 1 )
 
 RETURN
 

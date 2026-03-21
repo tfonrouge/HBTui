@@ -16,6 +16,7 @@ PROTECTED:
     DATA Fexecute INIT .F.
     DATA FeventStack        INIT { {}, {}, {} }
     DATA FeventStackLen     INIT { 0, 0, 0 }
+    DATA Fdesktop           INIT NIL  /* explicit: avoids READONLY keyword clash in PROPERTY macro */
 
 PUBLIC:
 
@@ -30,8 +31,7 @@ PUBLIC:
     METHOD queueEvent( event, priority )
     METHOD setDebug( lEnable )
 
-    PROPERTY allWidgets
-    PROPERTY desktop
+    METHOD desktop()   INLINE ::Fdesktop  /* explicit INLINE: avoids BLOCK getter scope issue */
     PROPERTY topLevelWindows INIT { => }
     
 ENDCLASS

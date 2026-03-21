@@ -366,7 +366,7 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTGet
         IF nClickCol >= ::FlabelWidth .AND. ::FoGet != NIL .AND. ::FlGetActive
             nNewPos := ::FdispOffset + ( nClickCol - ::FlabelWidth )
             IF nNewPos >= 1
-                ::FoGet:pos := Min( nNewPos, ::FoGet:nMaxEdit )
+                ::FoGet:pos := Min( nNewPos, Len( ::FoGet:buffer ) )
             ENDIF
             parent := ::parent()
             IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
@@ -423,14 +423,15 @@ METHOD PROCEDURE focusOutEvent( eventFocus ) CLASS HTGet
         IF ::Fvalid != NIL
             xValue := ::getValue()
             IF ! Eval( ::Fvalid, xValue )
-                /* validation failed — reject focus change, keep editing */
+                /* validation failed — deactivate cleanly, reject the focus change */
+                ::FoGet:killFocus()
+                ::FlGetActive := .F.
                 IF eventFocus != NIL
                     eventFocus:ignore()
                 ENDIF
-                /* re-focus this widget */
+                /* repaint to show validation feedback (e.g. status bar message) */
                 parent := ::parent()
                 IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
-                    parent:FfocusWidget := self
                     parent:repaintChild( self )
                 ENDIF
                 RETURN
