@@ -229,7 +229,7 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTLineEdit
     OTHERWISE
         /* printable character */
         cChar := hb_keyChar( keyEvent:key )
-        IF Len( cChar ) = 1 .AND. hb_asciiUpper( Asc( cChar ) ) >= 32
+        IF Len( cChar ) = 1 .AND. Asc( cChar ) >= 32
             IF ::hasSelection()
                 ::deleteSelection()
             ENDIF

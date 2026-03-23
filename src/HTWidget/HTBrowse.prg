@@ -145,8 +145,8 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTBrowse
 
     /* paint inline edit widget overlay if active */
     IF ::FlEditing .AND. ::FoEditWidget != NIL
-        DispOutAt( ::FoEditWidget:Fy, ::FoEditWidget:Fx, ;
-            PadR( ::FoEditWidget:text, ::FoEditWidget:Fwidth ), ;
+        DispOutAt( ::FoEditWidget:y, ::FoEditWidget:x, ;
+            PadR( ::FoEditWidget:text, ::FoEditWidget:width ), ;
             HTTheme():getColor( HT_CLR_LINEEDIT_FOCUSED ) )
     ENDIF
 
@@ -421,8 +421,6 @@ METHOD PROCEDURE beginEdit( nKey ) CLASS HTBrowse
     LOCAL oCol, xValue, cValue
     LOCAL nColPos, nCellLeft, nCellWidth, nDataRow
     LOCAL parent
-    LOCAL nHeadHeight
-    LOCAL i, oC
 
     IF ::FlEditing .OR. ::FoBrowse:colCount = 0
         RETURN
@@ -447,31 +445,17 @@ METHOD PROCEDURE beginEdit( nKey ) CLASS HTBrowse
         ENDIF
     ENDIF
 
-    /* calculate cell position within the viewport */
-    nHeadHeight := 1
-    IF ::FoBrowse:headSep != NIL .AND. ! Empty( ::FoBrowse:headSep )
-        nHeadHeight := 2
-    ENDIF
-    nDataRow := nHeadHeight + ::FoBrowse:rowPos - 1
-
-    /* calculate column left position and width */
-    nCellLeft := 0
-    FOR i := 1 TO nColPos - 1
-        oC := ::FoBrowse:getColumn( i )
-        nCellLeft += IIF( oC:width != NIL, oC:width, 10 )
-        IF ::FoBrowse:colSep != NIL
-            nCellLeft += Len( ::FoBrowse:colSep )
-        ENDIF
-    NEXT
+    /* use TBrowse's own cursor position — after forceStable, Row()/Col()
+       mark the exact cell position accounting for separators and alignment */
+    ::FoBrowse:forceStable()
+    nDataRow := Row()
+    nCellLeft := Col()
     nCellWidth := IIF( oCol:width != NIL, oCol:width, 10 )
 
     /* create edit widget */
     ::FoEditWidget := HTLineEdit():new()
-    ::FoEditWidget:Fx := nCellLeft
-    ::FoEditWidget:Fy := nDataRow
-    ::FoEditWidget:Fwidth := nCellWidth
-    ::FoEditWidget:Fheight := 1
-    ::FoEditWidget:FisVisible := .T.
+    ::FoEditWidget:setGeometry( nCellLeft, nDataRow, nCellWidth, 1 )
+    ::FoEditWidget:show()
     ::FoEditWidget:setText( AllTrim( cValue ) )
 
     ::FlEditing := .T.
