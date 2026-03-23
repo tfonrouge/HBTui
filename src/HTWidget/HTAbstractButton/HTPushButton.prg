@@ -15,6 +15,7 @@ PUBLIC:
     METHOD new( ... )
     METHOD paintEvent( paintEvent )
     METHOD keyEvent( keyEvent )
+    METHOD mouseEvent( eventMouse )
 
     PROPERTY autoDefault
     PROPERTY default
@@ -63,6 +64,19 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTPushButton
     ENDIF
 
     DispOutAt( 0, 0, cDisplay, cColor )
+
+RETURN
+
+/** Fires the onClicked callback on mouse click.
+ * @param eventMouse HTMouseEvent
+ */
+METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTPushButton
+
+    IF eventMouse:nKey = K_LBUTTONDOWN
+        IF ::FonClicked != NIL
+            Eval( ::FonClicked )
+        ENDIF
+    ENDIF
 
 RETURN
 
