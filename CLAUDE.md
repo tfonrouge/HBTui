@@ -40,10 +40,14 @@ HTBase
       HTMessageBox (singleton), HTScrollBar, HTSpinner, HTCheckList
       HTTabWidget, HTToolBar
       HTTheme (singleton, 4 themes: default/dark/high-contrast/mono)
+      HTToast (singleton, non-blocking notifications with auto-dismiss)
     HTAction (menu item with onTriggered callback)
     HTLayout → HTBoxLayout → HTHBoxLayout, HTVBoxLayout
                HTGridLayout
   HTLayoutItem (alignment mixin)
+
+HTEventLoop (singleton, unified event polling + task scheduling)
+HTGetBackend (TGet subclass, suppresses display() for viewport rendering)
 
 HTEvent (standalone, HB_CLS_NOTOBJECT)
   HTFocusEvent, HTPaintEvent, HTCloseEvent, HTShowEvent, HTHideEvent
@@ -142,15 +146,25 @@ Four coordinate spaces used in the event system:
 
 ```
 include/          hbtui.ch (constants, color categories, alignment), property.ch (macros)
-src/              Core classes (HTBase, HTObject, HTApplication), layouts, C API
+src/              Core classes (HTBase, HTObject, HTApplication, HTEventLoop), layouts, C API
 src/HTEvent/      Event classes (HTEvent, HTKeyEvent, HTMouseEvent, etc.)
-src/HTWidget/     Widget classes (25+ widgets)
+src/HTWidget/     Widget classes (25+ widgets, HTGetBackend, HTToast)
 src/types/        HTPoint, HTSize, HT
+docs/             Documentation
+  EVENT_SYSTEM.md HTEventLoop guide, event types, routing, focus, tasks, coordinates
 samples/          Demo applications (human-facing, require a display)
+  hello/          Minimal Hello World (HTMainWindow + HTLabel)
+  dialog/         Modal HTDialog + HTMessageBox (info/question/custom)
+  browse/         HTBrowse data grid with context menu and navigation
+  controls/       PushButton, CheckBox, RadioButton, Spinner, ComboBox, ListBox
+  get/            HTGet demo (string, numeric, date PICTURE, validation)
+  grid_layout/    HTGridLayout 2D form arrangement
+  editor/         HTLineEdit + HTTextEdit with clipboard support
+  layout/         HTVBoxLayout demo (spacing, stretch, nesting)
+  menu/           HTMenuBar + HTMenu + HTAction with keyboard shortcuts
+  theme/          Theme switching demo (4 themes, F-keys + buttons)
+  toast/          HTToast non-blocking notifications (4 styles, stacking)
   showcase/       Full controls demo with all features
-  get/            HTGet demo (string, numeric, date PICTURE)
-  layout/         Layout demo (spacing, stretch, nesting)
-  theme/          Theme switching demo
 tests/            Automated test suite (headless, -gtnul, exit code 0/1)
   test_basic      HTPoint, HTSize, all HTEvent subclasses
   test_layout     HTBoxLayout, HTGridLayout item management
