@@ -93,7 +93,11 @@
 #define HT_CLR_CTXMENU_NORMAL  48
 #define HT_CLR_CTXMENU_SELECTED 49
 #define HT_CLR_CTXMENU_SEP     50
-#define HT_CLR_MAX              50
+#define HT_CLR_TOAST_INFO       51
+#define HT_CLR_TOAST_SUCCESS    52
+#define HT_CLR_TOAST_WARNING    53
+#define HT_CLR_TOAST_ERROR      54
+#define HT_CLR_MAX              54
 
 /* alignment flags (can be combined with hb_bitOr) */
 #define HT_ALIGN_LEFT           0

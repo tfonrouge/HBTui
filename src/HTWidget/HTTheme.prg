@@ -103,6 +103,10 @@ METHOD PROCEDURE loadDefault() CLASS HTTheme
     ::FaColors[ HT_CLR_CTXMENU_NORMAL  ] := "00/07"
     ::FaColors[ HT_CLR_CTXMENU_SELECTED ] := "00/BG"
     ::FaColors[ HT_CLR_CTXMENU_SEP     ] := "00/07"
+    ::FaColors[ HT_CLR_TOAST_INFO      ] := "15/01"
+    ::FaColors[ HT_CLR_TOAST_SUCCESS   ] := "15/02"
+    ::FaColors[ HT_CLR_TOAST_WARNING   ] := "00/14"
+    ::FaColors[ HT_CLR_TOAST_ERROR     ] := "15/04"
 RETURN
 
 /** Loads the dark color theme. */
@@ -157,6 +161,10 @@ METHOD PROCEDURE loadDark() CLASS HTTheme
     ::FaColors[ HT_CLR_CTXMENU_NORMAL  ] := "15/08"
     ::FaColors[ HT_CLR_CTXMENU_SELECTED ] := "14/01"
     ::FaColors[ HT_CLR_CTXMENU_SEP     ] := "15/08"
+    ::FaColors[ HT_CLR_TOAST_INFO      ] := "15/08"
+    ::FaColors[ HT_CLR_TOAST_SUCCESS   ] := "15/02"
+    ::FaColors[ HT_CLR_TOAST_WARNING   ] := "00/14"
+    ::FaColors[ HT_CLR_TOAST_ERROR     ] := "15/04"
 RETURN
 
 /** Loads the high-contrast theme for accessibility. */
@@ -211,6 +219,10 @@ METHOD PROCEDURE loadHighContrast() CLASS HTTheme
     ::FaColors[ HT_CLR_CTXMENU_NORMAL  ] := "15/00"
     ::FaColors[ HT_CLR_CTXMENU_SELECTED ] := "00/15"
     ::FaColors[ HT_CLR_CTXMENU_SEP     ] := "15/00"
+    ::FaColors[ HT_CLR_TOAST_INFO      ] := "15/00"
+    ::FaColors[ HT_CLR_TOAST_SUCCESS   ] := "15/02"
+    ::FaColors[ HT_CLR_TOAST_WARNING   ] := "00/14"
+    ::FaColors[ HT_CLR_TOAST_ERROR     ] := "15/04"
 RETURN
 
 /** Loads the monochrome (grayscale) theme. */
@@ -265,4 +277,8 @@ METHOD PROCEDURE loadMono() CLASS HTTheme
     ::FaColors[ HT_CLR_CTXMENU_NORMAL  ] := "15/00"
     ::FaColors[ HT_CLR_CTXMENU_SELECTED ] := "00/07"
     ::FaColors[ HT_CLR_CTXMENU_SEP     ] := "15/00"
+    ::FaColors[ HT_CLR_TOAST_INFO      ] := "00/07"
+    ::FaColors[ HT_CLR_TOAST_SUCCESS   ] := "00/07"
+    ::FaColors[ HT_CLR_TOAST_WARNING   ] := "00/07"
+    ::FaColors[ HT_CLR_TOAST_ERROR     ] := "00/07"
 RETURN

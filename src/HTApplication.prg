@@ -109,6 +109,8 @@ METHOD FUNCTION exec() CLASS HTApplication
 
             ::getEvent()
 
+            HTToast():checkExpired()
+
             FOR priority := HT_EVENT_PRIORITY_HIGH TO HT_EVENT_PRIORITY_LOW
                 WHILE ::FeventStackLen[ priority ] > 0
 
