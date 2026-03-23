@@ -85,7 +85,7 @@ METHOD FUNCTION popup( nRow, nCol ) CLASS HTContextMenu
     LOCAL nKey, nActions, nMaxWidth, nVisibleRows
     LOCAL nWinTop, nWinLeft, nWinBottom, nWinRight
     LOCAL itm, nMouseRow, nClickItem, nIdx
-    LOCAL lRunning, oResult
+    LOCAL lRunning, oResult, event
     LOCAL nOldWindow
 
     nActions := Len( ::Factions )
@@ -145,93 +145,102 @@ METHOD FUNCTION popup( nRow, nCol ) CLASS HTContextMenu
 
     DO WHILE lRunning
 
-        nKey := Inkey( 0, INKEY_ALL )
+        event := HTEventLoop():poll( 0.05 )
 
-        SWITCH nKey
-        CASE K_UP
-            nIdx := ::FactiveItem - 1
-            DO WHILE nIdx >= 1
-                IF ! ::Factions[ nIdx ]:isSeparator
-                    ::FactiveItem := nIdx
-                    EXIT
-                ENDIF
-                nIdx--
-            ENDDO
-            IF nIdx < 1
-                /* wrap to last non-separator */
-                FOR nIdx := nActions TO 1 STEP -1
+        IF event == NIL
+            LOOP
+        ENDIF
+
+        IF event:className() == "HTKEYEVENT"
+            nKey := event:key
+
+            SWITCH nKey
+            CASE K_UP
+                nIdx := ::FactiveItem - 1
+                DO WHILE nIdx >= 1
                     IF ! ::Factions[ nIdx ]:isSeparator
                         ::FactiveItem := nIdx
                         EXIT
                     ENDIF
-                NEXT
-            ENDIF
-            ::paintPopup()
-            EXIT
-
-        CASE K_DOWN
-            nIdx := ::FactiveItem + 1
-            DO WHILE nIdx <= nActions
-                IF ! ::Factions[ nIdx ]:isSeparator
-                    ::FactiveItem := nIdx
-                    EXIT
+                    nIdx--
+                ENDDO
+                IF nIdx < 1
+                    /* wrap to last non-separator */
+                    FOR nIdx := nActions TO 1 STEP -1
+                        IF ! ::Factions[ nIdx ]:isSeparator
+                            ::FactiveItem := nIdx
+                            EXIT
+                        ENDIF
+                    NEXT
                 ENDIF
-                nIdx++
-            ENDDO
-            IF nIdx > nActions
-                /* wrap to first non-separator */
-                FOR nIdx := 1 TO nActions
+                ::paintPopup()
+                EXIT
+
+            CASE K_DOWN
+                nIdx := ::FactiveItem + 1
+                DO WHILE nIdx <= nActions
                     IF ! ::Factions[ nIdx ]:isSeparator
                         ::FactiveItem := nIdx
                         EXIT
                     ENDIF
-                NEXT
-            ENDIF
-            ::paintPopup()
-            EXIT
-
-        CASE K_ENTER
-            IF ::FactiveItem >= 1 .AND. ::FactiveItem <= nActions
-                oResult := ::Factions[ ::FactiveItem ]
-            ENDIF
-            lRunning := .F.
-            EXIT
-
-        CASE K_ESC
-            lRunning := .F.
-            EXIT
-
-        CASE K_LBUTTONDOWN
-        CASE K_RBUTTONDOWN
-            /* check if click is inside the popup */
-            nMouseRow := mRow( .T. ) - nWinTop - 1
-            IF nMouseRow >= 0 .AND. nMouseRow < nActions .AND. ;
-               mCol( .T. ) >= nWinLeft .AND. mCol( .T. ) <= nWinRight
-                nClickItem := nMouseRow + 1
-                IF nClickItem >= 1 .AND. nClickItem <= nActions .AND. ! ::Factions[ nClickItem ]:isSeparator
-                    oResult := ::Factions[ nClickItem ]
+                    nIdx++
+                ENDDO
+                IF nIdx > nActions
+                    /* wrap to first non-separator */
+                    FOR nIdx := 1 TO nActions
+                        IF ! ::Factions[ nIdx ]:isSeparator
+                            ::FactiveItem := nIdx
+                            EXIT
+                        ENDIF
+                    NEXT
                 ENDIF
-            ENDIF
-            /* click outside or on item: close */
-            lRunning := .F.
-            EXIT
+                ::paintPopup()
+                EXIT
 
-        CASE K_MOUSEMOVE
-            /* hover highlight */
-            nMouseRow := mRow( .T. ) - nWinTop - 1
-            IF nMouseRow >= 0 .AND. nMouseRow < nActions .AND. ;
-               mCol( .T. ) >= nWinLeft .AND. mCol( .T. ) <= nWinRight
-                nClickItem := nMouseRow + 1
-                IF nClickItem >= 1 .AND. nClickItem <= nActions .AND. ! ::Factions[ nClickItem ]:isSeparator
-                    IF nClickItem != ::FactiveItem
-                        ::FactiveItem := nClickItem
-                        ::paintPopup()
+            CASE K_ENTER
+                IF ::FactiveItem >= 1 .AND. ::FactiveItem <= nActions
+                    oResult := ::Factions[ ::FactiveItem ]
+                ENDIF
+                lRunning := .F.
+                EXIT
+
+            CASE K_ESC
+                lRunning := .F.
+                EXIT
+
+            ENDSWITCH
+
+        ELSEIF event:className() == "HTMOUSEEVENT"
+
+            IF event:nKey == K_LBUTTONDOWN .OR. event:nKey == K_RBUTTONDOWN
+                /* check if click is inside the popup */
+                nMouseRow := event:mouseAbsRow - nWinTop - 1
+                IF nMouseRow >= 0 .AND. nMouseRow < nActions .AND. ;
+                   event:mouseAbsCol >= nWinLeft .AND. event:mouseAbsCol <= nWinRight
+                    nClickItem := nMouseRow + 1
+                    IF nClickItem >= 1 .AND. nClickItem <= nActions .AND. ! ::Factions[ nClickItem ]:isSeparator
+                        oResult := ::Factions[ nClickItem ]
+                    ENDIF
+                ENDIF
+                /* click outside or on item: close */
+                lRunning := .F.
+
+            ELSEIF event:nKey == K_MOUSEMOVE
+                /* hover highlight */
+                nMouseRow := event:mouseAbsRow - nWinTop - 1
+                IF nMouseRow >= 0 .AND. nMouseRow < nActions .AND. ;
+                   event:mouseAbsCol >= nWinLeft .AND. event:mouseAbsCol <= nWinRight
+                    nClickItem := nMouseRow + 1
+                    IF nClickItem >= 1 .AND. nClickItem <= nActions .AND. ! ::Factions[ nClickItem ]:isSeparator
+                        IF nClickItem != ::FactiveItem
+                            ::FactiveItem := nClickItem
+                            ::paintPopup()
+                        ENDIF
                     ENDIF
                 ENDIF
             ENDIF
-            EXIT
 
-        ENDSWITCH
+        ENDIF
 
     ENDDO
 

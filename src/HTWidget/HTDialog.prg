@@ -39,6 +39,7 @@ PUBLIC:
 
     METHOD move( ... )
     METHOD resize( ... )
+    METHOD mouseEvent( eventMouse )
     METHOD keyEvent( keyEvent )
 
 ENDCLASS
@@ -159,17 +160,22 @@ METHOD FUNCTION addButtonBar( ... ) CLASS HTDialog
 RETURN aButtons
 
 /** Synchronous move — sets position immediately (no event queuing).
- * Dialog needs geometry set before exec() calls paintEvent().
+ * Before exec(): sets geometry for paintTopLevelWindow.
  * @param ... HTPoint or (x, y) numeric pair
  */
 METHOD PROCEDURE move( ... ) CLASS HTDialog
+    LOCAL nNewX, nNewY
     IF pCount() = 2 .AND. hb_isNumeric( hb_pValue( 1 ) ) .AND. hb_isNumeric( hb_pValue( 2 ) )
-        ::Fx := hb_pValue( 1 )
-        ::Fy := hb_pValue( 2 )
+        nNewX := hb_pValue( 1 )
+        nNewY := hb_pValue( 2 )
     ELSEIF pCount() = 1 .AND. hb_isObject( hb_pValue( 1 ) )
-        ::Fx := hb_pValue( 1 ):x
-        ::Fy := hb_pValue( 1 ):y
+        nNewX := hb_pValue( 1 ):x
+        nNewY := hb_pValue( 1 ):y
+    ELSE
+        RETURN
     ENDIF
+    ::Fx := nNewX
+    ::Fy := nNewY
 RETURN
 
 /** Synchronous resize — sets dimensions immediately (no event queuing).
@@ -183,6 +189,32 @@ METHOD PROCEDURE resize( ... ) CLASS HTDialog
         ::Fwidth  := hb_pValue( 1 ):width
         ::Fheight := hb_pValue( 1 ):height
     ENDIF
+RETURN
+
+/** Handles mouse events: overrides K_MOUSEMOVE for delta-based window dragging.
+ * The base class uses live mRow(.T.) which gives absolute coords incompatible
+ * with wMove for dialog windows. This override uses event-captured coords
+ * to compute proper deltas.
+ * @param eventMouse HTMouseEvent instance
+ */
+METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTDialog
+
+    LOCAL nDeltaRow, nDeltaCol
+
+    IF eventMouse:nKey = K_MOUSEMOVE .AND. ::FposDown != NIL .AND. ::FwinSysBtnMove .AND. ::FwindowId != NIL
+        /* delta = event mouse position - click offset */
+        nDeltaRow := eventMouse:mouseRow - ::FposDown:y
+        nDeltaCol := eventMouse:mouseCol - ::FposDown:x
+        wSelect( ::FwindowId, .F. )
+        wMove( wRow() + nDeltaRow, wCol() + nDeltaCol )
+        ::Fy := wRow()
+        ::Fx := wCol()
+        RETURN
+    ENDIF
+
+    /* delegate everything else to base class */
+    ::super:mouseEvent( eventMouse )
+
 RETURN
 
 /** Handles key events: ESC rejects the dialog, others delegate to parent.

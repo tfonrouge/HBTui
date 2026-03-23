@@ -98,6 +98,27 @@ HTGet wraps Harbour's core `Get` class for full Clipper-compatible input editing
 
 `move(x, y)` where **x = column, y = row**. `HTPoint(x, y)` same. `wOpen(top, left, bottom, right)` takes row-first. In `paintTopLevelWindow()`, `wOpen(::Fx, ::Fy, ...)` passes x(col) as top(row) — this works because `move()` stores x=col in Fx, and the window position happens to be correct, but the naming is misleading.
 
+### Event System Coordinates
+
+Four coordinate spaces used in the event system:
+
+| Space | Functions | Range | When to use |
+|-------|-----------|-------|-------------|
+| Screen absolute | `mRow(.T.)`, `mCol(.T.)`, `wRow()`, `wCol()` | 0..MaxRow/MaxCol of desktop | Positioning new CT windows (wOpen, wMove) |
+| Window-relative | `mRow()`, `mCol()` (with window selected via wSelect) | 0..window height/width | Hit-testing within a window, mouse event coords |
+| Content-area | `child:x`, `child:y` | 0..content width/height (inside border) | Child widget positioning in parent |
+| Viewport | `MaxRow()`, `MaxCol()` inside active `wFormat()` | Varies by current margins | Widget painting inside paintChild viewport |
+
+**HTMouseEvent** captures both absolute and window-relative coords at creation:
+- `mouseRow`, `mouseCol` — window-relative (relative to wSelect'd window at creation time)
+- Used by event handlers for hit-testing and delta calculations
+
+**Key rules:**
+- `wFormat()` is additive — always reset with `wFormat()` (no args) after use
+- `wMove(nRow, nCol)` takes screen-absolute position (not delta)
+- `mRow()` returns coords relative to currently selected window + current margins
+- After `wBox()` + `wFormat()` reset, margins are (0,0,0,0)
+
 ### Property System
 
 `include/property.ch` defines PROPERTY macros. Key patterns:

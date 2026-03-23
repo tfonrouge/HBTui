@@ -698,15 +698,13 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
 
         IF ::FposDown != NIL
 
-            x := mCol( .T. ) - ( ::FposDown:x + 1 )
-            y := mRow( .T. )
+            x := eventMouse:mouseCol - ( ::FposDown:x + 1 )
+            y := eventMouse:mouseRow
 
-            IF MLeftDown()
-                IF ::FwinSysBtnMove
-                    ::move( HTPoint():new( x, y ) )
-                ELSEIF ::FwinSysBtnResize
-                    ::addEvent( HTResizeEvent():new() )
-                ENDIF
+            IF ::FwinSysBtnMove
+                ::move( HTPoint():new( x, y ) )
+            ELSEIF ::FwinSysBtnResize
+                ::addEvent( HTResizeEvent():new() )
             ENDIF
 
         ENDIF

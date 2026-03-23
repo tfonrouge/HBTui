@@ -120,7 +120,9 @@ METHOD FUNCTION exec() CLASS HTApplication
                 ENDIF
             ENDIF
 
-            /* process queued events by priority */
+            /* process queued events by priority
+             * NOTE: aDel() + shift is O(n) per dequeue, but acceptable here —
+             * HBTUI_UI_STACK_EVENT_SIZE is 128, and TUI event rates are low. */
             FOR priority := HT_EVENT_PRIORITY_HIGH TO HT_EVENT_PRIORITY_LOW
                 WHILE ::FeventStackLen[ priority ] > 0
 
@@ -141,7 +143,7 @@ METHOD FUNCTION exec() CLASS HTApplication
 
     ELSE
 
-        ::ALREADY_RUNNING_EXEC()
+        ht_debugLog( "HTApplication:exec() called while already running — ignored" )
 
     ENDIF
 

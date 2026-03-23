@@ -25,6 +25,7 @@ PROCEDURE Main()
     SetMode( 20, 55 )
 
     app := HTApplication():new()
+    app:setDebug( .T. )
 
     win := HTMainWindow():new()
     win:setWindowTitle( " Dialog Demo " )
