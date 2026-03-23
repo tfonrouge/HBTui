@@ -108,7 +108,7 @@ METHOD FUNCTION exec() CLASS HTApplication
 
             IF event != NIL
                 /* route event to the appropriate top-level window */
-                IF event:isDerivedFrom( "HTMouseEvent" ) .AND. event:nKey != K_MOUSEMOVE
+                IF event:className() == "HTMOUSEEVENT" .AND. event:nKey != K_MOUSEMOVE
                     /* mouse click events go to window under cursor */
                     window := ::getTopLevelWindowFromWindowId( ht_windowAtMousePos() )
                     IF ! Empty( window )

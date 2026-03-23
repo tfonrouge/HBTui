@@ -360,7 +360,7 @@ METHOD PROCEDURE dropdownLoop() CLASS HTComboBox
             LOOP
         ENDIF
 
-        IF event:isDerivedFrom( "HTMouseEvent" )
+        IF event:className() == "HTMOUSEEVENT"
             IF event:nKey = K_LBUTTONDOWN
                 nClickWin := ht_windowAtMousePos()
                 IF nClickWin = ::FdropWinId
@@ -379,7 +379,7 @@ METHOD PROCEDURE dropdownLoop() CLASS HTComboBox
                     ::hidePopup()
                 ENDIF
             ENDIF
-        ELSEIF event:isDerivedFrom( "HTKeyEvent" )
+        ELSEIF event:className() == "HTKEYEVENT"
             SWITCH event:key
             CASE K_ESC
                 ::FcurrentIndex := nOldIndex

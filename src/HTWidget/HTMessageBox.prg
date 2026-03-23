@@ -118,7 +118,7 @@ METHOD FUNCTION showDialog( cTitle, cMessage, cColor, lQuestion ) CLASS HTMessag
             LOOP
         ENDIF
 
-        IF event:isDerivedFrom( "HTKeyEvent" )
+        IF event:className() == "HTKEYEVENT"
             IF event:key = K_ENTER .OR. event:key = K_SPACE
                 nResult := HT_DIALOG_ACCEPTED
                 EXIT
@@ -126,7 +126,7 @@ METHOD FUNCTION showDialog( cTitle, cMessage, cColor, lQuestion ) CLASS HTMessag
                 nResult := HT_DIALOG_REJECTED
                 EXIT
             ENDIF
-        ELSEIF event:isDerivedFrom( "HTMouseEvent" ) .AND. event:nKey = K_LBUTTONDOWN
+        ELSEIF event:className() == "HTMOUSEEVENT" .AND. event:nKey = K_LBUTTONDOWN
             /* check if click landed on a button (row 3 of content area) */
             wSelect( nWinId, .F. )
             wFormat()
