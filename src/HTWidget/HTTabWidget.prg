@@ -188,7 +188,9 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTTabWidget
 
                 oChild:paintEvent( HTPaintEvent():new() )
 
-                wFormat()
+                /* undo child margins (not wFormat() which resets ALL to 0,
+                   destroying the parent viewport set by paintChild) */
+                wFormat( -nTopMargin, -nLeftMargin, -nBottomMargin, -nRightMargin )
 
             ENDIF
         NEXT

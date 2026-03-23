@@ -211,7 +211,22 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTSpinner
 
     SWITCH eventMouse:nKey
     CASE K_LBUTTONDOWN
-        /* clicking the widget gives it focus; repaint */
+        /* check if click landed on up/down arrows (last 2 chars before ']') */
+        IF eventMouse:mouseCol = MaxCol() - 2  /* up arrow */
+            IF ::FnValue + ::FnStep <= ::FnMaximum
+                ::FnValue := ::FnValue + ::FnStep
+            ELSE
+                ::FnValue := ::FnMaximum
+            ENDIF
+            ::Fvalue := ::FnValue
+        ELSEIF eventMouse:mouseCol = MaxCol() - 1  /* down arrow */
+            IF ::FnValue - ::FnStep >= ::FnMinimum
+                ::FnValue := ::FnValue - ::FnStep
+            ELSE
+                ::FnValue := ::FnMinimum
+            ENDIF
+            ::Fvalue := ::FnValue
+        ENDIF
         EXIT
     CASE K_MWFORWARD
         IF ::FnValue + ::FnStep <= ::FnMaximum

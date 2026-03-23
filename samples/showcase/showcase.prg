@@ -92,7 +92,7 @@ PROCEDURE Main()
     oToolBar:addButton( "Open",    {|| UpdateStatus( "File > Open" ) } )
     oToolBar:addButton( "Save",    {|| UpdateStatus( "Saved!" ), AdvanceProgress() } )
     oToolBar:addButton( "Refresh", {|| oWindow:repaint(), UpdateStatus( "Refreshed" ) } )
-    oToolBar:addButton( "Quit",    {|| HTApplication():Fexecute := .F. } )
+    oToolBar:addButton( "Quit",    {|| HTApplication():quit() } )
     oToolBar:resize( 102, 1 )
 
     /* ================================================================
@@ -107,7 +107,7 @@ PROCEDURE Main()
     act:onTriggered := {|| UpdateStatus( "File > Open" ) }
     menu:addSeparator()
     act := menu:addAction( "Exit" )
-    act:onTriggered := {|| HTApplication():Fexecute := .F. }
+    act:onTriggered := {|| HTApplication():quit() }
 
     menu := menuBar:addMenu( "Edit" )
     act := menu:addAction( "Cut   Ctrl+X" )
@@ -149,6 +149,7 @@ PROCEDURE Main()
 
     frm := HTFrame():new( "Employee Form", w1 )
     frm:move( 1, 2 )
+    frm:resize( 36, 9 )
 
     /* String GET with @! uppercase */
     oGet := HTGet():new( w1 )
@@ -182,6 +183,7 @@ PROCEDURE Main()
     /* --- Options --- */
     sep := HTSeparator():new( w1 )
     sep:move( 1, 11 )
+    sep:resize( 36, 1 )
 
     HTLabel():new( "Options:", w1 ):move( 1, 12 )
 
@@ -202,6 +204,7 @@ PROCEDURE Main()
 
     sep := HTSeparator():new( w1 )
     sep:move( 1, 16 )
+    sep:resize( 36, 1 )
 
     /* --- Priority Radio Buttons --- */
     HTLabel():new( "Priority:", w1 ):move( 1, 17 )
@@ -217,6 +220,7 @@ PROCEDURE Main()
 
     sep := HTSeparator():new( w1 )
     sep:move( 1, 21 )
+    sep:resize( 36, 1 )
 
     /* --- Category ComboBox --- */
     HTLabel():new( "Category:", w1 ):move( 1, 22 )
@@ -273,9 +277,6 @@ PROCEDURE Main()
     }
     brw:contextMenu := oCtxMenu
 
-    /* ================================================================
-       CENTER BOTTOM - Tab widget: Editor tab + Tasks tab (cols 38-79)
-       ================================================================ */
     HTLabel():new( "Editor / Tasks:", w1 ):move( 38, 13 )
 
     oTab := HTTabWidget():new( w1 )
@@ -399,7 +400,7 @@ PROCEDURE Main()
 
     btn := HTPushButton():new( "Quit", w1 )
     btn:move( 31, 30 )
-    btn:onClicked := {|| HTApplication():Fexecute := .F. }
+    btn:onClicked := {|| HTApplication():quit() }
 
     /* ================================================================
        STATUS BAR

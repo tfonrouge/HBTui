@@ -29,6 +29,7 @@ PUBLIC:
     METHOD getEvent()
     METHOD getTopLevelWindowFromWindowId( windowId )
     METHOD queueEvent( event, priority )
+    METHOD quit() INLINE ::Fexecute := .F.
     METHOD setDebug( lEnable )
 
     METHOD desktop()   INLINE ::Fdesktop  /* explicit INLINE: avoids BLOCK getter scope issue */

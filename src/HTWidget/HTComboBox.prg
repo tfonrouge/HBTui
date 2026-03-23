@@ -25,6 +25,7 @@ PROTECTED:
     METHOD showPopup()
     METHOD hidePopup()
     METHOD paintDropdown()
+    METHOD dropdownLoop()
     METHOD typeSearch( cChar )
 
 PUBLIC:
@@ -269,11 +270,15 @@ METHOD PROCEDURE showPopup() CLASS HTComboBox
 
     ::paintDropdown()
 
+    /* run modal dropdown loop — handles mouse/keyboard selection */
+    ::dropdownLoop()
+
     /* reselect parent window so keyboard events keep flowing
      * through the main window -> focused child (this combobox) */
     parent := ::parent()
     IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
         wSelect( parent:windowId, .F. )
+        parent:repaintChild( self )
     ENDIF
 
 RETURN
@@ -335,6 +340,73 @@ METHOD PROCEDURE paintDropdown() CLASS HTComboBox
         DispOutAt( nRow, 0, Space( nMaxCol + 1 ), HTTheme():getColor( HT_CLR_COMBO_DROP_N ) )
         nRow++
     ENDDO
+
+RETURN
+
+/** Modal event loop for the open dropdown.
+ * Handles mouse clicks (select item or close), keyboard navigation,
+ * and type-to-filter. Exits when dropdown is closed.
+ */
+METHOD PROCEDURE dropdownLoop() CLASS HTComboBox
+
+    LOCAL nKey, nRow, nOldIndex, nClickWin
+
+    nOldIndex := ::FcurrentIndex
+
+    DO WHILE ::FdroppedDown
+        nKey := Inkey( 0 )
+
+        IF nKey >= K_MINMOUSE .AND. nKey <= K_MAXMOUSE
+            IF nKey = K_LBUTTONDOWN
+                nClickWin := ht_windowAtMousePos()
+                IF nClickWin = ::FdropWinId
+                    /* click inside dropdown: select item at mouse row */
+                    wSelect( ::FdropWinId, .F. )
+                    nRow := mRow()
+                    IF nRow >= 0 .AND. nRow <= MaxRow()
+                        ::FcurrentIndex := ::FdropTopIndex + nRow
+                        IF ::FcurrentIndex > Len( ::Fitems )
+                            ::FcurrentIndex := Len( ::Fitems )
+                        ENDIF
+                    ENDIF
+                    ::hidePopup()
+                ELSE
+                    /* click outside dropdown: close without changing */
+                    ::hidePopup()
+                ENDIF
+            ENDIF
+        ELSE
+            SWITCH nKey
+            CASE K_ESC
+                ::FcurrentIndex := nOldIndex
+                ::hidePopup()
+                EXIT
+            CASE K_ENTER
+                ::hidePopup()
+                EXIT
+            CASE K_DOWN
+                IF ::FcurrentIndex < Len( ::Fitems )
+                    ::FcurrentIndex++
+                    ::paintDropdown()
+                ENDIF
+                EXIT
+            CASE K_UP
+                IF ::FcurrentIndex > 1
+                    ::FcurrentIndex--
+                    ::paintDropdown()
+                ENDIF
+                EXIT
+            OTHERWISE
+                IF ::typeSearch( hb_keyChar( nKey ) )
+                    ::paintDropdown()
+                ENDIF
+            ENDSWITCH
+        ENDIF
+    ENDDO
+
+    IF ::FcurrentIndex != nOldIndex .AND. ::FonChanged != NIL
+        Eval( ::FonChanged, ::FcurrentIndex )
+    ENDIF
 
 RETURN
 

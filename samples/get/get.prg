@@ -85,7 +85,7 @@ PROCEDURE Main()
 
     btn := HTPushButton():new( "Quit", win )
     btn:move( 12, 10 )
-    btn:onClicked := {|| HTApplication():Fexecute := .F. }
+    btn:onClicked := {|| HTApplication():quit() }
 
     /* --- Status Bar --- */
     oStatusBar := HTStatusBar():new( win )
