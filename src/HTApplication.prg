@@ -8,6 +8,7 @@
 #include "inkey.ch"
 
 STATIC s_lDebug := .F.
+STATIC s_aFormatStack := {}
 
 SINGLETON CLASS HTApplication FROM HTObject
 
@@ -208,4 +209,43 @@ FUNCTION ht_debugLog( cMessage )
     IF s_lDebug
         OutErr( "[HBTui " + Time() + "] " + cMessage + hb_eol() )
     ENDIF
+RETURN NIL
+
+/*
+ * wFormat viewport stack — push/pop pattern for nested viewports.
+ *
+ * CT's wFormat() is additive but wFormat() no-args resets ALL margins to (0,0,0,0),
+ * destroying any parent viewport. These functions provide proper push/pop semantics:
+ *   ht_wFormatPush(t,l,b,r) — adds margins and saves them on a stack
+ *   ht_wFormatPop()         — undoes the last push, restoring parent margins
+ *
+ * Used by paintChild() for nested widget viewports.
+ */
+
+/** Pushes viewport margins onto the stack and applies them (additive).
+ * @param nTop Top margin to add
+ * @param nLeft Left margin to add
+ * @param nBottom Bottom margin to add
+ * @param nRight Right margin to add
+ */
+FUNCTION ht_wFormatPush( nTop, nLeft, nBottom, nRight )
+    AAdd( s_aFormatStack, { nTop, nLeft, nBottom, nRight } )
+    wFormat( nTop, nLeft, nBottom, nRight )
+RETURN NIL
+
+/** Pops the last pushed margins, restoring the parent viewport.
+ * Logs a warning on stack underflow (mismatched push/pop).
+ */
+FUNCTION ht_wFormatPop()
+
+    LOCAL aMargins
+
+    IF Len( s_aFormatStack ) > 0
+        aMargins := ATail( s_aFormatStack )
+        ASize( s_aFormatStack, Len( s_aFormatStack ) - 1 )
+        wFormat( -aMargins[ 1 ], -aMargins[ 2 ], -aMargins[ 3 ], -aMargins[ 4 ] )
+    ELSE
+        ht_debugLog( "ht_wFormatPop() underflow — mismatched push/pop" )
+    ENDIF
+
 RETURN NIL

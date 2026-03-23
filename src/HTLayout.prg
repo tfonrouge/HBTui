@@ -13,6 +13,7 @@ PROTECTED:
     DATA FmarginLeft   INIT 0
     DATA FmarginBottom INIT 0
     DATA FmarginRight  INIT 0
+    DATA FownerWidget  INIT NIL       /* widget this layout is attached to */
 
 PUBLIC:
 
@@ -30,6 +31,7 @@ ENDCLASS
  */
 METHOD new( parent ) CLASS HTLayout
     IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
+        ::FownerWidget := parent
         parent:setLayout( self )
     ENDIF
 RETURN self

@@ -16,11 +16,12 @@ PRIVATE:
 PROTECTED:
 
     DATA FmenuBar
-    METHOD addChild( child )
-    METHOD removeChild( child )
     METHOD setMenuBar( menuBar )
 
 PUBLIC:
+
+    METHOD addChild( child )
+    METHOD removeChild( child )
 
     CONSTRUCTOR new( parent )
 

@@ -81,7 +81,7 @@ PUBLIC:
 
     METHOD focusNextChild()
     METHOD focusPrevChild()
-    METHOD focusWidget() INLINE ::FfocusWidget
+    METHOD focusWidget()
     METHOD hasFocus()
     METHOD setAsDesktopWidget
     METHOD setBackgroundColor( color )
@@ -242,7 +242,7 @@ RETURN
  */
 METHOD FUNCTION childAt( nRow, nCol ) CLASS HTWidget
 
-    LOCAL child
+    LOCAL child, oNested
     LOCAL nI
 
     /* iterate in reverse: last-added (topmost) widgets are checked first,
@@ -253,6 +253,14 @@ METHOD FUNCTION childAt( nRow, nCol ) CLASS HTWidget
            child:width > 0 .AND. child:height > 0 .AND. ;
            nRow >= child:y .AND. nRow < child:y + child:height .AND. ;
            nCol >= child:x .AND. nCol < child:x + child:width
+
+            /* recurse into layout containers (no CT window) to find nested widgets */
+            IF child:FwindowId = NIL .AND. Len( child:Fchildren ) > 0
+                oNested := child:childAt( nRow - child:y, nCol - child:x )
+                IF oNested != NIL
+                    RETURN oNested
+                ENDIF
+            ENDIF
             RETURN child
         ENDIF
     NEXT
@@ -269,9 +277,14 @@ METHOD PROCEDURE displayLayout() CLASS HTWidget
         RETURN
     ENDIF
 
-    /* content area = window minus borders */
-    nContentWidth  := ::Fwidth - 2
-    nContentHeight := ::Fheight - 2
+    /* content area: top-level windows subtract 2 for border, containers use full size */
+    IF ::FwindowId != NIL
+        nContentWidth  := ::Fwidth - 2
+        nContentHeight := ::Fheight - 2
+    ELSE
+        nContentWidth  := ::Fwidth
+        nContentHeight := ::Fheight
+    ENDIF
 
     IF nContentWidth <= 0 .OR. nContentHeight <= 0
         RETURN
@@ -426,12 +439,19 @@ RETURN ::FwindowId
 METHOD FUNCTION focusableChildren() CLASS HTWidget
 
     LOCAL aResult := {}
-    LOCAL child
+    LOCAL child, nested
 
     FOR EACH child IN ::Fchildren
-        IF child:isDerivedFrom( "HTWidget" ) .AND. child:isVisible .AND. ;
-           child:focusPolicy != HT_FOCUS_NONE
-            AAdd( aResult, child )
+        IF child:isDerivedFrom( "HTWidget" ) .AND. child:isVisible
+            IF child:focusPolicy != HT_FOCUS_NONE
+                AAdd( aResult, child )
+            ENDIF
+            /* recurse into layout containers to find nested focusable widgets */
+            IF child:FwindowId = NIL .AND. Len( child:Fchildren ) > 0
+                FOR EACH nested IN child:focusableChildren()
+                    AAdd( aResult, nested )
+                NEXT
+            ENDIF
         ENDIF
     NEXT
 
@@ -543,13 +563,30 @@ RETURN .T.
 /** Returns .T. if this widget is the currently focused child of its parent.
  * @return Logical
  */
+/** Returns the focused child widget reference (debug logging for containers). */
+METHOD FUNCTION focusWidget() CLASS HTWidget
+
+    IF ::FfocusWidget != NIL .AND. ::className() == "HTWIDGET"
+        ht_debugLog( "container:focusWidget()=" + ;
+            IIF( hb_isString( ::FfocusWidget:Ftext ), ::FfocusWidget:Ftext, "?" ) + ;
+            " caller=" + ProcName( 1 ) + "/" + ProcName( 2 ) + "/" + ProcName( 3 ) )
+    ENDIF
+
+RETURN ::FfocusWidget
+
 METHOD FUNCTION hasFocus() CLASS HTWidget
 
-    LOCAL parent := ::parent()
+    LOCAL p := ::parent()
 
-    IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
-        RETURN parent:focusWidget() == self
-    ENDIF
+    /* find the top-level window (first ancestor with a CT window) and check
+       if it has this widget as its focused child. Containers (no windowId)
+       are skipped — they don't participate in the focus system. */
+    DO WHILE p != NIL .AND. p:isDerivedFrom( "HTWidget" )
+        IF p:FwindowId != NIL
+            RETURN p:FfocusWidget == self
+        ENDIF
+        p := p:parent()
+    ENDDO
 
 RETURN .F.
 
@@ -916,15 +953,21 @@ METHOD PROCEDURE paintChild( child ) CLASS HTWidget
 
     /*
      * Calculate margins for the child viewport.
-     * After paintTopLevelWindow(), margins are 0,0,0,0 (full window).
-     * Child x,y are relative to the content area (inside border),
-     * so we add 1 for the border on each side.
-     * wFormat() is additive from current margins (which are 0).
+     * Top-level windows (with CT window) have a 1-char border on each side,
+     * so child coords are offset by +1. Container widgets (no CT window,
+     * created by addLayout) have no border — coords are zero-based.
      */
-    nTopMargin    := 1 + child:y
-    nLeftMargin   := 1 + child:x
-    nBottomMargin := ::Fheight - 1 - child:y - child:height
-    nRightMargin  := ::Fwidth  - 1 - child:x - child:width
+    IF ::FwindowId != NIL
+        nTopMargin    := 1 + child:y
+        nLeftMargin   := 1 + child:x
+        nBottomMargin := ::Fheight - 1 - child:y - child:height
+        nRightMargin  := ::Fwidth  - 1 - child:x - child:width
+    ELSE
+        nTopMargin    := child:y
+        nLeftMargin   := child:x
+        nBottomMargin := ::Fheight - child:y - child:height
+        nRightMargin  := ::Fwidth  - child:x - child:width
+    ENDIF
 
     /* clamp to valid range */
     nTopMargin    := Max( nTopMargin, 0 )
@@ -937,14 +980,14 @@ METHOD PROCEDURE paintChild( child ) CLASS HTWidget
         RETURN
     ENDIF
 
-    /* set format area to child viewport */
-    wFormat( nTopMargin, nLeftMargin, nBottomMargin, nRightMargin )
+    /* push child viewport (additive, preserves parent margins on stack) */
+    ht_wFormatPush( nTopMargin, nLeftMargin, nBottomMargin, nRightMargin )
 
     /* child sees (0,0) to (MaxRow(), MaxCol()) as its world */
     child:paintEvent( HTPaintEvent():new() )
 
-    /* reset margins back to 0,0,0,0 */
-    wFormat()
+    /* pop child viewport, restoring parent margins */
+    ht_wFormatPop()
 
 RETURN
 
@@ -955,11 +998,17 @@ RETURN
 METHOD PROCEDURE repaintChild( child ) CLASS HTWidget
 
     IF ::FwindowId != NIL
+        /* top-level window: select CT window, reset margins, paint child */
         wSelect( ::FwindowId, .F. )
         wFormat()
+        ::paintChild( child )
+    ELSE
+        /* container widget (no CT window): delegate to parent so the full
+           viewport chain is rebuilt (container → child positions are correct) */
+        IF ::parent() != NIL .AND. ::parent():isDerivedFrom( "HTWidget" )
+            ::parent():repaintChild( self )
+        ENDIF
     ENDIF
-
-    ::paintChild( child )
 
 RETURN
 

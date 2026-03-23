@@ -28,6 +28,7 @@ PROCEDURE Main()
     SetMode( 20, 60 )
 
     app := HTApplication():new()
+    app:setDebug( .T. )
 
     win := HTMainWindow():new()
     win:setWindowTitle( " HBox Layout Demo " )

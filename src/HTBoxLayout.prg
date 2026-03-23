@@ -86,11 +86,23 @@ RETURN
  */
 METHOD PROCEDURE addLayout( oLayout ) CLASS HTBoxLayout
 
-    LOCAL oContainer
+    LOCAL oContainer, child
 
-    oContainer := HTWidget():new()
+    oContainer := HTWidget():new( ::FownerWidget )
     oContainer:setLayout( oLayout )
     oContainer:show()
+
+    /* reparent nested layout's widgets to the container so that
+       repaintChild routes through the container (correct viewport) */
+    FOR EACH child IN oLayout:widgetList()
+        IF child:isDerivedFrom( "HTWidget" )
+            IF child:parent() != NIL
+                child:parent():removeChild( child )
+            ENDIF
+            child:setParent( oContainer )
+        ENDIF
+    NEXT
+
     AAdd( ::FitemList, { oContainer, _ITEM_WIDGET, 0 } )
 
 RETURN
