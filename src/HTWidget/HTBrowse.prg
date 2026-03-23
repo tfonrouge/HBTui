@@ -274,7 +274,7 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTBrowse
     LOCAL nClickRow, nSkip, nColSkip
     LOCAL parent
     LOCAL nHeadHeight
-    LOCAL nColLeft, nCol, oC, nTargetCol
+    LOCAL nTargetCol, nHitResult
 
     IF ::FoBrowse:colCount = 0
         RETURN
@@ -324,21 +324,13 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTBrowse
             ENDDO
         ENDIF
 
-        /* determine which column was clicked (default: last column if past all) */
-        nColLeft := 0
-        nTargetCol := ::FoBrowse:colCount
-        FOR nCol := 1 TO ::FoBrowse:colCount
-            oC := ::FoBrowse:getColumn( nCol )
-            IF nMouseCol >= nColLeft .AND. ;
-               nMouseCol < nColLeft + IIF( oC:width != NIL, oC:width, 10 )
-                nTargetCol := nCol
-                EXIT
-            ENDIF
-            nColLeft += IIF( oC:width != NIL, oC:width, 10 )
-            IF ::FoBrowse:colSep != NIL
-                nColLeft += Len( ::FoBrowse:colSep )
-            ENDIF
-        NEXT
+        /* use TBrowse:hitTest to determine the clicked column —
+           it accounts for centering offset, frozen columns, separators */
+        nHitResult := ::FoBrowse:hitTest( nMouseRow, nMouseCol )
+        nTargetCol := ::FoBrowse:mColPos
+        IF nTargetCol < 1
+            nTargetCol := ::FoBrowse:colPos
+        ENDIF
 
         /* navigate to the target column */
         nColSkip := nTargetCol - ::FoBrowse:colPos

@@ -110,9 +110,16 @@ METHOD FUNCTION exec() CLASS HTApplication
             IF event != NIL
                 /* route event to the appropriate top-level window */
                 IF event:className() == "HTMOUSEEVENT" .AND. event:nKey != K_MOUSEMOVE
-                    /* mouse click events go to window under cursor */
+                    /* mouse click events go to window under cursor;
+                       recapture coordinates relative to the target window
+                       (poll() may have captured with wrong wSelect context) */
                     window := ::getTopLevelWindowFromWindowId( ht_windowAtMousePos() )
                     IF ! Empty( window )
+                        /* recapture coords relative to the target window using
+                           screen-absolute positions (immune to wFormat margin state) */
+                        wSelect( window:windowId, .F. )
+                        event:mouseRow := event:mouseAbsRow - wRow()
+                        event:mouseCol := event:mouseAbsCol - wCol()
                         window:addEvent( event )
                     ENDIF
                 ELSE
