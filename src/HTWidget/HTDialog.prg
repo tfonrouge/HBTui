@@ -37,6 +37,8 @@ PUBLIC:
     METHOD resultCode()  INLINE ::FresultCode
     METHOD addButtonBar( ... )
 
+    METHOD move( ... )
+    METHOD resize( ... )
     METHOD keyEvent( keyEvent )
 
 ENDCLASS
@@ -172,6 +174,33 @@ METHOD FUNCTION addButtonBar( ... ) CLASS HTDialog
     ENDIF
 
 RETURN aButtons
+
+/** Synchronous move — sets position immediately (no event queuing).
+ * Dialog needs geometry set before exec() calls paintEvent().
+ * @param ... HTPoint or (x, y) numeric pair
+ */
+METHOD PROCEDURE move( ... ) CLASS HTDialog
+    IF pCount() = 2 .AND. hb_isNumeric( hb_pValue( 1 ) ) .AND. hb_isNumeric( hb_pValue( 2 ) )
+        ::Fx := hb_pValue( 1 )
+        ::Fy := hb_pValue( 2 )
+    ELSEIF pCount() = 1 .AND. hb_isObject( hb_pValue( 1 ) )
+        ::Fx := hb_pValue( 1 ):x
+        ::Fy := hb_pValue( 1 ):y
+    ENDIF
+RETURN
+
+/** Synchronous resize — sets dimensions immediately (no event queuing).
+ * @param ... HTSize or (width, height) numeric pair
+ */
+METHOD PROCEDURE resize( ... ) CLASS HTDialog
+    IF pCount() = 2 .AND. hb_isNumeric( hb_pValue( 1 ) ) .AND. hb_isNumeric( hb_pValue( 2 ) )
+        ::Fwidth  := hb_pValue( 1 )
+        ::Fheight := hb_pValue( 2 )
+    ELSEIF pCount() = 1 .AND. hb_isObject( hb_pValue( 1 ) )
+        ::Fwidth  := hb_pValue( 1 ):width
+        ::Fheight := hb_pValue( 1 ):height
+    ENDIF
+RETURN
 
 /** Handles key events: ESC rejects the dialog, others delegate to parent.
  * @param keyEvent HTKeyEvent instance

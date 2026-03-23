@@ -2,14 +2,14 @@
  * Dialog Demo - Modal dialogs and message boxes
  *
  * Demonstrates:
- *   - HTMessageBox information dialog
+ *   - HTMessageBox information dialog (click OK or press Enter)
  *   - HTMessageBox question dialog with result handling
- *   - Custom HTDialog with buttons and result
- *   - HTStatusBar showing dialog results
+ *   - Custom HTDialog with OK/Cancel buttons
+ *   - HTToast feedback showing dialog results
  *
  * Keyboard:
  *   Tab/Shift+Tab - cycle buttons
- *   Enter         - activate button
+ *   Enter/Space   - activate button
  *   ESC           - quit
  */
 
@@ -17,24 +17,19 @@
 #include "inkey.ch"
 
 #define HT_DIALOG_ACCEPTED  1
-#define HT_DIALOG_REJECTED  0
-
-STATIC oStatusBar
-STATIC oWindow
 
 PROCEDURE Main()
 
-    LOCAL app, win, btn, oSB
+    LOCAL app, win, btn
 
-    SetMode( 25, 60 )
+    SetMode( 20, 55 )
 
     app := HTApplication():new()
 
     win := HTMainWindow():new()
     win:setWindowTitle( " Dialog Demo " )
     win:move( 1, 1 )
-    win:resize( 55, 20 )
-    oWindow := win
+    win:resize( 50, 16 )
 
     HTLabel():new( "Click a button to open a dialog:", win ):move( 2, 2 )
 
@@ -43,7 +38,7 @@ PROCEDURE Main()
     btn:move( 2, 4 )
     btn:onClicked := {|| ;
         HTMessageBox():information( "Info", "This is an info message" ), ;
-        UpdateStatus( "Information dialog closed" ) ;
+        HTToast():show( "Info dialog closed", 2000, HT_CLR_TOAST_INFO ) ;
     }
 
     /* --- Question button --- */
@@ -59,11 +54,7 @@ PROCEDURE Main()
     /* --- Separator --- */
     HTSeparator():new( win ):move( 1, 7 )
 
-    /* --- Status Bar --- */
-    oSB := HTStatusBar():new( win )
-    oSB:move( 1, 16 )
-    oSB:addSection( "Click a button to open a dialog" )
-    oStatusBar := oSB
+    HTLabel():new( "Results shown as toast notifications", win ):move( 2, 9 )
 
     win:show()
     app:exec()
@@ -77,52 +68,31 @@ STATIC PROCEDURE ShowQuestion()
     nResult := HTMessageBox():question( "Confirm", "Do you want to proceed?" )
 
     IF nResult == HT_DIALOG_ACCEPTED
-        UpdateStatus( "Question: user answered YES" )
+        HTToast():show( "User answered YES", 3000, HT_CLR_TOAST_SUCCESS )
     ELSE
-        UpdateStatus( "Question: user answered NO" )
+        HTToast():show( "User answered NO", 3000, HT_CLR_TOAST_WARNING )
     ENDIF
 
 RETURN
 
 STATIC PROCEDURE ShowCustomDialog()
 
-    LOCAL dlg, btn, nResult
+    LOCAL dlg, nResult
 
-    dlg := HTDialog():new( oWindow )
+    dlg := HTDialog():new()
     dlg:setWindowTitle( " Custom Dialog " )
-    dlg:move( 15, 5 )
+    dlg:move( 10, 4 )
     dlg:resize( 30, 8 )
 
     HTLabel():new( "Choose an action:", dlg ):move( 2, 2 )
-
-    btn := HTPushButton():new( "OK", dlg )
-    btn:move( 5, 4 )
-    btn:onClicked := {|| dlg:accept() }
-
-    btn := HTPushButton():new( "Cancel", dlg )
-    btn:move( 15, 4 )
-    btn:onClicked := {|| dlg:reject() }
+    dlg:addButtonBar( "OK", "Cancel" )
 
     nResult := dlg:exec()
 
     IF nResult == HT_DIALOG_ACCEPTED
-        UpdateStatus( "Custom dialog: OK pressed" )
+        HTToast():show( "Custom dialog: OK", 3000, HT_CLR_TOAST_SUCCESS )
     ELSE
-        UpdateStatus( "Custom dialog: Cancelled" )
-    ENDIF
-
-RETURN
-
-STATIC PROCEDURE UpdateStatus( cText )
-
-    LOCAL parent
-
-    IF oStatusBar != NIL
-        oStatusBar:setSection( 1, cText )
-        parent := oStatusBar:parent()
-        IF parent != NIL
-            parent:repaintChild( oStatusBar )
-        ENDIF
+        HTToast():show( "Custom dialog: Cancelled", 3000, HT_CLR_TOAST_WARNING )
     ENDIF
 
 RETURN

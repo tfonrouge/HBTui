@@ -110,7 +110,7 @@ METHOD FUNCTION showDialog( cTitle, cMessage, cColor, lQuestion ) CLASS HTMessag
 
     nResult := HT_DIALOG_ACCEPTED
 
-    /* simple modal key loop */
+    /* simple modal key + mouse loop */
     DO WHILE .T.
         nKey := Inkey( 0 )
         IF nKey = K_ENTER .OR. nKey = K_SPACE
@@ -119,6 +119,28 @@ METHOD FUNCTION showDialog( cTitle, cMessage, cColor, lQuestion ) CLASS HTMessag
         ELSEIF nKey = K_ESC
             nResult := HT_DIALOG_REJECTED
             EXIT
+        ELSEIF nKey = K_LBUTTONDOWN
+            /* check if click landed on a button (row 3 of content area) */
+            wSelect( nWinId, .F. )
+            wFormat()
+            wFormat( 1, 1, 1, 1 )
+            IF mRow() = 3
+                IF lQuestion
+                    IF mCol() >= nBtnCol .AND. mCol() < nBtnCol + 6
+                        nResult := HT_DIALOG_ACCEPTED
+                        EXIT
+                    ELSEIF mCol() >= nBtnCol + 10 .AND. mCol() < nBtnCol + 20
+                        nResult := HT_DIALOG_REJECTED
+                        EXIT
+                    ENDIF
+                ELSE
+                    IF mCol() >= nBtnCol .AND. mCol() < nBtnCol + 6
+                        nResult := HT_DIALOG_ACCEPTED
+                        EXIT
+                    ENDIF
+                ENDIF
+            ENDIF
+            wFormat()
         ENDIF
     ENDDO
 
