@@ -41,7 +41,7 @@ PROCEDURE Main()
 
     brw := HTBrowse():new( w1 )
     brw:move( 1, 1 )
-    brw:resize( 66, 16 )
+    brw:resize( 65, 16 )
     brw:setGoTopBlock( {|| nRecNo := 1 } )
     brw:setGoBottomBlock( {|| nRecNo := Len( aData ) } )
     brw:setSkipBlock( {|n| ArraySkip( n ) } )
