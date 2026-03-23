@@ -148,10 +148,10 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTScrollBar
         /* click-to-position */
         IF ::Forientation = _SB_ORIENT_VERTICAL
             nTrackLen := ::Fheight
-            nClickPos := eventMouse:mouseRow - 1 - ::Fy
+            nClickPos := eventMouse:mouseRow
         ELSE
             nTrackLen := ::Fwidth
-            nClickPos := eventMouse:mouseCol - 1 - ::Fx
+            nClickPos := eventMouse:mouseCol
         ENDIF
 
         IF nTrackLen > 0 .AND. nClickPos >= 0

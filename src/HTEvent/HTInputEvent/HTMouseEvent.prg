@@ -12,8 +12,8 @@ PUBLIC:
     CONSTRUCTOR new( nKey )
     PROPERTY mouseAbsRow
     PROPERTY mouseAbsCol
-    PROPERTY mouseCol
-    PROPERTY mouseRow
+    PROPERTY mouseCol READWRITE
+    PROPERTY mouseRow READWRITE
     PROPERTY nKey
 ENDCLASS
 

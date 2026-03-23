@@ -246,8 +246,9 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTTabWidget
     SWITCH eventMouse:nKey
     CASE K_LBUTTONDOWN
 
-        nClickRow := eventMouse:mouseRow - 1 - ::Fy
-        nClickCol := eventMouse:mouseCol - 1 - ::Fx
+        /* mouseRow/mouseCol are child-relative (translated by parent's dispatch) */
+        nClickRow := eventMouse:mouseRow
+        nClickCol := eventMouse:mouseCol
 
         /* click on tab bar (row 0) */
         IF nClickRow == 0
@@ -304,6 +305,9 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTTabWidget
                         ::FfocusWidget:focusInEvent( HTFocusEvent():new( HT_EVENT_TYPE_FOCUSIN ) )
                     ENDIF
                 ENDIF
+                /* translate event coordinates to child-relative before dispatch */
+                eventMouse:mouseRow := nContentRow - oHitChild:y
+                eventMouse:mouseCol := nContentCol - oHitChild:x
                 oHitChild:mouseEvent( eventMouse )
             ENDIF
 

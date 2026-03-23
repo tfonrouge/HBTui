@@ -360,7 +360,7 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTGet
     LOCAL nClickCol, parent, nNewPos
 
     IF eventMouse:nKey = K_LBUTTONDOWN
-        nClickCol := eventMouse:mouseCol - 1 - ::Fx
+        nClickCol := eventMouse:mouseCol
 
         /* only react to clicks on the input area */
         IF nClickCol >= ::FlabelWidth .AND. ::FoGet != NIL .AND. ::FlGetActive

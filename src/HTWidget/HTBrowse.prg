@@ -254,7 +254,8 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTBrowse
          * The browse viewport starts at (1 + ::y, 1 + ::x) in window coords.
          * Convert to browse-local coordinates.
          */
-        nMouseRow := eventMouse:mouseRow - 1 - ::Fy
+        /* mouseRow is child-relative (translated by parent's dispatch) */
+        nMouseRow := eventMouse:mouseRow
 
         IF nMouseRow < 0
             RETURN

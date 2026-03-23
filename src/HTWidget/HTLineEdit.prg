@@ -262,7 +262,7 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTLineEdit
     LOCAL nClickCol, parent
 
     IF eventMouse:nKey = K_LBUTTONDOWN
-        nClickCol := eventMouse:mouseCol - 1 - ::Fx
+        nClickCol := eventMouse:mouseCol
         IF nClickCol >= 0
             ::FcursorPos := Min( ::FdispOffset + nClickCol, Len( ::Ftext ) + 1 )
             ::clearSelection()

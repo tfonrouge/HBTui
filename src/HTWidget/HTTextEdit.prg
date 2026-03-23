@@ -377,8 +377,8 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTTextEdit
     LOCAL parent
 
     IF eventMouse:nKey = K_LBUTTONDOWN
-        nClickRow := eventMouse:mouseRow - 1 - ::Fy
-        nClickCol := eventMouse:mouseCol - 1 - ::Fx
+        nClickRow := eventMouse:mouseRow
+        nClickCol := eventMouse:mouseCol
 
         IF nClickRow >= 0 .AND. nClickCol >= 0
             nLine := ::FnTopRow + nClickRow

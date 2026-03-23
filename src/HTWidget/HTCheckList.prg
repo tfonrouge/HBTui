@@ -203,7 +203,8 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTCheckList
 
     SWITCH eventMouse:nKey
     CASE K_LBUTTONDOWN
-        nClickRow := eventMouse:mouseRow - 1 - ::Fy
+        /* mouseRow is child-relative (translated by parent's dispatch) */
+        nClickRow := eventMouse:mouseRow
         IF nClickRow >= 0
             nIndex := ::FtopIndex + nClickRow
             IF nIndex >= 1 .AND. nIndex <= Len( ::Fitems )

@@ -660,7 +660,9 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
                     ENDIF
                 ENDIF
 
-                /* dispatch mouse event to child */
+                /* dispatch mouse event to child with translated coordinates */
+                eventMouse:mouseRow := nContentRow - oHitChild:y
+                eventMouse:mouseCol := nContentCol - oHitChild:x
                 oHitChild:mouseEvent( eventMouse )
             ENDIF
         ENDIF

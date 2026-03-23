@@ -193,7 +193,7 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTToolBar
     LOCAL parent
 
     IF eventMouse:nKey = K_LBUTTONDOWN
-        nClickCol := eventMouse:mouseCol - 1 - ::Fx
+        nClickCol := eventMouse:mouseCol
         IF nClickCol >= 0
             nCol := 0
             FOR i := 1 TO Len( ::FaButtons )
