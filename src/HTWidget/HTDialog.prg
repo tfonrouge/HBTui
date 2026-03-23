@@ -162,7 +162,7 @@ METHOD FUNCTION addButtonBar( ... ) CLASS HTDialog
         nBtnWidth := Max( Len( aLabels[ i ] ) + 4, 8 )
         nBtnX -= nBtnWidth + 1
         oBtn := HTPushButton():new( aLabels[ i ], self )
-        oBtn:move( Max( 1, nBtnX ), nBarRow )
+        oBtn:setGeometry( Max( 1, nBtnX ), nBarRow, nBtnWidth, 1 )
         AAdd( aButtons, oBtn )
     NEXT
 

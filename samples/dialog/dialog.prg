@@ -77,14 +77,15 @@ RETURN
 
 STATIC PROCEDURE ShowCustomDialog()
 
-    LOCAL dlg, nResult
+    LOCAL dlg, oLbl, nResult
 
     dlg := HTDialog():new()
     dlg:setWindowTitle( " Custom Dialog " )
     dlg:move( 10, 4 )
     dlg:resize( 30, 8 )
 
-    HTLabel():new( "Choose an action:", dlg ):move( 2, 2 )
+    oLbl := HTLabel():new( "Choose an action:", dlg )
+    oLbl:setGeometry( 2, 2, 20, 1 )
     dlg:addButtonBar( "OK", "Cancel" )
 
     nResult := dlg:exec()
