@@ -1,4 +1,4 @@
-/*
+/** @file theme.prg
  * HTTheme Demo - Live theme switching with F-keys
  *
  * Demonstrates:

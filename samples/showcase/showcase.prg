@@ -1,4 +1,4 @@
-/*
+/** @file showcase.prg
  * HBTui Showcase - Comprehensive demo of all controls and features
  *
  * Demonstrates:

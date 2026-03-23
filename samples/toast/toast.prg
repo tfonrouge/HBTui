@@ -1,4 +1,4 @@
-/*
+/** @file toast.prg
  * HTToast Demo - Non-blocking toast notifications
  *
  * Demonstrates:

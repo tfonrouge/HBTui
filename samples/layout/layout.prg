@@ -1,4 +1,4 @@
-/*
+/** @file layout.prg
  * HTVBoxLayout Demo - Vertical layout with spacing, margins, and stretch
  *
  * Demonstrates:

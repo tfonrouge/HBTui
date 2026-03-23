@@ -1,11 +1,11 @@
-/*
- * HTToast — Non-blocking toast notification widget.
+/** @class HTToast
+ * Non-blocking toast notification widget (singleton).
  *
  * Shows a floating message that auto-dismisses after a configurable duration.
  * Multiple toasts stack vertically from the bottom-right corner.
  * Does not steal focus or block user interaction.
  *
- * Usage:
+ * @example
  *   HTToast():show( "Record saved!" )
  *   HTToast():show( "Error occurred", 5000, HT_CLR_TOAST_ERROR )
  */

@@ -1,4 +1,4 @@
-/*
+/** @file get.prg
  * HTGet Demo - TGet-backed editing with PICTURE formatting and validation
  *
  * Demonstrates:

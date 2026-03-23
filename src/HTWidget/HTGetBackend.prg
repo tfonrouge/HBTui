@@ -1,5 +1,6 @@
-/*
- * HTGetBackend — Display-suppressed TGet subclass for HTGet.
+/** @class HTGetBackend
+ * Display-suppressed TGet subclass used internally by HTGet.
+ * @extends Get
  *
  * TGet was designed for Clipper's READ system where GETs paint themselves
  * at fixed absolute screen coordinates via display(). HTGet operates in
