@@ -76,7 +76,7 @@ PUBLIC:
     METHOD browse() INLINE ::FoBrowse
 
     PROPERTY onActivated READWRITE               /* {|nRow, nCol| ... } Enter/dblclick */
-    PROPERTY editable INIT .F.                   /* .T. to enable inline cell editing */
+    PROPERTY editable READWRITE INIT .F.           /* .T. to enable inline cell editing */
     PROPERTY onBeginEdit READWRITE               /* {|nRow, nCol, xValue| lAllow} */
     PROPERTY onEndEdit READWRITE                 /* {|nRow, nCol, xOldValue, xNewValue| lAccept} */
 
@@ -143,6 +143,13 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTBrowse
     ::FoBrowse:refreshAll()
     ::FoBrowse:forceStable()
 
+    /* paint inline edit widget overlay if active */
+    IF ::FlEditing .AND. ::FoEditWidget != NIL
+        DispOutAt( ::FoEditWidget:Fy, ::FoEditWidget:Fx, ;
+            PadR( ::FoEditWidget:text, ::FoEditWidget:Fwidth ), ;
+            HTTheme():getColor( HT_CLR_LINEEDIT_FOCUSED ) )
+    ENDIF
+
 RETURN
 
 /** Dispatches navigation keys to the underlying TBrowse.
@@ -153,6 +160,26 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTBrowse
     LOCAL parent
 
     IF ::FoBrowse:colCount = 0
+        RETURN
+    ENDIF
+
+    /* route keys to edit widget during inline editing */
+    IF ::FlEditing .AND. ::FoEditWidget != NIL
+        SWITCH keyEvent:key
+        CASE K_ENTER
+            ::endEdit( .T. )
+            EXIT
+        CASE K_ESC
+            ::endEdit( .F. )
+            EXIT
+        OTHERWISE
+            ::FoEditWidget:keyEvent( keyEvent )
+        ENDSWITCH
+        keyEvent:accept()
+        parent := ::parent()
+        IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
+            parent:repaintChild( self )
+        ENDIF
         RETURN
     ENDIF
 

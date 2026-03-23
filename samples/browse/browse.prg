@@ -1,11 +1,12 @@
 /** @file browse.prg
- * HBTui Browse Demo - Data grid with context menu
+ * HBTui Browse Demo - Data grid with inline editing and context menu
  *
  * Demonstrates HTBrowse with array-backed data, column definitions
- * with PICTURE formatting, head/column separators, HTContextMenu
+ * with PICTURE formatting, head/column separators, inline cell editing
+ * (F2 or type to start, Enter to accept, Esc to cancel), HTContextMenu
  * with View/Edit/Delete actions, and onActivated callback.
  *
- * Up/Down=navigate  Enter=activate  Right-click=menu  ESC=quit
+ * Up/Down=navigate  F2/type=edit  Enter=accept  Esc=cancel  Right-click=menu
  */
 
 #include "hbtui.ch"
@@ -45,17 +46,25 @@ PROCEDURE Main()
     brw:setGoTopBlock( {|| nRecNo := 1 } )
     brw:setGoBottomBlock( {|| nRecNo := Len( aData ) } )
     brw:setSkipBlock( {|n| ArraySkip( n ) } )
-    brw:addColumn( "Code",   {|| aData[ nRecNo, 1 ] }, 7 )
-    brw:addColumn( "Name",   {|| aData[ nRecNo, 2 ] }, 12 )
-    brw:addColumn( "Type",   {|| aData[ nRecNo, 3 ] }, 10 )
-    brw:addColumn( "Budget", {|| aData[ nRecNo, 4 ] }, 12, "999,999.99" )
+
+    /* columns use read/write blocks for inline editing support */
+    brw:addColumn( "Code",   {|x| IIF( x == NIL, aData[ nRecNo, 1 ], aData[ nRecNo, 1 ] := x ) }, 7 )
+    brw:addColumn( "Name",   {|x| IIF( x == NIL, aData[ nRecNo, 2 ], aData[ nRecNo, 2 ] := x ) }, 12 )
+    brw:addColumn( "Type",   {|x| IIF( x == NIL, aData[ nRecNo, 3 ], aData[ nRecNo, 3 ] := x ) }, 10 )
+    brw:addColumn( "Budget", {|x| IIF( x == NIL, aData[ nRecNo, 4 ], aData[ nRecNo, 4 ] := Val( x ) ) }, 12, "999,999.99" )
+
     brw:setHeadSep( e"\xC4" )
     brw:setColSep( e"\xB3" )
+
+    /* enable inline editing (F2 or type to start) */
+    brw:_editable( .T. )
+    brw:onBeginEdit := {|r,c| UpdateStatus( "Editing row " + hb_ntos( r ) + " col " + hb_ntos( c ) ), .T. }
+    brw:onEndEdit := {|r,c,xOld,xNew| HB_SYMBOL_UNUSED( r ), HB_SYMBOL_UNUSED( c ), UpdateStatus( "Saved: " + hb_CStr( xOld ) + " -> " + hb_CStr( xNew ) ), .T. }
     brw:onActivated := {|r| UpdateStatus( "Activated: " + aData[ nRecNo, 2 ] + " (row " + hb_ntos( r ) + ")" ) }
 
     oCtxMenu := HTContextMenu():new()
     oCtxMenu:addAction( "View Details" ):onTriggered := {|| UpdateStatus( "View: " + aData[ nRecNo, 2 ] ) }
-    oCtxMenu:addAction( "Edit Record"  ):onTriggered := {|| UpdateStatus( "Edit: " + aData[ nRecNo, 2 ] ) }
+    oCtxMenu:addAction( "Edit Record"  ):onTriggered := {|| brw:beginEdit( 0 ) }
     oCtxMenu:addSeparator()
     oCtxMenu:addAction( "Delete" ):onTriggered := {|| UpdateStatus( "Delete: " + aData[ nRecNo, 2 ] ) }
     brw:contextMenu := oCtxMenu
@@ -63,7 +72,7 @@ PROCEDURE Main()
     oStatusBar := HTStatusBar():new( w1 )
     oStatusBar:move( 1, 21 )
     oStatusBar:addSection( "Ready" )
-    oStatusBar:addSection( "Enter=activate  Right-click=menu  ESC=quit" )
+    oStatusBar:addSection( "F2=edit  Enter=accept  Esc=cancel  Right-click=menu" )
 
     w1:show()
     app:exec()

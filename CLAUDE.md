@@ -155,18 +155,22 @@ docs/             Documentation
 samples/          Demo applications (human-facing, require a display)
   hello/          Minimal Hello World (HTMainWindow + HTLabel)
   dialog/         Modal HTDialog + HTMessageBox (info/question/custom)
-  browse/         HTBrowse data grid with context menu and navigation
+  browse/         HTBrowse data grid with inline editing and context menu
   controls/       PushButton, CheckBox, RadioButton, Spinner, ComboBox, ListBox
   get/            HTGet demo (string, numeric, date PICTURE, validation)
   grid_layout/    HTGridLayout 2D form arrangement
+  hbox_layout/    HTHBoxLayout horizontal button bar
   editor/         HTLineEdit + HTTextEdit with clipboard support
+  helpline/       Per-widget help text in status bar
   layout/         HTVBoxLayout demo (spacing, stretch, nesting)
   menu/           HTMenuBar + HTMenu + HTAction with keyboard shortcuts
+  progress/       Animated HTProgressBar with scheduleRepeat()
   theme/          Theme switching demo (4 themes, F-keys + buttons)
   toast/          HTToast non-blocking notifications (4 styles, stacking)
   showcase/       Full controls demo with all features
 tests/            Automated test suite (headless, -gtnul, exit code 0/1)
   test_basic      HTPoint, HTSize, all HTEvent subclasses
+  test_eventloop  HTEventLoop schedule, scheduleRepeat, cancelTask, runPendingTasks
   test_layout     HTBoxLayout, HTGridLayout item management
   test_theme      HTTheme singleton, all 4 themes, invalid index fallback
   test_widgets    HTLabel, HTLineEdit, HTCheckBox, HTPushButton, HTListBox,
