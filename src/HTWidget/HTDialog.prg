@@ -65,8 +65,6 @@ RETURN self
  */
 METHOD FUNCTION exec() CLASS HTDialog
 
-    LOCAL nKey
-    LOCAL event
     LOCAL aFocusable
 
     ::FisVisible := .T.
@@ -83,24 +81,8 @@ METHOD FUNCTION exec() CLASS HTDialog
         ENDIF
     ENDIF
 
-    /* modal event loop */
-    DO WHILE ::Frunning
-
-        nKey := Inkey( 0.1 )
-
-        IF nKey != 0
-            IF nKey >= K_MINMOUSE .AND. nKey <= K_MAXMOUSE
-                event := HTMouseEvent():new( nKey )
-                event:setWidget( self )
-                ::event( event )
-            ELSE
-                event := HTKeyEvent():new( nKey )
-                event:setWidget( self )
-                ::event( event )
-            ENDIF
-        ENDIF
-
-    ENDDO
+    /* modal event loop — uses shared HTEventLoop for mouse tracking + tasks */
+    HTEventLoop():run( self, {|| ::Frunning } )
 
     /* close the dialog window and unregister from top-level windows */
     IF ::FwindowId != NIL

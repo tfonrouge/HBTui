@@ -63,7 +63,7 @@ METHOD FUNCTION showDialog( cTitle, cMessage, cColor, lQuestion ) CLASS HTMessag
     LOCAL nMsgWidth, nWinWidth, nWinHeight
     LOCAL nTop, nLeft
     LOCAL nWinId
-    LOCAL nKey, nResult
+    LOCAL event, nResult
     LOCAL nBtnCol
 
     IF cTitle = NIL
@@ -110,16 +110,23 @@ METHOD FUNCTION showDialog( cTitle, cMessage, cColor, lQuestion ) CLASS HTMessag
 
     nResult := HT_DIALOG_ACCEPTED
 
-    /* simple modal key + mouse loop */
+    /* modal loop using shared event polling */
     DO WHILE .T.
-        nKey := Inkey( 0 )
-        IF nKey = K_ENTER .OR. nKey = K_SPACE
-            nResult := HT_DIALOG_ACCEPTED
-            EXIT
-        ELSEIF nKey = K_ESC
-            nResult := HT_DIALOG_REJECTED
-            EXIT
-        ELSEIF nKey = K_LBUTTONDOWN
+        event := HTEventLoop():poll( 0.05 )
+
+        IF event = NIL
+            LOOP
+        ENDIF
+
+        IF event:isDerivedFrom( "HTKeyEvent" )
+            IF event:key = K_ENTER .OR. event:key = K_SPACE
+                nResult := HT_DIALOG_ACCEPTED
+                EXIT
+            ELSEIF event:key = K_ESC
+                nResult := HT_DIALOG_REJECTED
+                EXIT
+            ENDIF
+        ELSEIF event:isDerivedFrom( "HTMouseEvent" ) .AND. event:nKey = K_LBUTTONDOWN
             /* check if click landed on a button (row 3 of content area) */
             wSelect( nWinId, .F. )
             wFormat()

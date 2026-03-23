@@ -26,7 +26,6 @@ PUBLIC:
     METHOD addTopLevelWindow( windowId, widget )
     METHOD removeTopLevelWindow( windowId )
     METHOD exec()
-    METHOD getEvent()
     METHOD getTopLevelWindowFromWindowId( windowId )
     METHOD queueEvent( event, priority )
     METHOD quit() INLINE ::Fexecute := .F.
@@ -84,6 +83,7 @@ METHOD FUNCTION exec() CLASS HTApplication
     LOCAL result
     LOCAL event
     LOCAL widget
+    LOCAL window
     LOCAL priority
 
     IF !::Fexecute
@@ -103,10 +103,24 @@ METHOD FUNCTION exec() CLASS HTApplication
 
         WHILE ::Fexecute
 
-            ::getEvent()
+            /* poll for input via the unified event loop */
+            event := HTEventLoop():poll( 0.1 )
 
-            HTToast():checkExpired()
+            IF event != NIL
+                /* route event to the appropriate top-level window */
+                IF event:isDerivedFrom( "HTMouseEvent" ) .AND. event:nKey != K_MOUSEMOVE
+                    /* mouse click events go to window under cursor */
+                    window := ::getTopLevelWindowFromWindowId( ht_windowAtMousePos() )
+                    IF ! Empty( window )
+                        window:addEvent( event )
+                    ENDIF
+                ELSE
+                    /* keyboard and mouse-move go to active window */
+                    ::queueEvent( event )
+                ENDIF
+            ENDIF
 
+            /* process queued events by priority */
             FOR priority := HT_EVENT_PRIORITY_HIGH TO HT_EVENT_PRIORITY_LOW
                 WHILE ::FeventStackLen[ priority ] > 0
 
@@ -132,50 +146,6 @@ METHOD FUNCTION exec() CLASS HTApplication
     ENDIF
 
 RETURN result
-
-/** Polls for keyboard and mouse input via Inkey and routes events
- * to the appropriate top-level window (mouse to window under cursor,
- * keyboard to active window).
- */
-METHOD PROCEDURE getEvent() CLASS HTApplication
-
-    LOCAL nKey
-    LOCAL mrow := mRow( .T. )
-    LOCAL mcol := mCol( .T. )
-    LOCAL window
-
-    STATIC mCoords
-
-    IF mCoords = NIL
-        mCoords := { mrow, mcol }
-    ENDIF
-
-    IF mCoords[ 1 ] != mrow .OR. mCoords[ 2 ] != mcol
-        ::queueEvent( HTMouseEvent():new( K_MOUSEMOVE ) )
-        mCoords[ 1 ] := mrow
-        mCoords[ 2 ] := mcol
-        RETURN
-    ENDIF
-
-    nKey := Inkey( 1 )
-
-    IF nKey != 0
-        IF nKey >= K_MINMOUSE .AND. nKey <= K_MAXMOUSE
-            /* mouse events go to the window under the mouse */
-            window := ::getTopLevelWindowFromWindowId( ht_windowAtMousePos() )
-            IF ! Empty( window )
-                window:addEvent( HTMouseEvent():new( nKey ) )
-            ENDIF
-        ELSE
-            /* keyboard events go to the active (focused) window */
-            window := ::activeWindow()
-            IF ! Empty( window )
-                window:addEvent( HTKeyEvent():new( nKey ) )
-            ENDIF
-        ENDIF
-    ENDIF
-
-RETURN
 
 /** Looks up a top-level widget by its CT window handle.
  * @param windowId Numeric CT window handle

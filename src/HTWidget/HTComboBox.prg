@@ -349,15 +349,19 @@ RETURN
  */
 METHOD PROCEDURE dropdownLoop() CLASS HTComboBox
 
-    LOCAL nKey, nRow, nOldIndex, nClickWin
+    LOCAL event, nRow, nOldIndex, nClickWin
 
     nOldIndex := ::FcurrentIndex
 
     DO WHILE ::FdroppedDown
-        nKey := Inkey( 0 )
+        event := HTEventLoop():poll( 0.05 )
 
-        IF nKey >= K_MINMOUSE .AND. nKey <= K_MAXMOUSE
-            IF nKey = K_LBUTTONDOWN
+        IF event = NIL
+            LOOP
+        ENDIF
+
+        IF event:isDerivedFrom( "HTMouseEvent" )
+            IF event:nKey = K_LBUTTONDOWN
                 nClickWin := ht_windowAtMousePos()
                 IF nClickWin = ::FdropWinId
                     /* click inside dropdown: select item at mouse row */
@@ -375,8 +379,8 @@ METHOD PROCEDURE dropdownLoop() CLASS HTComboBox
                     ::hidePopup()
                 ENDIF
             ENDIF
-        ELSE
-            SWITCH nKey
+        ELSEIF event:isDerivedFrom( "HTKeyEvent" )
+            SWITCH event:key
             CASE K_ESC
                 ::FcurrentIndex := nOldIndex
                 ::hidePopup()
@@ -397,7 +401,7 @@ METHOD PROCEDURE dropdownLoop() CLASS HTComboBox
                 ENDIF
                 EXIT
             OTHERWISE
-                IF ::typeSearch( hb_keyChar( nKey ) )
+                IF ::typeSearch( hb_keyChar( event:key ) )
                     ::paintDropdown()
                 ENDIF
             ENDSWITCH
