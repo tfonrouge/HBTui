@@ -62,11 +62,7 @@ RETURN ::getTopLevelWindowFromWindowId( wSelect() )
  */
 METHOD PROCEDURE addTopLevelWindow( windowId, widget ) CLASS HTApplication
 
-    IF hb_hHasKey( ::FtopLevelWindows, windowId )
-        ::ERROR_DUPLICATE_TOP_LEVEL_WINDOW()
-    ELSE
-        ::FtopLevelWindows[ windowId ] := widget
-    ENDIF
+    ::FtopLevelWindows[ windowId ] := widget
 
 RETURN
 

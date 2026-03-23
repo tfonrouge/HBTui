@@ -102,8 +102,9 @@ METHOD FUNCTION exec() CLASS HTDialog
 
     ENDDO
 
-    /* close the dialog window */
+    /* close the dialog window and unregister from top-level windows */
     IF ::FwindowId != NIL
+        HTApplication():removeTopLevelWindow( ::FwindowId )
         wClose( ::FwindowId )
         ::FwindowId := NIL
     ENDIF
