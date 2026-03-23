@@ -97,7 +97,8 @@
 #define HT_CLR_TOAST_SUCCESS    52
 #define HT_CLR_TOAST_WARNING    53
 #define HT_CLR_TOAST_ERROR      54
-#define HT_CLR_MAX              54
+#define HT_CLR_BROWSE_SELECTED  55
+#define HT_CLR_MAX              55
 
 /* alignment flags (can be combined with hb_bitOr) */
 #define HT_ALIGN_LEFT           0

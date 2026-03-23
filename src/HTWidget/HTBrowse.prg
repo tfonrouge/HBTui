@@ -131,8 +131,14 @@ METHOD PROCEDURE paintEvent( paintEvent ) CLASS HTBrowse
         RETURN
     ENDIF
 
-    /* set colorSpec based on focus state */
-    ::FoBrowse:colorSpec := IIF( ::hasFocus(), HTTheme():getColor( HT_CLR_BROWSE_FOCUSED ), HTTheme():getColor( HT_CLR_BROWSE_NORMAL ) )
+    /* set colorSpec: pair 1 = normal cells, pair 2 = selected cell */
+    IF ::hasFocus()
+        ::FoBrowse:colorSpec := HTTheme():getColor( HT_CLR_BROWSE_FOCUSED ) + "," + ;
+            HTTheme():getColor( HT_CLR_BROWSE_SELECTED )
+    ELSE
+        ::FoBrowse:colorSpec := HTTheme():getColor( HT_CLR_BROWSE_NORMAL ) + "," + ;
+            HTTheme():getColor( HT_CLR_BROWSE_NORMAL )
+    ENDIF
 
     /* configure TBrowse to fill viewport (only on first paint) */
     IF ! ::FlConfigured
@@ -264,10 +270,11 @@ RETURN
  */
 METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTBrowse
 
-    LOCAL nMouseRow
-    LOCAL nClickRow, nSkip
+    LOCAL nMouseRow, nMouseCol
+    LOCAL nClickRow, nSkip, nColSkip
     LOCAL parent
     LOCAL nHeadHeight
+    LOCAL nColLeft, nCol, oC, nTargetCol
 
     IF ::FoBrowse:colCount = 0
         RETURN
@@ -281,8 +288,9 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTBrowse
          * The browse viewport starts at (1 + ::y, 1 + ::x) in window coords.
          * Convert to browse-local coordinates.
          */
-        /* mouseRow is child-relative (translated by parent's dispatch) */
+        /* mouseRow/Col are child-relative (translated by parent's dispatch) */
         nMouseRow := eventMouse:mouseRow
+        nMouseCol := eventMouse:mouseCol
 
         IF nMouseRow < 0
             RETURN
@@ -313,6 +321,36 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTBrowse
             DO WHILE nSkip < 0
                 ::FoBrowse:up()
                 nSkip++
+            ENDDO
+        ENDIF
+
+        /* determine which column was clicked (default: last column if past all) */
+        nColLeft := 0
+        nTargetCol := ::FoBrowse:colCount
+        FOR nCol := 1 TO ::FoBrowse:colCount
+            oC := ::FoBrowse:getColumn( nCol )
+            IF nMouseCol >= nColLeft .AND. ;
+               nMouseCol < nColLeft + IIF( oC:width != NIL, oC:width, 10 )
+                nTargetCol := nCol
+                EXIT
+            ENDIF
+            nColLeft += IIF( oC:width != NIL, oC:width, 10 )
+            IF ::FoBrowse:colSep != NIL
+                nColLeft += Len( ::FoBrowse:colSep )
+            ENDIF
+        NEXT
+
+        /* navigate to the target column */
+        nColSkip := nTargetCol - ::FoBrowse:colPos
+        IF nColSkip > 0
+            DO WHILE nColSkip > 0
+                ::FoBrowse:right()
+                nColSkip--
+            ENDDO
+        ELSEIF nColSkip < 0
+            DO WHILE nColSkip < 0
+                ::FoBrowse:left()
+                nColSkip++
             ENDDO
         ENDIF
 
