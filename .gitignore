@@ -4,4 +4,7 @@
 
 lib
 *.app
+*.ppo
 .DS_Store
+.claude/
+.hbmk/
