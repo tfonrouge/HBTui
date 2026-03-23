@@ -66,6 +66,9 @@ METHOD FUNCTION showDialog( cTitle, cMessage, cColor, lQuestion ) CLASS HTMessag
     LOCAL event, nResult
     LOCAL nBtnCol
 
+    /* dismiss any active toasts so they don't intercept clicks */
+    HTToast():dismissAll()
+
     IF cTitle = NIL
         cTitle := ""
     ENDIF
@@ -128,7 +131,7 @@ METHOD FUNCTION showDialog( cTitle, cMessage, cColor, lQuestion ) CLASS HTMessag
             ENDIF
         ELSEIF event:className() == "HTMOUSEEVENT" .AND. event:nKey = K_LBUTTONDOWN
             /* check if click landed on a button (row 3 of content area) */
-            wSelect( nWinId, .F. )
+            wSelect( nWinId, .T. )  /* .T. = bring to front */
             wFormat()
             wFormat( 1, 1, 1, 1 )
             IF mRow() = 3
