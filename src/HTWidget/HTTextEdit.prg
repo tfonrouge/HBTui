@@ -31,6 +31,14 @@ PROTECTED:
     DATA FnTopRow    INIT 1            /* first visible line (scroll offset) */
     DATA FnLeftCol   INIT 1            /* first visible column (horizontal scroll) */
     DATA FreadOnly   INIT .F.
+    DATA FnSelAnchorRow INIT 0        /* selection anchor row (0 = no selection) */
+    DATA FnSelAnchorCol INIT 0        /* selection anchor column */
+
+    METHOD hasSelection()
+    METHOD getSelectedText()
+    METHOD deleteSelection()
+    METHOD clearSelection() INLINE ::FnSelAnchorRow := 0, ::FnSelAnchorCol := 0
+    METHOD selectionRange()           /* returns { startRow, startCol, endRow, endCol } or NIL */
 
 PUBLIC:
 
@@ -99,21 +107,111 @@ METHOD PROCEDURE setText( cText ) CLASS HTTextEdit
 
 RETURN
 
+/** Returns .T. if there is an active multi-line selection. */
+METHOD FUNCTION hasSelection() CLASS HTTextEdit
+RETURN ::FnSelAnchorRow > 0 .AND. ;
+    ( ::FnSelAnchorRow != ::FnCurRow .OR. ::FnSelAnchorCol != ::FnCurCol )
+
+/** Returns the normalized selection range { startRow, startCol, endRow, endCol } or NIL. */
+METHOD FUNCTION selectionRange() CLASS HTTextEdit
+
+    LOCAL nR1, nC1, nR2, nC2
+
+    IF ! ::hasSelection()
+        RETURN NIL
+    ENDIF
+
+    nR1 := ::FnSelAnchorRow
+    nC1 := ::FnSelAnchorCol
+    nR2 := ::FnCurRow
+    nC2 := ::FnCurCol
+
+    IF nR1 > nR2 .OR. ( nR1 = nR2 .AND. nC1 > nC2 )
+        RETURN { nR2, nC2, nR1, nC1 }
+    ENDIF
+
+RETURN { nR1, nC1, nR2, nC2 }
+
+/** Returns the text within the current selection. */
+METHOD FUNCTION getSelectedText() CLASS HTTextEdit
+
+    LOCAL aRange, nR1, nC1, nR2, nC2, cResult, i
+
+    aRange := ::selectionRange()
+    IF aRange = NIL
+        RETURN ""
+    ENDIF
+
+    nR1 := aRange[ 1 ]; nC1 := aRange[ 2 ]
+    nR2 := aRange[ 3 ]; nC2 := aRange[ 4 ]
+
+    IF nR1 = nR2
+        RETURN SubStr( ::FaLines[ nR1 ], nC1, nC2 - nC1 )
+    ENDIF
+
+    cResult := SubStr( ::FaLines[ nR1 ], nC1 )
+    FOR i := nR1 + 1 TO nR2 - 1
+        cResult += hb_eol() + ::FaLines[ i ]
+    NEXT
+    cResult += hb_eol() + Left( ::FaLines[ nR2 ], nC2 - 1 )
+
+RETURN cResult
+
+/** Deletes the text within the current selection and repositions the cursor. */
+METHOD PROCEDURE deleteSelection() CLASS HTTextEdit
+
+    LOCAL aRange, nR1, nC1, nR2, nC2
+
+    aRange := ::selectionRange()
+    IF aRange = NIL
+        RETURN
+    ENDIF
+
+    nR1 := aRange[ 1 ]; nC1 := aRange[ 2 ]
+    nR2 := aRange[ 3 ]; nC2 := aRange[ 4 ]
+
+    IF nR1 = nR2
+        ::FaLines[ nR1 ] := Left( ::FaLines[ nR1 ], nC1 - 1 ) + SubStr( ::FaLines[ nR1 ], nC2 )
+    ELSE
+        ::FaLines[ nR1 ] := Left( ::FaLines[ nR1 ], nC1 - 1 ) + SubStr( ::FaLines[ nR2 ], nC2 )
+        IF nR2 > nR1 + 1
+            ADel( ::FaLines, nR1 + 1, nR2 - nR1 - 1 )
+            ASize( ::FaLines, Len( ::FaLines ) - ( nR2 - nR1 - 1 ) )
+        ENDIF
+        hb_aDel( ::FaLines, nR1 + 1, .T. )
+    ENDIF
+
+    ::FnCurRow := nR1
+    ::FnCurCol := nC1
+    ::clearSelection()
+
+RETURN
+
 /** Renders visible lines with cursor positioning.
  * @param event HTPaintEvent (unused)
  */
 METHOD PROCEDURE paintEvent( event ) CLASS HTTextEdit
 
-    LOCAL i, nRow, cLine, cColor, cDisplay
+    LOCAL i, nRow, cLine, cColor, cSelColor, cDisplay
     LOCAL nMaxRow := MaxRow()
     LOCAL nMaxCol := MaxCol()
     LOCAL nVisRows := nMaxRow + 1
     LOCAL nVisCols := nMaxCol + 1
     LOCAL nCursorRow, nCursorCol
+    LOCAL aRange, nSelR1, nSelC1, nSelR2, nSelC2
+    LOCAL nSelStart, nSelEnd
 
     HB_SYMBOL_UNUSED( event )
 
     cColor := IIF( ::hasFocus(), HTTheme():getColor( HT_CLR_LINEEDIT_FOCUSED ), HTTheme():getColor( HT_CLR_LINEEDIT_NORMAL ) )
+    cSelColor := HTTheme():getColor( HT_CLR_LINEEDIT_SELECTED )
+
+    /* get selection range */
+    aRange := ::selectionRange()
+    IF aRange != NIL
+        nSelR1 := aRange[ 1 ]; nSelC1 := aRange[ 2 ]
+        nSelR2 := aRange[ 3 ]; nSelC2 := aRange[ 4 ]
+    ENDIF
 
     /* ensure cursor is visible */
     IF ::FnCurRow < ::FnTopRow
@@ -134,7 +232,28 @@ METHOD PROCEDURE paintEvent( event ) CLASS HTTextEdit
     FOR i := ::FnTopRow TO Min( ::FnTopRow + nVisRows - 1, Len( ::FaLines ) )
         cLine := ::FaLines[ i ]
         cDisplay := PadR( SubStr( cLine, ::FnLeftCol ), nVisCols )
-        DispOutAt( nRow, 0, cDisplay, cColor )
+
+        IF aRange != NIL .AND. i >= nSelR1 .AND. i <= nSelR2
+            /* this line has selection — render in segments */
+            nSelStart := IIF( i = nSelR1, Max( nSelC1 - ::FnLeftCol, 0 ), 0 )
+            nSelEnd   := IIF( i = nSelR2, Min( nSelC2 - ::FnLeftCol, nVisCols ), nVisCols )
+            IF nSelStart < nSelEnd
+                /* before selection */
+                IF nSelStart > 0
+                    DispOutAt( nRow, 0, Left( cDisplay, nSelStart ), cColor )
+                ENDIF
+                /* selected portion */
+                DispOutAt( nRow, nSelStart, SubStr( cDisplay, nSelStart + 1, nSelEnd - nSelStart ), cSelColor )
+                /* after selection */
+                IF nSelEnd < nVisCols
+                    DispOutAt( nRow, nSelEnd, SubStr( cDisplay, nSelEnd + 1 ), cColor )
+                ENDIF
+            ELSE
+                DispOutAt( nRow, 0, cDisplay, cColor )
+            ENDIF
+        ELSE
+            DispOutAt( nRow, 0, cDisplay, cColor )
+        ENDIF
         nRow++
     NEXT
 
@@ -161,41 +280,61 @@ RETURN
 METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTTextEdit
 
     LOCAL parent
-    LOCAL cChar, cLine, cPaste, aPasteLines, i
+    LOCAL cChar, cLine, cPaste, aPasteLines, i, cSel
     LOCAL lChanged := .F.
     LOCAL nLineCount := Len( ::FaLines )
-    LOCAL lCtrl := hb_bitAnd( hb_gtInfo( HB_GTI_KBDSHIFTS ), HB_GTI_KBD_CTRL ) != 0
+    LOCAL nShifts := hb_gtInfo( HB_GTI_KBDSHIFTS )
+    LOCAL lCtrl  := hb_bitAnd( nShifts, HB_GTI_KBD_CTRL ) != 0
+    LOCAL lShift := hb_bitAnd( nShifts, HB_GTI_KBD_SHIFT ) != 0
 
     /* --- Clipboard (handle before SWITCH to avoid key code collisions) --- */
     IF lCtrl
         IF keyEvent:key = K_PGDN   /* K_CTRL_C = K_PGDN = 3 */
-            /* copy current line */
-            hb_gtInfo( HB_GTI_CLIPBOARDDATA, ::FaLines[ ::FnCurRow ] )
+            /* copy selection (or current line if no selection) */
+            IF ::hasSelection()
+                hb_gtInfo( HB_GTI_CLIPBOARDDATA, ::getSelectedText() )
+            ELSE
+                hb_gtInfo( HB_GTI_CLIPBOARDDATA, ::FaLines[ ::FnCurRow ] )
+            ENDIF
             keyEvent:accept()
             RETURN
         ELSEIF keyEvent:key = K_DOWN .AND. ! ::FreadOnly   /* K_CTRL_X = K_DOWN = 24 */
-            /* cut current line */
-            hb_gtInfo( HB_GTI_CLIPBOARDDATA, ::FaLines[ ::FnCurRow ] )
-            IF Len( ::FaLines ) > 1
-                hb_aDel( ::FaLines, ::FnCurRow, .T. )
-                IF ::FnCurRow > Len( ::FaLines )
-                    ::FnCurRow := Len( ::FaLines )
-                ENDIF
+            /* cut selection (or current line if no selection) */
+            IF ::hasSelection()
+                hb_gtInfo( HB_GTI_CLIPBOARDDATA, ::getSelectedText() )
+                ::deleteSelection()
             ELSE
-                ::FaLines[ 1 ] := ""
+                hb_gtInfo( HB_GTI_CLIPBOARDDATA, ::FaLines[ ::FnCurRow ] )
+                IF Len( ::FaLines ) > 1
+                    hb_aDel( ::FaLines, ::FnCurRow, .T. )
+                    IF ::FnCurRow > Len( ::FaLines )
+                        ::FnCurRow := Len( ::FaLines )
+                    ENDIF
+                ELSE
+                    ::FaLines[ 1 ] := ""
+                ENDIF
+                ::FnCurCol := Min( ::FnCurCol, Len( ::FaLines[ ::FnCurRow ] ) + 1 )
             ENDIF
-            ::FnCurCol := Min( ::FnCurCol, Len( ::FaLines[ ::FnCurRow ] ) + 1 )
             lChanged := .T.
             keyEvent:accept()
             parent := ::parent()
             IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
                 parent:repaintChild( self )
             ENDIF
-            IF lChanged .AND. ::FonChanged != NIL
+            IF ::FonChanged != NIL
                 Eval( ::FonChanged, ::getText() )
             ENDIF
             RETURN
         ENDIF
+    ENDIF
+
+    /* --- Selection: start anchor on first Shift+arrow if no selection --- */
+    IF lShift .AND. ::FnSelAnchorRow = 0
+        ::FnSelAnchorRow := ::FnCurRow
+        ::FnSelAnchorCol := ::FnCurCol
+    ELSEIF ! lShift .AND. ::FnSelAnchorRow > 0
+        /* non-shift navigation clears selection */
+        ::clearSelection()
     ENDIF
 
     SWITCH keyEvent:key
@@ -255,6 +394,9 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTTextEdit
     /* --- Editing --- */
     CASE K_ENTER
         IF ! ::FreadOnly
+            IF ::hasSelection()
+                ::deleteSelection()
+            ENDIF
             cLine := ::FaLines[ ::FnCurRow ]
             ::FaLines[ ::FnCurRow ] := Left( cLine, ::FnCurCol - 1 )
             hb_aIns( ::FaLines, ::FnCurRow + 1, SubStr( cLine, ::FnCurCol ), .T. )
@@ -265,6 +407,11 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTTextEdit
         EXIT
     CASE K_BS
         IF ! ::FreadOnly
+            IF ::hasSelection()
+                ::deleteSelection()
+                lChanged := .T.
+                EXIT
+            ENDIF
             IF ::FnCurCol > 1
                 cLine := ::FaLines[ ::FnCurRow ]
                 ::FaLines[ ::FnCurRow ] := Left( cLine, ::FnCurCol - 2 ) + SubStr( cLine, ::FnCurCol )
@@ -282,6 +429,11 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTTextEdit
         EXIT
     CASE K_DEL
         IF ! ::FreadOnly
+            IF ::hasSelection()
+                ::deleteSelection()
+                lChanged := .T.
+                EXIT
+            ENDIF
             cLine := ::FaLines[ ::FnCurRow ]
             IF ::FnCurCol <= Len( cLine )
                 ::FaLines[ ::FnCurRow ] := Left( cLine, ::FnCurCol - 1 ) + SubStr( cLine, ::FnCurCol + 1 )
@@ -313,6 +465,9 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTTextEdit
     /* --- Clipboard (Ctrl+V / paste) --- */
     CASE K_CTRL_V
         IF ! ::FreadOnly
+            IF ::hasSelection()
+                ::deleteSelection()
+            ENDIF
             cPaste := hb_gtInfo( HB_GTI_CLIPBOARDDATA )
             IF hb_isString( cPaste ) .AND. Len( cPaste ) > 0
                 aPasteLines := hb_ATokens( cPaste, .T. )
@@ -343,6 +498,9 @@ METHOD PROCEDURE keyEvent( keyEvent ) CLASS HTTextEdit
         IF ! ::FreadOnly
             cChar := hb_keyChar( keyEvent:key )
             IF Len( cChar ) = 1 .AND. Asc( cChar ) >= 32
+                IF ::hasSelection()
+                    ::deleteSelection()
+                ENDIF
                 cLine := ::FaLines[ ::FnCurRow ]
                 ::FaLines[ ::FnCurRow ] := Left( cLine, ::FnCurCol - 1 ) + cChar + SubStr( cLine, ::FnCurCol )
                 ::FnCurCol++

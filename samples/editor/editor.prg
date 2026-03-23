@@ -51,6 +51,7 @@ PROCEDURE Main()
                 "Type here to edit text. Use arrow keys to navigate," + hb_eol() + ;
                 "Home/End for line start/end, PgUp/PgDn to scroll." + hb_eol() + ;
                 "" + hb_eol() + ;
+                "Select: Shift+Arrows, Shift+Home/End" + hb_eol() + ;
                 "Clipboard: Ctrl+C (copy), Ctrl+X (cut), Ctrl+V (paste)" + hb_eol() + ;
                 "Press Ins to toggle insert/overwrite mode." + hb_eol() + ;
                 "" + hb_eol() + ;
@@ -58,7 +59,7 @@ PROCEDURE Main()
 
     /* --- Status Bar --- */
     oStatusBar := HTStatusBar():new( win )
-    oStatusBar:addSection( "Ctrl+C/V/X: clipboard | Ins: toggle mode" )
+    oStatusBar:addSection( "Shift+Arrows: select | Ctrl+C/X/V: copy/cut/paste | Ins: mode" )
 
     win:show()
     app:exec()

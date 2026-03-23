@@ -76,10 +76,10 @@ METHOD PROCEDURE show( cMessage, nDurationMs, nColorCategory ) CLASS HTToast
     nWinId := wOpen( nTop, nLeft, nBottom, nRight, .T. )
     wSetShadow( 8 )
     wBox( NIL, cColor )
-    wFormat()
 
-    /* draw message text */
+    /* draw message text (wBox sets margins 1,1,1,1 so row 0 = content row) */
     DispOutAt( 0, 0, PadR( cMessage, nToastWidth - 2 ), cColor )
+    wFormat()
 
     /* store toast info */
     AAdd( ::FaToasts, { nWinId, Seconds(), nDurationMs / 1000 } )

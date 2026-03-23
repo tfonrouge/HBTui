@@ -113,11 +113,8 @@ METHOD PROCEDURE doLayout( nWidth, nHeight ) CLASS HTGridLayout
         ENDIF
 
         IF item[ 1 ]:isDerivedFrom( "HTWidget" )
-            item[ 1 ]:Fx := nX
-            item[ 1 ]:Fy := nY
-            item[ 1 ]:Fwidth := nW
-            item[ 1 ]:Fheight := nH
-            item[ 1 ]:FisVisible := .T.
+            item[ 1 ]:setGeometry( nX, nY, nW, nH )
+            item[ 1 ]:show()
         ENDIF
 
     NEXT
