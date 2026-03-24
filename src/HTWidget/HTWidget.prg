@@ -677,6 +677,13 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
         nContentRow := ::FposDown:y - 1
         nContentCol := ::FposDown:x - 1
 
+        /* check menu bar click (row 0 of content = menu bar row) */
+        IF nContentRow = 0 .AND. ht_objectFromId( ::FmenuBar ) != NIL
+            IF ht_objectFromId( ::FmenuBar ):handleClick( 0, nContentCol )
+                EXIT
+            ENDIF
+        ENDIF
+
         IF nContentRow >= 0 .AND. nContentCol >= 0
             oHitChild := ::childAt( nContentRow, nContentCol )
 

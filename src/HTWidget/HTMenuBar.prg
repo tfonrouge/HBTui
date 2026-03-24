@@ -32,6 +32,7 @@ PUBLIC:
 
     METHOD paintEvent( event )
     METHOD handleKey( nKey )
+    METHOD handleClick( nRow, nCol )
 
 ENDCLASS
 
@@ -464,3 +465,47 @@ METHOD PROCEDURE paintDropdown( oMenu ) CLASS HTMenuBar
     wFormat()
 
 RETURN
+
+/** Handles a mouse click on the menu bar row.
+ * Determines which menu title was clicked and opens/closes the dropdown.
+ * @param nRow Row relative to the menu bar (0 = menu bar row)
+ * @param nCol Column relative to the window content area
+ * @return .T. if the click was handled
+ */
+METHOD FUNCTION handleClick( nRow, nCol ) CLASS HTMenuBar
+
+    LOCAL aMenus := ::getMenus()
+    LOCAL nMenuCount := Len( aMenus )
+    LOCAL i, nLeft, nRight, nWidth
+    LOCAL parent
+
+    IF nMenuCount = 0 .OR. nRow != 0
+        RETURN .F.
+    ENDIF
+
+    /* determine which menu title was clicked */
+    nLeft := 1
+    FOR i := 1 TO nMenuCount
+        nWidth := Len( aMenus[ i ]:title ) + 2
+        nRight := nLeft + nWidth - 1
+        IF nCol >= nLeft .AND. nCol <= nRight
+            IF ::FactiveMenu = i .AND. ::FmenuOpen
+                ::closeMenu()
+                ::FactiveMenu := 0
+            ELSE
+                IF ::FmenuOpen
+                    ::closeMenu()
+                ENDIF
+                ::FactiveMenu := i
+                ::openMenu( i )
+            ENDIF
+            parent := ::parent()
+            IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
+                parent:repaint()
+            ENDIF
+            RETURN .T.
+        ENDIF
+        nLeft += nWidth
+    NEXT
+
+RETURN .F.

@@ -122,7 +122,7 @@ STATIC PROCEDURE UpdateLabel( nVal )
 
     LOCAL parent
 
-    oLabel:text := "Progress: " + LTrim( Str( nVal ) ) + "%"
+    oLabel:setText( "Progress: " + LTrim( Str( nVal ) ) + "%" )
     parent := oLabel:parent()
     IF parent != NIL
         parent:repaintChild( oLabel )
