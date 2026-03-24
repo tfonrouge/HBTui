@@ -42,6 +42,8 @@ PUBLIC:
     METHOD scheduleRepeat( bTask, nIntervalMs )
     METHOD cancelTask( nTaskId )
 
+    METHOD handleResize()
+
 ENDCLASS
 
 /** Creates the singleton instance. */
@@ -88,6 +90,11 @@ METHOD FUNCTION poll( nTimeout ) CLASS HTEventLoop
 
     IF nKey >= K_MINMOUSE .AND. nKey <= K_MAXMOUSE
         RETURN HTMouseEvent():new( nKey )
+    ENDIF
+
+    IF nKey = HB_K_RESIZE
+        ::handleResize()
+        RETURN NIL
     ENDIF
 
 RETURN HTKeyEvent():new( nKey )
@@ -193,5 +200,41 @@ METHOD PROCEDURE cancelTask( nTaskId ) CLASS HTEventLoop
             EXIT
         ENDIF
     NEXT
+
+RETURN
+
+/** Handles terminal resize (HB_K_RESIZE).
+ * Updates the desktop dimensions, resets the CT board, and repaints
+ * all top-level windows so they render correctly in the new grid.
+ */
+METHOD PROCEDURE handleResize() CLASS HTEventLoop
+
+    LOCAL app, desktop, window, key
+
+    app := HTApplication()
+    IF app = NIL
+        RETURN
+    ENDIF
+
+    /* update desktop to new screen dimensions */
+    desktop := app:desktop
+    IF desktop != NIL
+        desktop:setGeometry( 0, 0, MaxCol() + 1, MaxRow() + 1 )
+        wSelect( 0 )
+        wBoard()
+        desktop:paintEvent( HTPaintEvent():new() )
+    ENDIF
+
+    /* repaint all top-level windows */
+    FOR EACH key IN hb_hKeys( app:topLevelWindows )
+        window := app:topLevelWindows[ key ]
+        IF window != NIL .AND. window:isDerivedFrom( "HTWidget" )
+            window:repaint()
+        ENDIF
+    NEXT
+
+    /* reset mouse tracking (grid changed) */
+    ::FmouseRow := -1
+    ::FmouseCol := -1
 
 RETURN

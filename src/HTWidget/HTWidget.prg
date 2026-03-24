@@ -737,11 +737,16 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
 
         IF ::FposDown != NIL
 
-            x := eventMouse:mouseCol - ( ::FposDown:x + 1 )
-            y := eventMouse:mouseRow
-
             IF ::FwinSysBtnMove
-                ::move( HTPoint():new( x, y ) )
+                /* drag window: use screen-absolute coords for stable positioning.
+                   new window pos = mouse screen pos - click offset within window */
+                IF ::FwindowId != NIL
+                    wSelect( ::FwindowId, .F. )
+                    wMove( eventMouse:mouseAbsRow - ::FposDown:y, ;
+                           eventMouse:mouseAbsCol - ::FposDown:x )
+                    ::Fy := wRow()
+                    ::Fx := wCol()
+                ENDIF
             ELSEIF ::FwinSysBtnResize
                 ::addEvent( HTResizeEvent():new() )
             ENDIF
