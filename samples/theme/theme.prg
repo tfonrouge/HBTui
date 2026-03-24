@@ -41,6 +41,7 @@ PROCEDURE Main()
     /* --- Frame --- */
     frm := HTFrame():new( "Sample Controls", win )
     frm:move( 1, 1 )
+    frm:resize( 24, 6 )
 
     /* --- Label --- */
     HTLabel():new( "Select a theme with F1-F4:", win ):move( 2, 2 )
