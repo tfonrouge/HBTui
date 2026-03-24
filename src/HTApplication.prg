@@ -110,8 +110,13 @@ METHOD FUNCTION exec() CLASS HTApplication
             IF event != NIL
                 IF event:className() == "HTMOUSEEVENT"
                     IF event:nKey != K_MOUSEMOVE
-                        /* mouse click: route to window under cursor */
+                        /* mouse click: route to window under cursor;
+                           fall back to active window if clicked window is
+                           unregistered (e.g., menu dropdown CT window) */
                         window := ::getTopLevelWindowFromWindowId( ht_windowAtMousePos() )
+                        IF Empty( window )
+                            window := ::activeWindow()
+                        ENDIF
                     ELSE
                         /* mouse move: route to active window */
                         window := ::activeWindow()

@@ -677,10 +677,17 @@ METHOD PROCEDURE mouseEvent( eventMouse ) CLASS HTWidget
         nContentRow := ::FposDown:y - 1
         nContentCol := ::FposDown:x - 1
 
-        /* check menu bar click (row 0 of content = menu bar row) */
-        IF nContentRow = 0 .AND. ht_objectFromId( ::FmenuBar ) != NIL
-            IF ht_objectFromId( ::FmenuBar ):handleClick( 0, nContentCol )
+        /* menu bar: if a dropdown is open, route ALL clicks through the menu */
+        IF ht_objectFromId( ::FmenuBar ) != NIL
+            IF ht_objectFromId( ::FmenuBar ):isMenuOpen()
+                ht_objectFromId( ::FmenuBar ):handleMouseClick( eventMouse:mouseAbsRow, eventMouse:mouseAbsCol )
                 EXIT
+            ENDIF
+            /* check menu bar click (row 0 of content = menu bar row) */
+            IF nContentRow = 0
+                IF ht_objectFromId( ::FmenuBar ):handleClick( 0, nContentCol )
+                    EXIT
+                ENDIF
             ENDIF
         ENDIF
 

@@ -33,6 +33,8 @@ PUBLIC:
     METHOD paintEvent( event )
     METHOD handleKey( nKey )
     METHOD handleClick( nRow, nCol )
+    METHOD handleMouseClick( nAbsRow, nAbsCol )
+    METHOD isMenuOpen() INLINE ::FmenuOpen
 
 ENDCLASS
 
@@ -509,3 +511,78 @@ METHOD FUNCTION handleClick( nRow, nCol ) CLASS HTMenuBar
     NEXT
 
 RETURN .F.
+
+/** Handles a mouse click while a dropdown menu is open.
+ * Checks if the click is on a dropdown item, on the menu bar, or outside.
+ * @param nAbsRow Screen-absolute row
+ * @param nAbsCol Screen-absolute column
+ * @return .T. if the click was handled
+ */
+METHOD FUNCTION handleMouseClick( nAbsRow, nAbsCol ) CLASS HTMenuBar
+
+    LOCAL aMenus, oMenu, aActions
+    LOCAL nDropRow, nDropCol
+    LOCAL nDropTop, nDropLeft, nDropBottom, nDropRight
+    LOCAL nItemIdx
+    LOCAL parent
+
+    IF ! ::FmenuOpen .OR. ::FdropWinId = NIL
+        RETURN .F.
+    ENDIF
+
+    /* get dropdown window bounds */
+    wSelect( ::FdropWinId, .F. )
+    nDropTop    := wRow()
+    nDropLeft   := wCol()
+    nDropBottom := nDropTop + MaxRow()
+    nDropRight  := nDropLeft + MaxCol()
+
+    /* check if click is inside the dropdown */
+    IF nAbsRow >= nDropTop + 1 .AND. nAbsRow <= nDropBottom - 1 .AND. ;
+       nAbsCol >= nDropLeft + 1 .AND. nAbsCol <= nDropRight - 1
+
+        nDropRow := nAbsRow - nDropTop - 1
+        aMenus := ::getMenus()
+        oMenu := aMenus[ ::FactiveMenu ]
+        aActions := oMenu:actions()
+
+        nItemIdx := nDropRow + 1
+        IF nItemIdx >= 1 .AND. nItemIdx <= Len( aActions ) .AND. ;
+           ! aActions[ nItemIdx ]:isSeparator
+
+            aActions[ nItemIdx ]:trigger()
+            ::closeMenu()
+            ::FactiveMenu := 0
+            ::FactiveItem := 0
+
+            parent := ::parent()
+            IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
+                parent:repaint()
+            ENDIF
+            RETURN .T.
+        ENDIF
+        RETURN .T.  /* click on separator or border — consume but don't trigger */
+    ENDIF
+
+    /* check if click is on the menu bar row — switch menus */
+    parent := ::parent()
+    IF parent != NIL
+        wSelect( parent:windowId, .F. )
+        nDropRow := nAbsRow - wRow()
+        nDropCol := nAbsCol - wCol()
+        IF nDropRow = 1  /* menu bar is at window row 1 (border=0, menubar=1) */
+            ::closeMenu()
+            ::FactiveMenu := 0
+            RETURN ::handleClick( 0, nDropCol - 1 )
+        ENDIF
+    ENDIF
+
+    /* click outside — close the menu */
+    ::closeMenu()
+    ::FactiveMenu := 0
+    ::FactiveItem := 0
+    IF parent != NIL .AND. parent:isDerivedFrom( "HTWidget" )
+        parent:repaint()
+    ENDIF
+
+RETURN .T.
