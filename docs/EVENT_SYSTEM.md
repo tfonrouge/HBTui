@@ -31,6 +31,7 @@ Checks for input events in this order:
 2. Runs `runPendingTasks()` to execute scheduled callbacks
 3. Detects mouse movement by comparing `mRow(.T.)/mCol(.T.)` with stored position
 4. Calls `Inkey(nTimeout)` for keyboard and mouse click events
+5. Intercepts `HB_K_RESIZE` (terminal resize) — calls `handleResize()` which updates desktop dimensions, resets CT board, repaints all windows, and resets mouse tracking.
 
 Returns an `HTMouseEvent` or `HTKeyEvent`, or NIL if no input.
 
@@ -117,8 +118,10 @@ All events inherit from `HTEvent` (which uses `HB_CLS_NOTOBJECT` for lightweight
 | Property | Description |
 |----------|-------------|
 | `nKey` | Mouse event code (K_LBUTTONDOWN, K_LBUTTONUP, K_MOUSEMOVE, etc.) |
-| `mouseRow` | Row relative to the CT window selected when the event was created |
-| `mouseCol` | Column relative to the CT window selected when the event was created |
+| `mouseRow` | Row relative to the CT window selected when the event was created (READWRITE — recaptured by the application relative to the target window) |
+| `mouseCol` | Column relative to the CT window selected when the event was created (READWRITE — recaptured by the application relative to the target window) |
+| `mouseAbsRow` | Screen-absolute row captured at creation, immune to wFormat margin state |
+| `mouseAbsCol` | Screen-absolute column captured at creation, immune to wFormat margin state |
 
 ## Event Routing
 
@@ -126,9 +129,11 @@ All events inherit from `HTEvent` (which uses `HB_CLS_NOTOBJECT` for lightweight
 
 `HTApplication:exec()` routes events from `poll()` to the correct top-level window:
 
-- **Mouse clicks** (K_LBUTTONDOWN, K_LBUTTONUP, K_RBUTTONDOWN): routed to the window under the cursor via `ht_windowAtMousePos()`. The CT window system determines which window is at the mouse position.
+- **Mouse clicks** (K_LBUTTONDOWN, K_LBUTTONUP, K_RBUTTONDOWN): routed to the window under the cursor via `ht_windowAtMousePos()`. The CT window system determines which window is at the mouse position. Clicks falling on unregistered CT windows (e.g., menu dropdown windows) fall back to the active window.
 - **Keyboard events**: routed to the active (focused) window via `HTApplication():activeWindow()`.
 - **Mouse movement** (K_MOUSEMOVE): routed to the active window (not the window under cursor).
+
+ALL mouse events (clicks and moves) have their `mouseRow`/`mouseCol` recaptured using screen-absolute coordinates: `event:mouseRow := event:mouseAbsRow - wRow()`, `event:mouseCol := event:mouseAbsCol - wCol()`. This is immune to wFormat margin state from stale wSelect context.
 
 ### Event Priority Queue
 
@@ -175,23 +180,36 @@ keyEvent(event) on top-level window
 mouseEvent(event) on top-level window
   │
   ├── K_LBUTTONDOWN
+  │    ├── Check if dropdown menu is open → route ALL clicks to menuBar:handleMouseClick()
+  │    ├── Check menu bar click (content row 0) → menuBar:handleClick()
   │    ├── Check system buttons (close ■, hide ■, maximize ■)
   │    ├── Check title bar → start window drag (FwinSysBtnMove)
   │    ├── Hit-test children via childAt(row, col)
-  │    │    └── Reverse order (topmost widget first)
+  │    │    └── Reverse order, recurses into layout containers
   │    ├── Transfer focus to clicked child
-  │    └── Dispatch mouse event to child
+  │    └── Dispatch mouse event to child (with translated coords)
   │
   ├── K_LBUTTONUP
   │    ├── Fire close/hide/maximize if button was pressed
   │    └── Reset all button state flags
   │
   ├── K_MOUSEMOVE
-  │    └── If FwinSysBtnMove: call ::move() to drag window
+  │    └── If FwinSysBtnMove: wMove(mouseAbsRow - clickOffsetY, mouseAbsCol - clickOffsetX)
+  │         (screen-absolute positioning, no delta accumulation)
   │
   └── K_RBUTTONDOWN
        └── Show context menu on child or self
 ```
+
+### Menu Bar Mouse Support
+
+The menu bar responds to mouse clicks in addition to F10/keyboard:
+
+- **Click on menu title**: `menuBar:handleClick(nRow, nCol)` opens/closes the dropdown
+- **Click on dropdown item**: `menuBar:handleMouseClick(nAbsRow, nAbsCol)` triggers the action
+- **Click outside**: closes the dropdown
+
+When a dropdown is open, ALL mouse clicks are intercepted by `handleMouseClick()` before normal child hit-testing. Clicks on unregistered CT windows (the dropdown window) fall back to the active window in `HTApplication:exec()`.
 
 ## Focus System
 
@@ -199,9 +217,12 @@ mouseEvent(event) on top-level window
 
 ```
 HTApplication → activeWindow() → window:focusWidget() → child:focusWidget() → ...
+                                                          (skips layout containers)
 ```
 
-Each widget tracks its focused child via `FfocusWidget`. `hasFocus()` checks if the widget is its parent's focused child.
+Each widget tracks its focused child via `FfocusWidget`. `hasFocus()` walks up the parent chain to the first ancestor with a CT window (`windowId != NIL`), skipping layout containers which don't participate in the focus system.
+
+`focusableChildren()` recurses into layout containers (children with no `windowId`) to find nested focusable widgets. Similarly, `childAt()` recurses into containers for mouse hit-testing.
 
 ### Focus Policies
 
@@ -327,6 +348,10 @@ LOCAL nAnim := HTEventLoop():scheduleRepeat( {|| ;
 - `wMove(row, col)` takes **absolute** screen position (not delta)
 - After `wBox()` + `wFormat()` reset, window margins are (0,0,0,0)
 - `HTMouseEvent:mouseRow/mouseCol` are captured at event creation time, relative to the window selected at that moment
+
+**Viewport stack (`ht_wFormatPush()`/`ht_wFormatPop()`):** CT's `wFormat()` no-args reset destroys ALL margins including parent viewports. `ht_wFormatPush`/`Pop` provides proper nested viewport stacking — push adds margins and saves them on a stack, pop undoes only the last push. Used by `paintChild()` for nested widget viewports. Includes stack underflow detection via debug log.
+
+**Container margins:** Layout containers (widgets without a CT window, created by `addLayout()`) use zero-based margins in `paintChild()` — no +1 border offset. Their `displayLayout()` uses full `Fwidth`/`Fheight` instead of subtracting 2 for borders. `repaintChild()` delegates upward to the parent window since containers have no CT window to select.
 
 ## Debug Logging
 
