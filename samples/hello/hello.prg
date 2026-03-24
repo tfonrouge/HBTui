@@ -28,15 +28,17 @@ PROCEDURE Main()
 
     lbl := HTLabel():new( "Hello, World!", win )
     lbl:move( 16, 3 )
-    lbl:setAlignment( HT_ALIGN_CENTER )
+    lbl:alignment := HT_ALIGN_CENTER
 
     lbl := HTLabel():new( "Press ESC to quit", win )
     lbl:move( 14, 5 )
-    lbl:setAlignment( HT_ALIGN_CENTER )
+    lbl:alignment := HT_ALIGN_CENTER
 
     oSB := HTStatusBar():new( win )
     oSB:move( 1, 8 )
     oSB:addSection( "HBTui v0.3" )
+
+    win:onKey( K_ESC, {|| HTApplication():quit() } )
 
     win:show()
     app:exec()

@@ -39,7 +39,7 @@ PROCEDURE Main()
     oWindow := win
 
     /* --- Menu Bar --- */
-    menuBar := win:menuBar
+    menuBar := HTMenuBar():new( win )
 
     /* File menu */
     menu := menuBar:addMenu( "File" )
@@ -77,6 +77,8 @@ PROCEDURE Main()
 
     /* --- Status Bar --- */
     oStatusBar := HTStatusBar():new( win )
+    oStatusBar:move( 1, 20 )
+    oStatusBar:resize( 56, 1 )
     oStatusBar:addSection( "Ready" )
     oStatusBar:addSection( "F10: menu" )
 

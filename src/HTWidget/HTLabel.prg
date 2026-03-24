@@ -16,7 +16,7 @@ PUBLIC:
     METHOD paintEvent( paintEvent )
     METHOD setText( text )
 
-    PROPERTY alignment INIT HT_ALIGN_LEFT
+    PROPERTY alignment READWRITE INIT HT_ALIGN_LEFT
     PROPERTY text INIT ""
 
 ENDCLASS

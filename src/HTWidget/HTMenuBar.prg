@@ -380,7 +380,9 @@ METHOD PROCEDURE openMenu( nIndex ) CLASS HTMenuBar
     nMaxWidth := 10
     FOR EACH itm IN oMenu:actions()
         nActions++
-        nMaxWidth := Max( nMaxWidth, Len( itm:text ) + 4 )
+        IF itm:text != NIL
+            nMaxWidth := Max( nMaxWidth, Len( itm:text ) + 4 )
+        ENDIF
     NEXT
 
     IF nActions = 0
